@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تفعيل ثقة ودليل الباي</title>
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script src="https://sdk.minepi.com/pi-sdk.js?v=1.2"></script>
     <style>
         body { font-family: sans-serif; text-align: center; background: #f3e5f5; padding: 50px 20px; }
         .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .btn-pay { background: #000; color: #fff; padding: 20px; border-radius: 15px; border: 2px dashed #ffd700; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; }
+        .btn-pay { background: #000; color: #fff; padding: 20px; border-radius: 15px; border: 2px dashed #ffd700; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; transition: 0.3s; }
+        .btn-pay:active { background: #333; transform: scale(0.98); }
     </style>
 </head>
 <body>
@@ -19,37 +20,33 @@
     </div>
 
     <script>
-        // تهيئة الـ SDK مع ربط الموقع الرسمي للمشروع
         const Pi = window.Pi;
-        Pi.init({ 
-            version: "2.0", 
-            sandbox: true 
-        });
+        // تفعيل وضع الـ Sandbox لربط المحفظة التجريبية
+        Pi.init({ version: "2.0", sandbox: true });
 
         async function transferPi() {
             try {
-                // طلب الدفع التجريبي لتفعيل الخطوة 10
                 const payment = await Pi.createPayment({
                     amount: 0.1,
-                    memo: "تفعيل مشروع ثقة ودليل الباي",
+                    memo: "تفعيل مشروع ثقة ودليل الباي - الخطوة 10",
                     metadata: { step: 10 }
                 }, {
                     onReadyForServerApproval: (paymentId) => { 
-                        console.log("Payment Approved:", paymentId); 
+                        console.log("Approved:", paymentId); 
                     },
                     onReadyForServerCompletion: (paymentId, txid) => { 
                         alert("تم التفعيل بنجاح! مبروك يا شريكتي."); 
                     },
                     onCancel: (paymentId) => { 
-                        console.log("Payment Canceled"); 
+                        console.log("Canceled"); 
                     },
                     onError: (error, payment) => { 
-                        alert("تأكدي من فتح المحفظة wallet.pi واختيار Testnet"); 
+                        alert("تأكدي من فتح المحفظة wallet.pi واختيار شبكة Testnet");
                     }
                 });
             } catch (e) {
-                // تظهر هذه الرسالة إذا فشل النظام في التعرف على المتصفح أو الرابط
-                alert("يرجى الدخول من زر Start في الخطوة 10 داخل Checklist");
+                // رسالة توضيحية في حالة وجود مشكلة في الربط
+                alert("يرجى التأكد من الدخول عبر زر Start في الخطوة 10");
             }
         }
     </script>
