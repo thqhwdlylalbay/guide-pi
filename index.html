@@ -19,23 +19,37 @@
     </div>
 
     <script>
+        // تهيئة الـ SDK مع ربط الموقع الرسمي للمشروع
         const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: true }); // تفعيل وضع الاختبار
+        Pi.init({ 
+            version: "2.0", 
+            sandbox: true 
+        });
 
         async function transferPi() {
             try {
+                // طلب الدفع التجريبي لتفعيل الخطوة 10
                 const payment = await Pi.createPayment({
                     amount: 0.1,
                     memo: "تفعيل مشروع ثقة ودليل الباي",
                     metadata: { step: 10 }
                 }, {
-                    onReadyForServerApproval: (id) => { console.log("Approved"); },
-                    onReadyForServerCompletion: (id, tx) => { alert("نجحنا! ارجعي لصفحة المهام الآن."); },
-                    onCancel: (id) => { console.log("Canceled"); },
-                    onError: (err) => { alert("افتحي محفظتك أولاً wallet.pi"); }
+                    onReadyForServerApproval: (paymentId) => { 
+                        console.log("Payment Approved:", paymentId); 
+                    },
+                    onReadyForServerCompletion: (paymentId, txid) => { 
+                        alert("تم التفعيل بنجاح! مبروك يا شريكتي."); 
+                    },
+                    onCancel: (paymentId) => { 
+                        console.log("Payment Canceled"); 
+                    },
+                    onError: (error, payment) => { 
+                        alert("تأكدي من فتح المحفظة wallet.pi واختيار Testnet"); 
+                    }
                 });
             } catch (e) {
-                alert("تأكدي أنكِ داخل متصفح Pi");
+                // تظهر هذه الرسالة إذا فشل النظام في التعرف على المتصفح أو الرابط
+                alert("يرجى الدخول من زر Start في الخطوة 10 داخل Checklist");
             }
         }
     </script>
