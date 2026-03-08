@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>ثقة ودليل الباي</title>
 
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
@@ -10,70 +12,145 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
-:root { --p:#673ab7; --bg:#f3e5f5; --gold:#ffd700; --red:#e91e63; --ora:#ff9800; --green:#25D366; }
-body { font-family:sans-serif;background:var(--bg);margin:0;padding-bottom:90px;}
-.header {background:#fff;padding:12px 15px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.1);position:sticky;top:0;z-index:1000;}
-.logo-box {width:40px;height:40px;border-radius:50%;border:2px solid var(--gold);background:var(--p);color:white;display:flex;align-items:center;justify-content:center;font-weight:bold;}
-.section {display:none;padding:15px;}
-.section.active {display:block;}
-.card-bar {background:#fff;border-radius:15px;padding:15px;margin-bottom:12px;box-shadow:0 4px 10px rgba(0,0,0,0.05);border-right:5px solid var(--p);text-decoration:none;color:inherit;display:block;}
-.footer {position:fixed;bottom:0;width:100%;background:#fff;display:flex;border-top:1px solid #eee;padding:10px 0;}
-.f-item {flex:1;text-align:center;color:#aaa;cursor:pointer;font-size:11px;}
-.f-item.active {color:var(--p);font-weight:bold;}
-.f-item i {display:block;font-size:22px;margin-bottom:4px;}
-.btn-main {width:100%;background:var(--p);color:white;border:none;padding:15px;border-radius:10px;font-weight:bold;cursor:pointer;}
+
+:root{
+--p:#673ab7;
+--bg:#f3e5f5;
+--gold:#ffd700;
+}
+
+body{
+font-family:sans-serif;
+background:var(--bg);
+margin:0;
+padding-bottom:90px;
+}
+
+.header{
+background:#fff;
+padding:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.logo{
+width:40px;
+height:40px;
+border-radius:50%;
+background:var(--p);
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+}
+
+.btn-main{
+width:100%;
+background:var(--p);
+color:white;
+border:none;
+padding:16px;
+border-radius:12px;
+font-weight:bold;
+cursor:pointer;
+margin-top:15px;
+font-size:16px;
+}
+
+.card{
+background:#fff;
+padding:15px;
+border-radius:12px;
+margin-top:15px;
+box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+.footer{
+position:fixed;
+bottom:0;
+width:100%;
+background:#fff;
+display:flex;
+border-top:1px solid #eee;
+padding:10px 0;
+}
+
+.f-item{
+flex:1;
+text-align:center;
+color:#aaa;
+font-size:12px;
+}
+
+.f-item i{
+display:block;
+font-size:22px;
+}
+
 </style>
+
 </head>
 
 <body>
 
 <div class="header">
-<button style="background:none;border:none;font-size:24px;color:var(--p);" onclick="toggleLang()">
-<i class="fa fa-globe"></i>
-</button>
 
-<div style="display:flex;align-items:center;gap:8px;">
-<div style="text-align:right;">
-<b id="t-title">ثقة ودليل الباي</b><br>
-<small id="t-desc">استثمر عملاتك بأمان</small>
-</div>
-<div class="logo-box">π</div>
-</div>
+<div>
+<b>ثقة ودليل الباي</b><br>
+<small>استثمر عملاتك بأمان</small>
 </div>
 
+<div class="logo">π</div>
 
-<div id="home" class="section active">
+</div>
 
-<div style="margin-bottom:15px;">
+<div style="padding:15px">
+
 <button onclick="payWithPi()" class="btn-main">
 اختبار الدفع 0.01 Pi
 </button>
+
+<div class="card">
+
+<h3>تطبيقات المايننت الموثقة</h3>
+
+<p>Fireside Forum</p>
+
 </div>
 
-<h4>تطبيقات المايننت الموثقة</h4>
-
-<a href="https://fireside.pinet.com" class="card-bar">
-<strong>Fireside Forum</strong>
-</a>
-
 </div>
-
 
 <div class="footer">
-<div class="f-item active"><i class="fa fa-house"></i>الرئيسية</div>
+
+<div class="f-item">
+<i class="fa fa-house"></i>
+الرئيسية
 </div>
 
+</div>
 
 <script>
 
-Pi.init({ version: "2.0" });
+window.onload=function(){
+
+if(typeof Pi==="undefined"){
+alert("افتح الموقع داخل Pi Browser");
+return;
+}
+
+Pi.init({version:"2.0"});
+
+}
 
 function payWithPi(){
 
-const paymentData = {
-amount: 0.01,
-memo: "Test Payment",
-metadata:{ type:"test"}
+const paymentData={
+amount:0.01,
+memo:"Test Payment",
+metadata:{type:"test"}
 };
 
 Pi.createPayment(paymentData,{
@@ -87,18 +164,7 @@ console.log(paymentId,txid);
 },
 
 onCancel:function(paymentId){
-console.log("cancel");
+alert("تم إلغاء الدفع");
 },
 
-onError:function(error){
-console.error(error);
-}
-
-});
-
-}
-
-</script>
-
-</body>
-</html>
+onError:function
