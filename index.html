@@ -125,4 +125,59 @@ font-size:22px;
 
 <div class="footer">
 
-<div class="
+<div class="f-item">
+<i class="fa fa-house"></i>
+الرئيسية
+</div>
+
+</div>
+
+<script>
+
+window.onload=function(){
+
+if(typeof Pi==="undefined"){
+alert("افتح الموقع داخل Pi Browser");
+return;
+}
+
+Pi.init({version:"2.0", sandbox:true});
+
+}
+
+function payWithPi(){
+
+const paymentData={
+amount:0.01,
+memo:"Test Payment",
+metadata:{type:"test"}
+};
+
+Pi.createPayment(paymentData,{
+
+onReadyForServerApproval:function(paymentId){
+console.log("Payment ready:",paymentId);
+},
+
+onReadyForServerCompletion:function(paymentId,txid){
+console.log("Payment completed:",paymentId,txid);
+alert("تم الدفع بنجاح");
+},
+
+onCancel:function(paymentId){
+alert("تم إلغاء الدفع");
+},
+
+onError:function(error){
+console.error(error);
+alert("حدث خطأ في الدفع");
+}
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
