@@ -1,179 +1,103 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>ثقة ودليل الباي</title>
+<title>ثقه ودليل الباي</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
 <style>
-
-:root{
---p:#673ab7;
---bg:#f3e5f5;
---gold:#ffd700;
-}
-
 body{
-font-family:sans-serif;
-background:var(--bg);
-margin:0;
-padding-bottom:90px;
+font-family: Arial;
+text-align:center;
+background:#f4f4f4;
+padding:40px;
 }
 
-.header{
-background:#fff;
-padding:15px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-box-shadow:0 2px 10px rgba(0,0,0,0.1);
-}
-
-.logo{
-width:40px;
-height:40px;
-border-radius:50%;
-background:var(--p);
-color:#fff;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:bold;
-}
-
-.btn-main{
-width:100%;
-background:var(--p);
+button{
+background:#6a1b9a;
 color:white;
 border:none;
-padding:16px;
-border-radius:12px;
-font-weight:bold;
+padding:15px 25px;
+font-size:18px;
+border-radius:10px;
 cursor:pointer;
-margin-top:15px;
-font-size:16px;
 }
 
-.card{
-background:#fff;
-padding:15px;
-border-radius:12px;
-margin-top:15px;
-box-shadow:0 4px 10px rgba(0,0,0,0.05);
+button:hover{
+background:#4a148c;
 }
-
-.footer{
-position:fixed;
-bottom:0;
-width:100%;
-background:#fff;
-display:flex;
-border-top:1px solid #eee;
-padding:10px 0;
-}
-
-.f-item{
-flex:1;
-text-align:center;
-color:#aaa;
-font-size:12px;
-}
-
-.f-item i{
-display:block;
-font-size:22px;
-}
-
 </style>
 
 </head>
 
 <body>
 
-<div class="header">
+<h2>ثقه ودليل الباي</h2>
+<p>ادعم التطبيق بعملية دفع Pi</p>
 
-<div>
-<b>ثقة ودليل الباي</b><br>
-<small>استثمر عملاتك بأمان</small>
-</div>
-
-<div class="logo">π</div>
-
-</div>
-
-<div style="padding:15px">
-
-<button onclick="payWithPi()" class="btn-main">
-اختبار الدفع 0.01 Pi
-</button>
-
-<div class="card">
-
-<h3>تطبيقات المايننت الموثقة</h3>
-
-<p>Fireside Forum</p>
-
-</div>
-
-</div>
-
-<div class="footer">
-
-<div class="f-item">
-<i class="fa fa-house"></i>
-الرئيسية
-</div>
-
-</div>
+<button onclick="pay()">ادفع 0.01 Pi</button>
 
 <script>
 
-window.onload=function(){
+const Pi = window.Pi;
 
-if(typeof Pi==="undefined"){
-alert("افتح الموقع داخل Pi Browser");
-return;
-}
+Pi.init({
+version: "2.0",
+sandbox: true
+});
 
-Pi.init({version:"2.0", sandbox:true});
+async function pay(){
 
-}
+const scopes = ['payments'];
 
-function payWithPi(){
+const auth = await Pi.authenticate(scopes, function(payment){
+console.log("Incomplete payment found", payment);
+});
 
-const paymentData={
-amount:0.01,
-memo:"Test Payment",
-metadata:{type:"test"}
+const paymentData = {
+amount: 0.01,
+memo: "دعم التطبيق",
+metadata: {type:"donation"}
 };
 
-Pi.createPayment(paymentData,{
+const paymentCallbacks = {
 
-onReadyForServerApproval:function(paymentId){
-console.log("Payment ready:",paymentId);
+onReadyForServerApproval: function(paymentId){
+
+fetch("/api/approve",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body: JSON.stringify({paymentId: paymentId})
+});
+
 },
 
-onReadyForServerCompletion:function(paymentId,txid){
-console.log("Payment completed:",paymentId,txid);
-alert("تم الدفع بنجاح");
+onReadyForServerCompletion: function(paymentId, txid){
+
+fetch("/api/complete",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body: JSON.stringify({
+paymentId: paymentId,
+txid: txid
+})
+});
+
 },
 
-onCancel:function(paymentId){
+onCancel: function(paymentId){
 alert("تم إلغاء الدفع");
 },
 
-onError:function(error){
+onError: function(error){
 console.error(error);
-alert("حدث خطأ في الدفع");
 }
 
-});
+};
+
+Pi.createPayment(paymentData, paymentCallbacks);
 
 }
 
