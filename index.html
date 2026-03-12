@@ -161,46 +161,52 @@
         }
         function toggleLang() { /* كود اللغة كما هو في النسخة الأصلية */ }
         
-    <script>
+   <script>
   const Pi = window.Pi;
+  
+  const MY_API_KEY = 'kt6zk72mbd5xyfqacqubmcltoynbvcs74uohmqe1b8vmz2g1wfspvbtgnoa8ycs2'; 
 
-  // انتظر حتى يتم تحميل الصفحة بالكامل
   window.onload = function() {
     if (typeof Pi !== 'undefined') {
-      Pi.init({ version: "2.0", sandbox: false }); // تأكدي أن sandbox هنا false لأنكِ على الموبايل
+      Pi.init({ version: "2.0", sandbox: false });
       console.log("Pi SDK Initialized");
-    } else {
-      alert("لم يتم العثور على مكتبة Pi. تأكدي من الاتصال بالإنترنت.");
     }
   };
 
   async function startPayment() {
     try {
-      // طلب تسجيل دخول أولاً للتأكد من أننا داخل المتصفح
+      // 1. طلب تسجيل دخول المستخدم (ظهر في الفيديو)
       const auth = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
-      
+      console.log("تم تسجيل الدخول باسم: " + auth.user.username);
+
+      // 2. إنشاء المعاملة (كما في الفيديو دقيقة 09:18)
       const payment = await Pi.createPayment({
         amount: 1, 
         memo: "تجربة دفع في ثقة ودليل الباي", 
-        metadata: { orderId: "test-101" }
+        metadata: { orderId: "trust-test-101" }
       }, {
-        onReadyForServerApproval: (paymentId) => {
-          alert("الطلب مسجل برقم: " + paymentId);
+        // هذه هي الخطوة الناقصة: موافقة السيرفر
+        onReadyForServerApproval: async (paymentId) => {
+          console.log("الطلب ينتظر الموافقة، جاري الإرسال للسيرفر...");
+          // في الفيديو كان يستخدم سيرفر Rails، هنا سنحاكي العملية
+          alert("تم تقديم طلب الدفع برقم: " + paymentId + "\nبرجاء الانتظار للموافقة...");
+          
+          // ملاحظة: الموافقة النهائية الحقيقية تتم عبر رابط API خاص بـ Pi
+          // لغرض التجربة الآن، سنكتفي بإظهار رقم المعاملة
         },
         onReadyForServerCompletion: (paymentId, txid) => {
-          alert("نجحت العملية! رقم التوقيع: " + txid);
+          console.log("المعاملة اكتملت على البلوكشين!");
+          alert("مبروك! نجحت المعاملة.\nرقم العملية (TXID): " + txid);
         },
-        onCancel: (paymentId) => { alert("تم إلغاء العملية"); },
-        onError: (error, payment) => { alert("خطأ: " + error.message); },
+        onCancel: (paymentId) => { console.log("تم إلغاء العملية"); },
+        onError: (error, payment) => { console.error("خطأ:", error); },
       });
     } catch (err) {
-      alert("خطأ: يرجى فتح الموقع من داخل Pi Browser الرسمي فقط.");
+      alert("تأكد من فتح الموقع داخل متصفح Pi الرسمي.");
     }
   }
 
   function onIncompletePaymentFound(payment) {
-    // وظيفة للتعامل مع المدفوعات غير المكتملة
+    console.log("هناك معاملة معلقة مكتشفة:", payment.identifier);
   }
-</script>
-
-            
+    </script>
