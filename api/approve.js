@@ -1,7 +1,7 @@
 // هذا هو الكود الذي يوافق على المعاملة برمجياً
 export default async function handler(req, res) {
     const { paymentId } = req.query;
-    const API_KEY = "kt6zk72mbd5xyfqacqubmcltoynbvcs74uohmqe1b8vmz2g1wfspvbtgnoa8ycs2"; // مفتاحك
+const API_KEY = process.env.PI_API_KEY; // مفتاحك
 
     try {
         // الاتصال بخوادم Pi لإرسال الموافقة (Approve)
