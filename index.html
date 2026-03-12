@@ -160,6 +160,47 @@
             }
         }
         function toggleLang() { /* كود اللغة كما هو في النسخة الأصلية */ }
-    </script>
-</body>
-            </html>
+        
+    <script>
+  const Pi = window.Pi;
+
+  // انتظر حتى يتم تحميل الصفحة بالكامل
+  window.onload = function() {
+    if (typeof Pi !== 'undefined') {
+      Pi.init({ version: "2.0", sandbox: false }); // تأكدي أن sandbox هنا false لأنكِ على الموبايل
+      console.log("Pi SDK Initialized");
+    } else {
+      alert("لم يتم العثور على مكتبة Pi. تأكدي من الاتصال بالإنترنت.");
+    }
+  };
+
+  async function startPayment() {
+    try {
+      // طلب تسجيل دخول أولاً للتأكد من أننا داخل المتصفح
+      const auth = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
+      
+      const payment = await Pi.createPayment({
+        amount: 1, 
+        memo: "تجربة دفع في ثقة ودليل الباي", 
+        metadata: { orderId: "test-101" }
+      }, {
+        onReadyForServerApproval: (paymentId) => {
+          alert("الطلب مسجل برقم: " + paymentId);
+        },
+        onReadyForServerCompletion: (paymentId, txid) => {
+          alert("نجحت العملية! رقم التوقيع: " + txid);
+        },
+        onCancel: (paymentId) => { alert("تم إلغاء العملية"); },
+        onError: (error, payment) => { alert("خطأ: " + error.message); },
+      });
+    } catch (err) {
+      alert("خطأ: يرجى فتح الموقع من داخل Pi Browser الرسمي فقط.");
+    }
+  }
+
+  function onIncompletePaymentFound(payment) {
+    // وظيفة للتعامل مع المدفوعات غير المكتملة
+  }
+</script>
+
+            
