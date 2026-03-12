@@ -47,8 +47,8 @@
 
     <div id="home" class="section active">
         <button id="pay-button" class="btn-main btn-pay-pi" onclick="startPayment()">
-            <i class="fab fa-pi"></i> <span id="t-pay-btn">ادفع 1 Pi للتجربة</span>
-        </button>
+    <i class="fab fa-pi"></i> <span id="t-pay-btn">ادفع 1 Pi للتجربة</span>
+</button>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
             <div onclick="showPage('add_form', this)" style="background: var(--p); color:white; padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
@@ -177,7 +177,7 @@
     try {
       // 1. طلب تسجيل دخول المستخدم (ظهر في الفيديو)
       const auth = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
-      console.log("تم تسجيل الدخول باسم: " + auth.user.username);
+      console.log(" تم تسجيل الدخول باسم:" + auth.user.username);
 
       // 2. إنشاء المعاملة (كما في الفيديو دقيقة 09:18)
       const payment = await Pi.createPayment({
