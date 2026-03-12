@@ -9,39 +9,23 @@
     <style>
         :root { --p: #673ab7; --bg: #f3e5f5; --gold: #ffd700; --red: #e91e63; --ora: #ff9800; --green: #25D366; }
         body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; overflow-x: hidden; }
-        
-        /* الهيدر */
         .header { background: #fff; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
         .logo-box { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--gold); background: var(--p); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        
-        /* الأقسام */
         .section { display: none; padding: 15px; animation: fadeIn 0.3s; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* الأزرار والأيقونات الصغيرة */
         .grid-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .menu-item { padding: 12px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; font-size: 13px; font-weight: bold; border: 1px solid rgba(0,0,0,0.05); }
         .menu-item i { font-size: 18px; margin-bottom: 5px; display: block; }
-        
-        /* كروت الخدمات */
         .card-bar { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.04); border-right: 4px solid var(--p); text-decoration: none; color: inherit; display: block; }
-        
-        /* زر الدفع المخصص */
         .pay-banner { background: linear-gradient(135deg, var(--p), #9c27b0); color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: center; border: 2px solid var(--gold); cursor: pointer; position: relative; overflow: hidden; }
-        .pay-banner:active { transform: scale(0.98); }
-
-        /* الفوتر */
         .footer { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #eee; padding: 8px 0; z-index: 1000; }
         .f-item { flex: 1; text-align: center; color: #aaa; cursor: pointer; font-size: 10px; }
         .f-item.active { color: var(--p); font-weight: bold; }
         .f-item i { display: block; font-size: 20px; margin-bottom: 2px; }
-
-        /* نافذة رسائل الدفع (Modal) */
         #payment-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; }
         .modal-content { background: white; width: 85%; max-width: 350px; padding: 25px; border-radius: 20px; text-align: center; position: relative; }
         .modal-icon { font-size: 40px; margin-bottom: 15px; }
-
         .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; }
         input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 14px; }
     </style>
@@ -153,7 +137,6 @@
             window.scrollTo(0,0);
         }
 
-        // دالة إظهار النافذة الاحترافية
         function openModal(title, text, icon) {
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-text').innerText = text;
@@ -164,7 +147,6 @@
 
         function closeModal() { document.getElementById('payment-modal').style.display = 'none'; }
 
-        // دالة الدفع (الـ SDK المدمج)
         async function startPayment() {
             try {
                 openModal("جاري التحقق", "يرجى تسجيل الدخول والمتابعة..", "🔐");
@@ -191,7 +173,17 @@
             } catch (err) { closeModal(); alert("افتح التطبيق من Pi Browser"); }
         }
 
-        function onIncompletePaymentFound(payment) { console.log("Payment Pending:", payment.identifier); }
+        // دالة تنظيف المعاملات المعلقة (الحل لمشكلتك)
+        function onIncompletePaymentFound(payment) {
+            console.log("لقينا معاملة معلقة: ", payment.identifier);
+            // إرسال طلب للسيرفر للموافقة عليها فوراً لإزالتها
+            fetch(`/api/approve?paymentId=${payment.identifier}`)
+            .then(() => {
+                console.log("تمت معالجة المعاملة القديمة بنجاح.");
+                location.reload(); // تحديث الصفحة لفتح الدفع من جديد
+            })
+            .catch(err => console.error("عطل في التنظيف:", err));
+        }
 
         function calc() {
             let amt = document.getElementById('p_amount').value;
@@ -203,7 +195,6 @@
             }
         }
 
-        // دالة تغيير اللغة (كما هي في كودك)
         let isAr = true;
         function toggleLang() {
             isAr = !isAr;
@@ -211,8 +202,7 @@
             const t = isAr ? { title: "ثقة ودليل الباي", pay: "ادفع 1 Pi لدعم وتوثيق مشروعنا" } : { title: "Trust & Pi Guide", pay: "Pay 1 Pi to support our project" };
             document.getElementById('t-title').innerText = t.title;
             document.getElementById('t-pay-text').innerText = t.pay;
-            // يمكنك إكمال باقي الترجمة هنا بنفس أسلوب كودك الأصلي
         }
     </script>
 </body>
-                </html>
+</html>
