@@ -5,204 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ثقة ودليل الباي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --p: #673ab7; --bg: #f3e5f5; --gold: #ffd700; --red: #e91e63; --ora: #ff9800; --green: #25D366; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; overflow-x: hidden; }
-        .header { background: #fff; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
-        .logo-box { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--gold); background: var(--p); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .section { display: none; padding: 15px; animation: fadeIn 0.3s; }
-        .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .grid-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .menu-item { padding: 12px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; font-size: 13px; font-weight: bold; border: 1px solid rgba(0,0,0,0.05); }
-        .menu-item i { font-size: 18px; margin-bottom: 5px; display: block; }
-        .card-bar { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.04); border-right: 4px solid var(--p); text-decoration: none; color: inherit; display: block; }
-        .pay-banner { background: linear-gradient(135deg, var(--p), #9c27b0); color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: center; border: 2px solid var(--gold); cursor: pointer; position: relative; overflow: hidden; }
-        .footer { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #eee; padding: 8px 0; z-index: 1000; }
-        .f-item { flex: 1; text-align: center; color: #aaa; cursor: pointer; font-size: 10px; }
-        .f-item.active { color: var(--p); font-weight: bold; }
-        .f-item i { display: block; font-size: 20px; margin-bottom: 2px; }
-        #payment-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; }
-        .modal-content { background: white; width: 85%; max-width: 350px; padding: 25px; border-radius: 20px; text-align: center; position: relative; }
-        .modal-icon { font-size: 40px; margin-bottom: 15px; }
-        .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; }
-        input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 14px; }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
+        .btn { background-color: #673ab7; color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; }
+        .status { margin-top: 20px; color: #555; }
     </style>
 </head>
 <body>
 
-    <div id="payment-modal">
-        <div class="modal-content">
-            <div id="modal-icon" class="modal-icon">⏳</div>
-            <h3 id="modal-title" style="margin: 0 0 10px 0;">جاري التحميل...</h3>
-            <p id="modal-text" style="color: #666; font-size: 14px; margin-bottom: 20px;">انتظر من فضلك</p>
-            <button class="btn-main" onclick="closeModal()" id="modal-btn" style="display:none;">موافق</button>
-        </div>
-    </div>
-
-    <div class="header">
-        <button style="background:none; border:none; font-size:22px; color:var(--p); cursor:pointer;" onclick="toggleLang()">
-            <i class="fa fa-globe"></i>
-        </button>
-        <div style="display:flex; align-items:center; gap:8px;">
-            <div style="text-align: right;">
-                <b id="t-title" style="font-size: 14px;">ثقة ودليل الباي</b><br>
-                <small id="t-desc" style="font-size: 11px;">استثمر عملاتك بأمان</small>
-            </div>
-            <div class="logo-box">π</div>
-        </div>
-    </div>
-
-    <div id="home" class="section active">
-        <div class="pay-banner" onclick="startPayment()">
-            <i class="fab fa-pi" style="font-size: 24px; margin-bottom: 5px;"></i>
-            <div id="t-pay-text" style="font-weight: bold;">ادفع 1 Pi لدعم وتوثيق مشروعنا</div>
-            <small style="opacity: 0.8; font-size: 10px;">تجربة دفع آمنة عبر شبكة Pi</small>
-        </div>
-
-        <div class="grid-menu">
-            <div onclick="showPage('add_form', this)" class="menu-item" style="background: var(--p); color:white;">
-                <i class="fa fa-store"></i><span id="t-b-add">أضف متجرك</span>
-            </div>
-            <div onclick="showPage('stake', this)" class="menu-item" style="background:#fff; color:var(--p); border-color:var(--p);">
-                <i class="fa fa-chart-line"></i><span id="t-b-calc">احسب أرباحك</span>
-            </div>
-        </div>
-
-        <h4 id="t-feat-h" style="font-size: 14px; margin: 15px 0 10px 0;"><i class="fa fa-check-circle"></i> تطبيقات موثقة</h4>
-        <a href="https://fireside.pinet.com" class="card-bar" style="border-right-color: var(--ora);">
-            <strong style="font-size: 13px;">Fireside Forum</strong><br>
-            <small id="t-fire-d" style="font-size: 11px;">اربح عملات Pi مقابل المحتوى المميز.</small>
-        </a>
-
-        <h4 style="font-size: 14px; margin: 20px 0 10px 0; color:var(--red);"><i class="fa fa-shield-alt"></i> ركن الأمان</h4>
-        <div class="card-bar" style="border-right-color: var(--red); background: #fff5f5;">
-            <strong id="t-safe-t" style="font-size: 12px; color: var(--red);">نصيحة أمان هامة</strong>
-            <p id="t-safe-d" style="font-size: 11px; color: #666; margin-top: 5px;">لا تدخل كلمة سر المحفظة خارج متصفح Pi الرسمي أبداً.</p>
-        </div>
-    </div>
-
-    <div id="verify_list" class="section">
-        <h3 id="t-v-title" style="text-align:center; font-size: 16px;">دليل المشاريع</h3>
-        <a href="https://www.pichainmall.com" class="card-bar"><strong>Pi Chain Mall</strong></a>
-        <a href="https://pibridge.org" class="card-bar" style="border-right-color: #2196f3;"><strong>Pi Bridge</strong></a>
-    </div>
-
-    <div id="stake" class="section">
-        <h3 id="t-s-title" style="text-align:center; font-size: 16px;">مركز الأرباح</h3>
-        <div class="card-bar" style="border:none; background:#e8f5e9;">
-            <input type="number" id="p_amount" placeholder="الكمية مثلاً: 100">
-            <select id="p_years">
-                <option value="0.5">6 أشهر (+50%)</option>
-                <option value="2.0">سنة واحدة (+200%)</option>
-            </select>
-            <button class="btn-main" onclick="calc()" id="t-s-btn">احسب الآن</button>
-            <div id="res_box" style="display:none; text-align:center; margin-top:15px; font-weight:bold;">
-                <span id="total_v" style="font-size:24px; color:var(--p);"></span> π
-            </div>
-        </div>
-    </div>
-
-    <div id="add_form" class="section">
-        <h3 id="t-a-title" style="text-align:center;">سجل متجرك</h3>
-        <div class="card-bar" style="text-align:center; border:none;">
-            <i class="fab fa-whatsapp" style="font-size:40px; color:var(--green);"></i>
-            <p id="t-a-desc" style="font-size: 13px;">تواصل معنا لتسجيل بيانات متجرك.</p>
-            <a href="whatsapp://send?phone=201220469415&text=طلب_تسجيل" class="btn-main" style="background:var(--green); text-decoration:none; display:block;">مراسلة واتساب</a>
-        </div>
-    </div>
-
-    <div id="report" class="section">
-        <h3 id="t-r-title" style="text-align:center; color:var(--red);">بلاغ عن احتيال</h3>
-        <a href="whatsapp://send?phone=201220469415&text=بلاغ" class="btn-main" style="background:var(--red); text-decoration:none; display:block; text-align:center;">إرسال بلاغ</a>
-    </div>
-
-    <div class="footer">
-        <div class="f-item" id="n-rep" onclick="showPage('report', this)"><i class="fa fa-bullhorn"></i><span id="n-t-rep">إبلاغ</span></div>
-        <div class="f-item" id="n-ver" onclick="showPage('verify_list', this)"><i class="fa fa-medal"></i><span id="n-t-ver">توثيق</span></div>
-        <div class="f-item" id="n-sta" onclick="showPage('stake', this)"><i class="fa fa-chart-pie"></i><span id="n-t-sta">أرباح</span></div>
-        <div class="f-item active" id="n-hom" onclick="showPage('home', this)"><i class="fa fa-house"></i><span id="n-t-hom">الرئيسية</span></div>
-    </div>
+    <h1>ثقة ودليل الباي</h1>
+    <p>اضغط أدناه لحل مشكلة المعاملة المعلقة وتوثيق المشروع</p>
+    
+    <button class="btn" onclick="payPi()">ادفع 1 Pi لدعم وتوثيق مشروعنا</button>
+    <div id="status" class="status"></div>
 
     <script>
         const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: false });
+        Pi.init({ version: "2.0", sandbox: true }); // sandbox: true لأننا في التستنت
 
-        function showPage(id, el) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.f-item').forEach(i => i.classList.remove('active'));
-            if(el) el.classList.add('active');
-            window.scrollTo(0,0);
-        }
-
-        function openModal(title, text, icon) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-text').innerText = text;
-            document.getElementById('modal-icon').innerText = icon;
-            document.getElementById('payment-modal').style.display = 'flex';
-            document.getElementById('modal-btn').style.display = 'none';
-        }
-
-        function closeModal() { document.getElementById('payment-modal').style.display = 'none'; }
-
-        async function startPayment() {
+        async function payPi() {
             try {
-                openModal("جاري التحقق", "يرجى تسجيل الدخول والمتابعة..", "🔐");
-                const auth = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
-                
-                openModal("انتظار الدفع", "يرجى إتمام العملية في محفظتك..", "💸");
-                
                 const payment = await Pi.createPayment({
-                    amount: 1,
+                    amount: 1.1, // غيرناها لـ 1.1 لتمييزها عن القديمة
                     memo: "دعم مشروع ثقة ودليل الباي",
-                    metadata: { orderId: "p_" + Date.now() }
+                    metadata: { orderId: 12345 }
                 }, {
-                    onReadyForServerApproval: async (paymentId) => {
-                        openModal("تأكيد السيرفر", "جاري توثيق المعاملة تلقائياً..", "⏳");
-                        await fetch(`/api/approve?paymentId=${paymentId}`);
+                    onReadyForServerApproval: (paymentId) => {
+                        fetch(`/api/approve?paymentId=${paymentId}`);
                     },
                     onReadyForServerCompletion: (paymentId, txid) => {
-                        openModal("تم الدفع بنجاح!", "رقم العملية: " + txid.substring(0,10) + "...", "✅");
-                        document.getElementById('modal-btn').style.display = 'block';
+                        fetch(`/api/complete?paymentId=${paymentId}&txid=${txid}`);
                     },
-                    onCancel: () => { closeModal(); },
-                    onError: (err) => { openModal("خطأ", err.message, "❌"); document.getElementById('modal-btn').style.display = 'block'; }
+                    onCancel: (paymentId) => { console.log("تم الإلغاء"); },
+                    onError: (error, payment) => { console.error(error); }
                 });
-            } catch (err) { closeModal(); alert("افتح التطبيق من Pi Browser"); }
-        }
-
-        // دالة تنظيف المعاملات المعلقة (الحل لمشكلتك)
-        function onIncompletePaymentFound(payment) {
-            console.log("لقينا معاملة معلقة: ", payment.identifier);
-            // إرسال طلب للسيرفر للموافقة عليها فوراً لإزالتها
-            fetch(`/api/approve?paymentId=${payment.identifier}`)
-            .then(() => {
-                console.log("تمت معالجة المعاملة القديمة بنجاح.");
-                location.reload(); // تحديث الصفحة لفتح الدفع من جديد
-            })
-            .catch(err => console.error("عطل في التنظيف:", err));
-        }
-
-        function calc() {
-            let amt = document.getElementById('p_amount').value;
-            let bonus = document.getElementById('p_years').value;
-            if(amt > 0) {
-                let total = parseFloat(amt) + (amt * bonus);
-                document.getElementById('total_v').innerText = total.toLocaleString();
-                document.getElementById('res_box').style.display = 'block';
+            } catch (err) {
+                alert("حدث خطأ أو يوجد معاملة معلقة جاري حلها..");
             }
         }
 
-        let isAr = true;
-        function toggleLang() {
-            isAr = !isAr;
-            document.dir = isAr ? 'rtl' : 'ltr';
-            const t = isAr ? { title: "ثقة ودليل الباي", pay: "ادفع 1 Pi لدعم وتوثيق مشروعنا" } : { title: "Trust & Pi Guide", pay: "Pay 1 Pi to support our project" };
-            document.getElementById('t-title').innerText = t.title;
-            document.getElementById('t-pay-text').innerText = t.pay;
-        }
+        // الكود السحري لمسح المعاملة المعلقة
+        Pi.authenticate(['payments', 'username'], (payment) => {
+            console.log("تم تسجيل الدخول: " + payment.user.username);
+        }, (incompletePayment) => {
+            const paymentId = incompletePayment.identifier;
+            document.getElementById('status').innerText = "تم العثور على معاملة معلقة.. جاري المسح...";
+            
+            // نطلب من السيرفر إلغاء المعاملة (CANCEL) بدلاً من APPROVE
+            fetch(`/api/approve?paymentId=${paymentId()}&cancel=true`)
+                .then(() => {
+                    document.getElementById('status').innerText = "تم إرسال طلب إلغاء المعاملة بنجاح. يرجى إعادة تشغيل التطبيق.";
+                });
+        });
     </script>
 </body>
 </html>
