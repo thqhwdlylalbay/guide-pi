@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pi App Test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+</head>
+<body style="text-align: center; padding-top: 50px; font-family: Arial;">
+
+    <h1>تطبيق تجربة الدفع</h1>
+    
+    <button id="btn_pay" style="padding: 15px 30px; background-color: #673ab7; color: white; border: none; border-radius: 5px; font-size: 18px; cursor: pointer;">
+        ادفع 1 Pi الآن
+    </button>
+
+    <p id="status" style="margin-top: 20px; color: blue;">انتظار التحميل...</p>
+
+    <script>
+        const Pi = window.Pi;
+        // ضعي مفتاح الـ API الخاص بكِ هنا بدلاً من النجوم
+        const apiKey = 'kt6zk72mbd5xyfqacqubmcltoynbvcs74uohmqe1b8vmz2g1wfspvbtgnoa8ycs2'; 
+
+        // 1. تشغيل المكتبة
+        Pi.init({ version: "2.0", sandbox: false });
+
+        document.getElementById('status').innerText = "تم ربط الشبكة بنجاح";
+
+        // 2. وظيفة الزرار عند الضغط
+        document.getElementById('btn_pay').addEventListener('click', async function() {
+            try {
+                document.getElementById('status').innerText = "جاري الاتصال بالمحفظة...";
+
+                // طلب تسجيل الدخول (Authenticate)
+                const auth = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
+                
+                // إنشاء المعاملة (Create Payment)
+                const payment = await Pi.createPayment({
+                    amount: 1,
+                    memo: "تجربة دفع فيديو الكورتيم",
+                    metadata: { orderId: "order_123" }
+                }, {
+                    onReadyForServerApproval: function(paymentId) {
+                        alert("الطلب بانتظار موافقة السيرفر: " + paymentId);
+                    },
+                    onReadyForServerCompletion: function(paymentId, txid) {
+                        alert("تمت المعاملة بنجاح! رقم العملية: " + txid);
+                        document.getElementById('status').innerText = "تم الدفع بنجاح!";
+                    },
+                    onCancel: function(paymentId) {
+                        document.getElementById('status').innerText = "تم إلغاء الدفع من قبلك.";
+                    },
+                    onError: function(error, payment) {
+                        alert("حدث خطأ: " + error.message);
+                    }
+                });
+
+            } catch (err) {
+                alert("يجب فتح هذا الرابط من داخل تطبيق Pi Browser");
+            }
+        });
+
+        function onIncompletePaymentFound(payment) {
+            console.log("معاملة قديمة معلقة: " + payment.identifier);
+        };
+    </script>
+</body>
+</html>
