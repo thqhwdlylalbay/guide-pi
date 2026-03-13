@@ -16,25 +16,27 @@
     <h1>ثقة ودليل الباي</h1>
     <p>اضغط أدناه لحل مشكلة المعاملة المعلقة وتوثيق المشروع</p>
     
-    <button class="btn" onclick="payPi()">ادفع 1 Pi لدعم وتوثيق مشروعنا</button>
+    <button class="btn" onclick="payPi()">ادفع 1.1 Pi لدعم وتوثيق مشروعنا</button>
     <div id="status" class="status"></div>
 
     <script>
         const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: true }); // sandbox: true لأننا في التستنت
+        Pi.init({ version: "2.0", sandbox: true }); 
 
         async function payPi() {
             try {
                 const payment = await Pi.createPayment({
-                    amount: 1.1, // غيرناها لـ 1.1 لتمييزها عن القديمة
+                    amount: 1.1, 
                     memo: "دعم مشروع ثقة ودليل الباي",
                     metadata: { orderId: 12345 }
                 }, {
                     onReadyForServerApproval: (paymentId) => {
-                        fetch(`/api/approve?paymentId=${paymentId}`);
+                        // تعديل: الربط المباشر بسيرفر Vercel الجديد للموافقة
+                        fetch(`https://thqhwdlylalbay-github-io-nadg.vercel.app/api/approve?paymentId=${paymentId}`);
                     },
                     onReadyForServerCompletion: (paymentId, txid) => {
-                        fetch(`/api/complete?paymentId=${paymentId}&txid=${txid}`);
+                        // تعديل: الربط المباشر بسيرفر Vercel لإتمام العملية
+                        fetch(`https://thqhwdlylalbay-github-io-nadg.vercel.app/api/complete?paymentId=${paymentId}&txid=${txid}`);
                     },
                     onCancel: (paymentId) => { console.log("تم الإلغاء"); },
                     onError: (error, payment) => { console.error(error); }
@@ -44,17 +46,17 @@
             }
         }
 
-        // الكود السحري لمسح المعاملة المعلقة
+        // كود معالجة المعاملات المعلقة
         Pi.authenticate(['payments', 'username'], (payment) => {
             console.log("تم تسجيل الدخول: " + payment.user.username);
         }, (incompletePayment) => {
             const paymentId = incompletePayment.identifier;
-            document.getElementById('status').innerText = "تم العثور على معاملة معلقة.. جاري المسح...";
+            document.getElementById('status').innerText = "تم العثور على معاملة معلقة.. جاري المعالجة...";
             
-            // نطلب من السيرفر إلغاء المعاملة (CANCEL) بدلاً من APPROVE
-            fetch(`/api/approve?paymentId=${paymentId()}&cancel=true`)
+            // محاولة الموافقة على المعاملة المعلقة عبر السيرفر الجديد
+            fetch(`https://thqhwdlylalbay-github-io-nadg.vercel.app/api/approve?paymentId=${paymentId}`)
                 .then(() => {
-                    document.getElementById('status').innerText = "تم إرسال طلب إلغاء المعاملة بنجاح. يرجى إعادة تشغيل التطبيق.";
+                    document.getElementById('status').innerText = "تم إرسال طلب معالجة المعاملة. يرجى تحديث الصفحة.";
                 });
         });
     </script>
