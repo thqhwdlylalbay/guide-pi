@@ -1,69 +1,50 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Trust and Pi Guide</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <title>Pi App</title>
 </head>
-<body style="text-align: center; padding-top: 50px;">
-
-    <h1>ثقة ودليل الباي</h1>
-    <button id="btn" style="padding: 15px 30px; background: #6c5ce7; color: white; border: none; border-radius: 8px; font-size: 18px;">
-        توثيق الحساب (1 Pi)
-    </button>
-    <p id="msg"></p>
+<body style="text-align: center; font-family: sans-serif;">
+    <h1>Pi Payment Test</h1>
+    <button id="pay_btn" style="padding: 15px; background: #673ab7; color: #fff; border: none; border-radius: 5px;">Pay 1 Pi</button>
 
     <script>
-        // 1. التهيئة الفورية (أهم سطر عشان الخطأ اللي ظهرلك)
-        Pi.init({ version: "1.5", sandbox: false });
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0", sandbox: false });
 
-        // 2. المصادقة التلقائية
-        async function login() {
+        async function auth() {
             try {
-                await Pi.authenticate(['payments', 'username'], onIncomplete);
-            } catch (e) {
-                document.getElementById('msg').innerText = "افتح التطبيق من Pi Browser";
-            }
+                const user = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
+                console.log(user);
+            } catch (err) { console.error(err); }
         }
 
-        async function onIncomplete(p) {
-            await fetch("https://trust-pi-guide.netlify.app/api/complete", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentId: p.identifier, txid: p.transaction.txid })
+        async function createPayment() {
+            const payment = await Pi.createPayment({
+                amount: 1,
+                memo: "Test Payment",
+                metadata: { orderId: "123" }
+            }, {
+                onReadyForServerApproval: (paymentId) => {
+                    console.log("Payment ID:", paymentId);
+                    alert("Order Submitted! ID: " + paymentId);
+                    // في الفيديو: هنا كان بيتوقف ويوافق يدوياً من السيرفر
+                },
+                onReadyForServerCompletion: (paymentId, txid) => {
+                    alert("Success! TXID: " + txid);
+                },
+                onCancel: (paymentId) => { console.log("Cancelled"); },
+                onError: (error, payment) => { console.error(error); },
             });
         }
 
-        // 3. زرار الدفع
-        document.getElementById('btn').onclick = async () => {
-            try {
-                const pay = await Pi.createPayment({
-                    amount: 1,
-                    memo: "Verification",
-                    metadata: { type: "verification" }
-                }, {
-                    onReadyForServerApproval: (id) => {
-                        fetch("https://trust-pi-guide.netlify.app/api/approve", {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId: id })
-                        });
-                    },
-                    onReadyForServerCompletion: (id, tx) => {
-                        fetch("https://trust-pi-guide.netlify.app/api/complete", {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId: id, txid: tx })
-                        });
-                        document.getElementById('msg').innerText = "تم التوثيق!";
-                    },
-                    onCancel: () => {},
-                    onError: () => { document.getElementById('msg').innerText = "خطأ في العملية"; }
-                });
-            } catch (err) {}
-        };
+        document.getElementById('pay_btn').addEventListener('click', () => {
+            auth().then(createPayment);
+        });
 
-        login();
+        function onIncompletePaymentFound(payment) { /* ... */ }
     </script>
 </body>
 </html>
