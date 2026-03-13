@@ -5,65 +5,65 @@
     <title>Trust and Pi Guide</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
-<body>
+<body style="text-align: center; padding-top: 50px;">
+
     <h1>ثقة ودليل الباي</h1>
-    <button id="pay_button" style="padding: 15px; background: #6c5ce7; color: white; border: none; border-radius: 5px; cursor: pointer;">
-        دفع 1 Pi للتوثيق
+    <button id="btn" style="padding: 15px 30px; background: #6c5ce7; color: white; border: none; border-radius: 8px; font-size: 18px;">
+        توثيق الحساب (1 Pi)
     </button>
-    <p id="status"></p>
+    <p id="msg"></p>
 
     <script>
-        const Pi = window.Pi;
-        // تهيئة الـ SDK هي أهم خطوة عند الكورتيم
+        // 1. التهيئة الفورية (أهم سطر عشان الخطأ اللي ظهرلك)
         Pi.init({ version: "1.5", sandbox: false });
 
-        async function auth() {
+        // 2. المصادقة التلقائية
+        async function login() {
             try {
-                await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
-            } catch (err) {
-                document.getElementById('status').innerText = "خطأ في المصادقة";
+                await Pi.authenticate(['payments', 'username'], onIncomplete);
+            } catch (e) {
+                document.getElementById('msg').innerText = "افتح التطبيق من Pi Browser";
             }
         }
 
-        async function onIncompletePaymentFound(payment) {
+        async function onIncomplete(p) {
             await fetch("https://trust-pi-guide.netlify.app/api/complete", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid })
+                body: JSON.stringify({ paymentId: p.identifier, txid: p.transaction.txid })
             });
         }
 
-        document.getElementById('pay_button').onclick = async () => {
+        // 3. زرار الدفع
+        document.getElementById('btn').onclick = async () => {
             try {
-                const payment = await Pi.createPayment({
+                const pay = await Pi.createPayment({
                     amount: 1,
-                    memo: "توثيق الحساب",
+                    memo: "Verification",
                     metadata: { type: "verification" }
                 }, {
-                    onReadyForServerApproval: (paymentId) => {
+                    onReadyForServerApproval: (id) => {
                         fetch("https://trust-pi-guide.netlify.app/api/approve", {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId })
+                            body: JSON.stringify({ paymentId: id })
                         });
                     },
-                    onReadyForServerCompletion: (paymentId, txid) => {
+                    onReadyForServerCompletion: (id, tx) => {
                         fetch("https://trust-pi-guide.netlify.app/api/complete", {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId, txid })
+                            body: JSON.stringify({ paymentId: id, txid: tx })
                         });
-                        document.getElementById('status').innerText = "تم بنجاح!";
+                        document.getElementById('msg').innerText = "تم التوثيق!";
                     },
-                    onCancel: (pId) => {},
-                    onError: (err, p) => { document.getElementById('status').innerText = "حدث خطأ"; }
+                    onCancel: () => {},
+                    onError: () => { document.getElementById('msg').innerText = "خطأ في العملية"; }
                 });
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) {}
         };
 
-        auth(); // تشغيل المصادقة فوراً عند التحميل
+        login();
     </script>
 </body>
 </html>
