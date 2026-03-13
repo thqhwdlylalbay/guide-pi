@@ -1,23 +1,71 @@
-async function onIncompletePaymentFound(payment) {
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Pi Payment Test</title>
 
-  await fetch("https://pi-payment-server--thqhwdlylalbay.replit.app/approve", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      paymentId: payment.identifier
-    })
-  });
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-  await fetch("https://pi-payment-server--thqhwdlylalbay.replit.app/complete", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      paymentId: payment.identifier
-    })
-  });
+<script>
+Pi.init({ version: "2.0", sandbox: true });
+
+function pay() {
+
+  const paymentData = {
+    amount: 1,
+    memo: "Test payment",
+    metadata: { orderId: "12345" }
+  };
+
+  Pi.createPayment(
+    paymentData,
+    {
+      onReadyForServerApproval: function(paymentId) {
+
+        fetch("https://pi-payment-server--thqhwdlylalbay.replit.app/approve", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ paymentId })
+        });
+
+      },
+
+      onReadyForServerCompletion: function(paymentId, txid) {
+
+        fetch("https://pi-payment-server--thqhwdlylalbay.replit.app/complete", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ paymentId, txid })
+        });
+
+      },
+
+      onCancel: function(paymentId) {
+        console.log("Payment cancelled");
+      },
+
+      onError: function(error, payment) {
+        console.log(error);
+      }
+    }
+  );
 
 }
+</script>
+
+</head>
+
+<body style="text-align:center; margin-top:120px; font-family:Arial;">
+
+<h1>Pi Test Payment</h1>
+
+<button onclick="pay()" style="font-size:25px;padding:20px 40px;background:#f4b400;border:none;border-radius:10px;">
+Pay with Pi
+</button>
+
+</body>
+</html>
