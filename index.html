@@ -1,52 +1,23 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-</head>
+async function onIncompletePaymentFound(payment) {
 
-<body style="text-align:center;padding-top:60px;font-family:sans-serif;">
+  await fetch("https://pi-payment-server--thqhwdlylalbay.replit.app/approve", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      paymentId: payment.identifier
+    })
+  });
 
-<h2>اختبار دفع Pi Testnet</h2>
-
-<button id="pay" style="padding:15px 30px;font-size:18px;">
-ادفع 1 Pi
-</button>
-
-<script>
-
-Pi.init({ version:"2.0", sandbox:true });
-
-document.getElementById("pay").onclick = async function(){
-
-const payment = await Pi.createPayment(
-{
-amount:1,
-memo:"Test Payment",
-metadata:{orderId:Date.now()}
-},
-{
-onReadyForServerApproval: function(paymentId){
-console.log("Approve:",paymentId);
-},
-
-onReadyForServerCompletion: function(paymentId,txid){
-console.log("Complete:",paymentId,txid);
-alert("تم الدفع بنجاح");
-},
-
-onCancel:function(paymentId){
-alert("تم إلغاء الدفع");
-},
-
-onError:function(error){
-console.error(error);
-}
-});
+  await fetch("https://pi-payment-server--thqhwdlylalbay.replit.app/complete", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      paymentId: payment.identifier
+    })
+  });
 
 }
-
-</script>
-
-</body>
-</html>
