@@ -3,100 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - Trust and Pi Guide</title>
+    <title>ثقة ودليل الباي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 20px; }
-        .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        h1 { color: #6c5ce7; }
-        .video-container { margin: 20px 0; border-radius: 10px; overflow: hidden; }
-        button { background-color: #6c5ce7; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; width: 100%; transition: 0.3s; }
-        button:hover { background-color: #5a4bcf; }
-        #status { margin-top: 15px; color: #d63031; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .card { background: white; padding: 40px 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); max-width: 400px; width: 100%; text-align: center; border: 1px solid #e0e0e0; }
+        .logo-placeholder { font-size: 50px; margin-bottom: 20px; }
+        h2 { color: #6c5ce7; margin-bottom: 10px; font-size: 24px; }
+        p { color: #636e72; font-size: 16px; margin-bottom: 30px; line-height: 1.5; }
+        #pay-button { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border: none; padding: 18px; border-radius: 15px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; transition: 0.3s; display: none; box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3); }
+        #pay-button:active { transform: scale(0.96); }
+        #status { margin-top: 20px; font-size: 14px; font-weight: bold; }
+        .loader { color: #b2bec3; font-style: italic; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>ثقة ودليل الباي</h1>
-    <p>اضغط أدناه لحل مشكلة المعاملة المعلقة وتوثيق المشروع</p>
+<div class="card">
+    <div class="logo-placeholder">🛡️</div>
+    <h2>ثقة ودليل الباي</h2>
+    <p>توثيق الحساب ورفع قيود المعاملات المعلقة في شبكة Pi</p>
 
-    <div class="video-container">
-        <iframe 
-            width="100%" 
-            height="250" 
-            src="https://www.youtube.com/embed/S_8q0-v-R64" 
-            title="Pi Network Core Team Message" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen>
-        </iframe>
-    </div>
-
-    <button id="pay-button">توثيق الحساب ورفع القيود (1 Pi)</button>
+    <div id="loading" class="loader">جاري الاتصال بـ Pi Network...</div>
+    <button id="pay-button">بدء التوثيق الآن (1 Pi)</button>
     <div id="status"></div>
 </div>
 
 <script>
-    // الرابط الجديد بتاعك على Netlify عشان ما يظهرش "حدث خطأ"
-    const backendUrl = "https://trust-pi-guide.netlify.app"; 
+    const backendUrl = "https://trust-pi-guide.netlify.app";
+    const statusDiv = document.getElementById('status');
+    const payBtn = document.getElementById('pay-button');
+    const loadingText = document.getElementById('loading');
 
-    const Pi = window.Pi;
-    Pi.init({ version: "1.5", sandbox: false });
+    window.onload = function() {
+        if (window.Pi) {
+            window.Pi.init({ version: "1.5", sandbox: false });
+            authenticateUser();
+        } else {
+            statusDiv.innerHTML = "<span style='color:red;'>يرجى فتح التطبيق من داخل Pi Browser</span>";
+        }
+    };
 
-    async function auth() {
+    async function authenticateUser() {
         try {
-            const user = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
-            console.log("User Authenticated:", user.username);
+            await window.Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
+            loadingText.style.display = 'none';
+            payBtn.style.display = 'block';
         } catch (err) {
-            document.getElementById('status').innerText = "حدث خطأ في المصادقة: " + err.message;
+            statusDiv.style.color = "red";
+            statusDiv.innerText = "فشل المصادقة.. تأكد من اتصالك";
         }
     }
 
     async function onIncompletePaymentFound(payment) {
-        // في حالة وجود دفعة معلقة، يتم إرسالها للسيرفر الجديد
-        await fetch(`${backendUrl}/complete`, {
+        await fetch(`${backendUrl}/api/complete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid })
         });
     }
 
-    document.getElementById('pay-button').onclick = async () => {
+    payBtn.onclick = async () => {
+        statusDiv.style.color = "#6c5ce7";
+        statusDiv.innerText = "جاري فتح محفظة Pi...";
+        
         try {
-            const payment = await Pi.createPayment({
+            const payment = await window.Pi.createPayment({
                 amount: 1,
-                memo: "توثيق حساب ثقة ودليل الباي",
+                memo: "توثيق مشروع ثقة ودليل الباي",
                 metadata: { type: "verification" }
             }, {
                 onReadyForServerApproval: (paymentId) => {
-                    fetch(`${backendUrl}/approve`, {
+                    fetch(`${backendUrl}/api/approve`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ paymentId })
                     });
                 },
                 onReadyForServerCompletion: (paymentId, txid) => {
-                    fetch(`${backendUrl}/complete`, {
+                    fetch(`${backendUrl}/api/complete`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ paymentId, txid })
                     });
-                    document.getElementById('status').style.color = "green";
-                    document.getElementById('status').innerText = "تم التوثيق بنجاح!";
+                    statusDiv.style.color = "green";
+                    statusDiv.innerText = "✅ تم التوثيق بنجاح!";
                 },
-                onCancel: (paymentId) => console.log("Payment Cancelled"),
-                onError: (error, payment) => {
-                    document.getElementById('status').innerText = "حدث خطأ أو يوجد معاملة معلقة جاري حلها..";
-                    console.error(error);
-                }
+                onCancel: (paymentId) => { statusDiv.innerText = "تم إلغاء العملية."; },
+                onError: (error, payment) => { statusDiv.innerText = "حدث خطأ في العملية."; }
             });
         } catch (err) {
-            document.getElementById('status').innerText = "خطأ في تشغيل الدفع.";
+            statusDiv.innerText = "خطأ: " + err.message;
         }
     };
-
-    auth();
 </script>
 
 </body>
