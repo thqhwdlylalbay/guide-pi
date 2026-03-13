@@ -3,62 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي</title>
+    <title>ثقة ودليل الباي - Trust and Pi Guide</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
-        .btn { background-color: #673ab7; color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; }
-        .status { margin-top: 20px; color: #555; }
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 20px; }
+        .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        h1 { color: #6c5ce7; }
+        .video-container { margin: 20px 0; border-radius: 10px; overflow: hidden; }
+        button { background-color: #6c5ce7; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; width: 100%; transition: 0.3s; }
+        button:hover { background-color: #5a4bcf; }
+        #status { margin-top: 15px; color: #d63031; font-weight: bold; }
     </style>
 </head>
 <body>
 
+<div class="container">
     <h1>ثقة ودليل الباي</h1>
     <p>اضغط أدناه لحل مشكلة المعاملة المعلقة وتوثيق المشروع</p>
-    
-    <button class="btn" onclick="payPi()">ادفع 1.1 Pi لدعم وتوثيق مشروعنا</button>
-    <div id="status" class="status"></div>
 
-    <script>
-        const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: true }); 
+    <div class="video-container">
+        <iframe 
+            width="100%" 
+            height="250" 
+            src="https://www.youtube.com/embed/S_8q0-v-R64" 
+            title="Pi Network Core Team Message" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+    </div>
 
-        async function payPi() {
-            try {
-                const payment = await Pi.createPayment({
-                    amount: 1.1, 
-                    memo: "دعم مشروع ثقة ودليل الباي",
-                    metadata: { orderId: 12345 }
-                }, {
-                    onReadyForServerApproval: (paymentId) => {
-                        // تعديل: الربط المباشر بسيرفر Vercel الجديد للموافقة
-                        fetch(`https://thqhwdlylalbay-github-io-nadg.vercel.app/api/approve?paymentId=${paymentId}`);
-                    },
-                    onReadyForServerCompletion: (paymentId, txid) => {
-                        // تعديل: الربط المباشر بسيرفر Vercel لإتمام العملية
-                        fetch(`https://thqhwdlylalbay-github-io-nadg.vercel.app/api/complete?paymentId=${paymentId}&txid=${txid}`);
-                    },
-                    onCancel: (paymentId) => { console.log("تم الإلغاء"); },
-                    onError: (error, payment) => { console.error(error); }
-                });
-            } catch (err) {
-                alert("حدث خطأ أو يوجد معاملة معلقة جاري حلها..");
-            }
+    <button id="pay-button">توثيق الحساب ورفع القيود (1 Pi)</button>
+    <div id="status"></div>
+</div>
+
+<script>
+    // الرابط الجديد بتاعك على Netlify عشان ما يظهرش "حدث خطأ"
+    const backendUrl = "https://trust-pi-guide.netlify.app"; 
+
+    const Pi = window.Pi;
+    Pi.init({ version: "1.5", sandbox: false });
+
+    async function auth() {
+        try {
+            const user = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
+            console.log("User Authenticated:", user.username);
+        } catch (err) {
+            document.getElementById('status').innerText = "حدث خطأ في المصادقة: " + err.message;
         }
+    }
 
-        // كود معالجة المعاملات المعلقة
-        Pi.authenticate(['payments', 'username'], (payment) => {
-            console.log("تم تسجيل الدخول: " + payment.user.username);
-        }, (incompletePayment) => {
-            const paymentId = incompletePayment.identifier;
-            document.getElementById('status').innerText = "تم العثور على معاملة معلقة.. جاري المعالجة...";
-            
-            // محاولة الموافقة على المعاملة المعلقة عبر السيرفر الجديد
-            fetch(`https://thqhwdlylalbay-github-io-nadg.vercel.app/api/approve?paymentId=${paymentId}`)
-                .then(() => {
-                    document.getElementById('status').innerText = "تم إرسال طلب معالجة المعاملة. يرجى تحديث الصفحة.";
-                });
+    async function onIncompletePaymentFound(payment) {
+        // في حالة وجود دفعة معلقة، يتم إرسالها للسيرفر الجديد
+        await fetch(`${backendUrl}/complete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid })
         });
-    </script>
+    }
+
+    document.getElementById('pay-button').onclick = async () => {
+        try {
+            const payment = await Pi.createPayment({
+                amount: 1,
+                memo: "توثيق حساب ثقة ودليل الباي",
+                metadata: { type: "verification" }
+            }, {
+                onReadyForServerApproval: (paymentId) => {
+                    fetch(`${backendUrl}/approve`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId })
+                    });
+                },
+                onReadyForServerCompletion: (paymentId, txid) => {
+                    fetch(`${backendUrl}/complete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId, txid })
+                    });
+                    document.getElementById('status').style.color = "green";
+                    document.getElementById('status').innerText = "تم التوثيق بنجاح!";
+                },
+                onCancel: (paymentId) => console.log("Payment Cancelled"),
+                onError: (error, payment) => {
+                    document.getElementById('status').innerText = "حدث خطأ أو يوجد معاملة معلقة جاري حلها..";
+                    console.error(error);
+                }
+            });
+        } catch (err) {
+            document.getElementById('status').innerText = "خطأ في تشغيل الدفع.";
+        }
+    };
+
+    auth();
+</script>
+
 </body>
 </html>
