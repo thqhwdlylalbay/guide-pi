@@ -2,101 +2,68 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي</title>
+    <title>Trust and Pi Guide</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .card { background: white; padding: 40px 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); max-width: 400px; width: 100%; text-align: center; border: 1px solid #e0e0e0; }
-        .logo-placeholder { font-size: 50px; margin-bottom: 20px; }
-        h2 { color: #6c5ce7; margin-bottom: 10px; font-size: 24px; }
-        p { color: #636e72; font-size: 16px; margin-bottom: 30px; line-height: 1.5; }
-        #pay-button { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border: none; padding: 18px; border-radius: 15px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; transition: 0.3s; display: none; box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3); }
-        #pay-button:active { transform: scale(0.96); }
-        #status { margin-top: 20px; font-size: 14px; font-weight: bold; }
-        .loader { color: #b2bec3; font-style: italic; }
-    </style>
 </head>
 <body>
+    <h1>ثقة ودليل الباي</h1>
+    <button id="pay_button" style="padding: 15px; background: #6c5ce7; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        دفع 1 Pi للتوثيق
+    </button>
+    <p id="status"></p>
 
-<div class="card">
-    <div class="logo-placeholder">🛡️</div>
-    <h2>ثقة ودليل الباي</h2>
-    <p>توثيق الحساب ورفع قيود المعاملات المعلقة في شبكة Pi</p>
+    <script>
+        const Pi = window.Pi;
+        // تهيئة الـ SDK هي أهم خطوة عند الكورتيم
+        Pi.init({ version: "1.5", sandbox: false });
 
-    <div id="loading" class="loader">جاري الاتصال بـ Pi Network...</div>
-    <button id="pay-button">بدء التوثيق الآن (1 Pi)</button>
-    <div id="status"></div>
-</div>
-
-<script>
-    const backendUrl = "https://trust-pi-guide.netlify.app";
-    const statusDiv = document.getElementById('status');
-    const payBtn = document.getElementById('pay-button');
-    const loadingText = document.getElementById('loading');
-
-    window.onload = function() {
-        if (window.Pi) {
-            window.Pi.init({ version: "1.5", sandbox: false });
-            authenticateUser();
-        } else {
-            statusDiv.innerHTML = "<span style='color:red;'>يرجى فتح التطبيق من داخل Pi Browser</span>";
+        async function auth() {
+            try {
+                await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
+            } catch (err) {
+                document.getElementById('status').innerText = "خطأ في المصادقة";
+            }
         }
-    };
 
-    async function authenticateUser() {
-        try {
-            await window.Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
-            loadingText.style.display = 'none';
-            payBtn.style.display = 'block';
-        } catch (err) {
-            statusDiv.style.color = "red";
-            statusDiv.innerText = "فشل المصادقة.. تأكد من اتصالك";
-        }
-    }
-
-    async function onIncompletePaymentFound(payment) {
-        await fetch(`${backendUrl}/api/complete`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid })
-        });
-    }
-
-    payBtn.onclick = async () => {
-        statusDiv.style.color = "#6c5ce7";
-        statusDiv.innerText = "جاري فتح محفظة Pi...";
-        
-        try {
-            const payment = await window.Pi.createPayment({
-                amount: 1,
-                memo: "توثيق مشروع ثقة ودليل الباي",
-                metadata: { type: "verification" }
-            }, {
-                onReadyForServerApproval: (paymentId) => {
-                    fetch(`${backendUrl}/api/approve`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId })
-                    });
-                },
-                onReadyForServerCompletion: (paymentId, txid) => {
-                    fetch(`${backendUrl}/api/complete`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId, txid })
-                    });
-                    statusDiv.style.color = "green";
-                    statusDiv.innerText = "✅ تم التوثيق بنجاح!";
-                },
-                onCancel: (paymentId) => { statusDiv.innerText = "تم إلغاء العملية."; },
-                onError: (error, payment) => { statusDiv.innerText = "حدث خطأ في العملية."; }
+        async function onIncompletePaymentFound(payment) {
+            await fetch("https://trust-pi-guide.netlify.app/api/complete", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid })
             });
-        } catch (err) {
-            statusDiv.innerText = "خطأ: " + err.message;
         }
-    };
-</script>
 
+        document.getElementById('pay_button').onclick = async () => {
+            try {
+                const payment = await Pi.createPayment({
+                    amount: 1,
+                    memo: "توثيق الحساب",
+                    metadata: { type: "verification" }
+                }, {
+                    onReadyForServerApproval: (paymentId) => {
+                        fetch("https://trust-pi-guide.netlify.app/api/approve", {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId })
+                        });
+                    },
+                    onReadyForServerCompletion: (paymentId, txid) => {
+                        fetch("https://trust-pi-guide.netlify.app/api/complete", {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId, txid })
+                        });
+                        document.getElementById('status').innerText = "تم بنجاح!";
+                    },
+                    onCancel: (pId) => {},
+                    onError: (err, p) => { document.getElementById('status').innerText = "حدث خطأ"; }
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        auth(); // تشغيل المصادقة فوراً عند التحميل
+    </script>
 </body>
 </html>
