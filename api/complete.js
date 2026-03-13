@@ -1,15 +1,26 @@
-export default async function handler(req, res) {
+const axios = require('axios');
 
-if(req.method !== "POST"){
-return res.status(405).json({error:"Method not allowed"});
-}
+module.exports = async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-const {paymentId, txid} = req.body;
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
 
-res.status(200).json({
-completed:true,
-paymentId:paymentId,
-txid:txid
-});
+    const { paymentId, txid } = req.body;
+    const apiKey = process.env.PI_API_KEY;
 
-}
+    try {
+        await axios.post(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+            txid: txid
+        }, {
+            headers: { 'Authorization': `Key ${apiKey}` }
+        });
+        res.status(200).json({ message: "Completed" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Completion failed" });
+    }
+};
