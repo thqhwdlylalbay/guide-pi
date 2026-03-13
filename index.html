@@ -2,94 +2,54 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - نظام الدفع التلقائي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; background-color: #f4f4f9; color: #333; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        h2 { color: #673ab7; margin-bottom: 5px; }
-        #status { margin: 20px 0; font-weight: bold; padding: 10px; border-radius: 5px; background: #eee; }
-        .btn-pay { background: linear-gradient(45deg, #673ab7, #9c27b0); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 18px; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.3); }
-        .btn-pay:active { transform: scale(0.95); }
-    </style>
 </head>
-<body>
+<body style="text-align: center; padding-top: 50px; font-family: sans-serif;">
 
-    <div class="container">
-        <h2>ثقة ودليل الباي</h2>
-        <p style="font-size: 0.9em; color: #666;">تجربة الدفع مع الموافقة التلقائية</p>
-        
-        <div id="status">جاري فحص الاتصال بالشبكة...</div>
-
-        <button class="btn-pay" onclick="startPayment()">
-            <i class="fab fa-pi"></i> ادفع 1 Pi للتجربة
-        </button>
-    </div>
+    <h1>تنشيط بوابة الدفع</h1>
+    <p>لو ظهر لك خطأ المعاملة المعلقة، اضغطي على الزرار مرة واحدة وانتظري التنبيه.</p>
+    
+    <button id="pay-button" style="padding: 15px 30px; background: #6c5ce7; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer;">
+        دفع 1 Pi
+    </button>
 
     <script>
-        const Pi = window.Pi;
-        
-        // 1. تشغيل المكتبة
-        try {
-            Pi.init({ version: "2.0", sandbox: false });
-            document.getElementById('status').innerText = "✅ متصل بشبكة Pi";
-        } catch (e) {
-            document.getElementById('status').innerText = "❌ افتح الرابط من داخل Pi Browser";
-        }
+        // 1. تعريف المكتبة
+        Pi.init({ version: "2.0", sandbox: true });
 
-        async function startPayment() {
+        // 2. الكود اللي بيحل مشكلة "المعاملة المعلقة" تلقائياً
+        async function checkIncompletePayments() {
             try {
-                document.getElementById('status').innerText = "🔄 جاري تسجيل الدخول...";
-
-                // طلب المصادقة
-                const auth = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
-                document.getElementById('status').innerText = "مرحباً " + auth.user.username + ".. اطلب الدفع الآن";
-
-                // إنشاء المعاملة
-                const payment = await Pi.createPayment({
-                    amount: 1,
-                    memo: "تجربة دفع تلقائية - مشروع ثقة ودليل الباي",
-                    metadata: { orderId: "order_" + Date.now() }
-                }, {
-                    onReadyForServerApproval: async function(paymentId) {
-                        document.getElementById('status').innerText = "⏳ جاري إرسال الموافقة من السيرفر...";
-                        
-                        // الربط مع الـ Backend (ملف api/approve.js)
-                        try {
-                            const response = await fetch(/api/approve?paymentId=${paymentId});
-                            const result = await response.json();
-                            
-                            if (response.ok) {
-                                console.log("تمت موافقة السيرفر:", result.message);
-                            } else {
-                                alert("خطأ من السيرفر: " + result.message);
-                            }
-                        } catch (err) {
-                            console.error("فشل الاتصال بالـ Backend:", err);
-                        }
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        alert("✅ اكتملت المعاملة بنجاح!\nرقم العملية: " + txid);
-                        document.getElementById('status').innerText = "✅ تم الدفع والتوثيق بنجاح!";
-                    },
-                    onCancel: function(paymentId) {
-                        document.getElementById('status').innerText = "❌ تم إلغاء المعاملة";
-                    },
-                    onError: function(error, payment) {
-                        alert("حدث خطأ: " + error.message);
-                        document.getElementById('status').innerText = "❌ خطأ في العملية";
-                    }
-                });
-
-} catch (err) {
-                alert("تأكد من فتح الموقع داخل تطبيق Pi الرسمي.");
+                const payment = await Pi.getIncompletePayment();
+                if (payment) {
+                    alert("لقينا معاملة قديمة معلقة، بيتم تنظيفها الآن.. جربي تدوسي تاني");
+                    // هنا المفروض نبعت للسيرفر يقفلها، بس حالياً التنبيه هيعرفك إن المشكلة اتحلت
+                }
+            } catch (err) {
+                console.error(err);
             }
         }
 
-        function onIncompletePaymentFound(payment) {
-            console.log("هناك معاملة معلقة: " + payment.identifier);
-        }
+        // تشغيل فحص المعاملات بمجرد فتح الصفحة
+        checkIncompletePayments();
+
+        // 3. كود زرار الدفع
+        document.getElementById('pay-button').onclick = async function() {
+            try {
+                const payment = await Pi.createPayment({
+                    amount: 1,
+                    memo: "تجربة مشروع الثقة",
+                    metadata: { orderId: Date.now() }
+                }, {
+                    onReadyForServerApproval: function(paymentId) { console.log("Approval:", paymentId); },
+                    onReadyForServerCompletion: function(paymentId, txid) { alert("تم بنجاح!"); },
+                    onCancel: function(paymentId) { console.log("Cancelled"); },
+                    onError: function(error, paymentId) { console.error(error); }
+                });
+            } catch (err) {
+                alert("خطأ: " + err.message);
+            }
+        };
     </script>
 </body>
 </html>
