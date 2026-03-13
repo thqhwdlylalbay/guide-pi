@@ -1,41 +1,50 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <title>Pi App</title>
 </head>
-<body style="text-align: center; font-family: Arial, sans-serif; padding-top: 50px;">
-
-    <h1>مرحباً بك في مشروع ثقة ودليل الباي</h1>
-    <p>هذا الموقع مخصص لتجارب الدفع الآمنة</p>
-
-    <button id="pay-button" style="background-color: #6c5ce7; color: white; padding: 15px 30px; border: none; border-radius: 10px; font-size: 20px; cursor: pointer;">
-        دفع 1 Pi للتجربة
-    </button>
+<body style="text-align: center; font-family: sans-serif;">
+    <h1>Pi Payment Test</h1>
+    <button id="pay_btn" style="padding: 15px; background: #673ab7; color: #fff; border: none; border-radius: 5px;">Pay 1 Pi</button>
 
     <script>
-        // تشغيل مكتبة Pi (وضعية التجربة Sandbox)
-        Pi.init({ version: "2.0", sandbox: true });
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0", sandbox: false });
 
-        document.getElementById('pay-button').onclick = function() {
-            Pi.createPayment({
+        async function auth() {
+            try {
+                const user = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
+                console.log(user);
+            } catch (err) { console.error(err); }
+        }
+
+        async function createPayment() {
+            const payment = await Pi.createPayment({
                 amount: 1,
-                memo: "تجربة دفع - ثقة ودليل الباي",
-                metadata: { orderId: 101 }
+                memo: "Test Payment",
+                metadata: { orderId: "123" }
             }, {
-                onReadyForServerApproval: function(paymentId) {
-                    console.log("المعاملة بانتظار الموافقة:", paymentId);
+                onReadyForServerApproval: (paymentId) => {
+                    console.log("Payment ID:", paymentId);
+                    alert("Order Submitted! ID: " + paymentId);
+                    // في الفيديو: هنا كان بيتوقف ويوافق يدوياً من السيرفر
                 },
-                onReadyForServerCompletion: function(paymentId, txid) {
-                    console.log("تم الدفع بنجاح! رقم العملية:", txid);
-                    alert("تمت العملية بنجاح!");
+                onReadyForServerCompletion: (paymentId, txid) => {
+                    alert("Success! TXID: " + txid);
                 },
-                onCancel: function(paymentId) { console.log("تم الإلغاء"); },
-                onError: function(error, paymentId) { console.error("خطأ:", error); }
+                onCancel: (paymentId) => { console.log("Cancelled"); },
+                onError: (error, payment) => { console.error(error); },
             });
-        };
+        }
+
+        document.getElementById('pay_btn').addEventListener('click', () => {
+            auth().then(createPayment);
+        });
+
+        function onIncompletePaymentFound(payment) { /* ... */ }
     </script>
 </body>
 </html>
