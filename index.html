@@ -1,65 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>Pi Payment Test</title>
-
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ثقة ودليل الباي - توثيق الدفع</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; background-color: #f4f4f9; color: #333; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+        h2 { color: #673ab7; margin-bottom: 5px; }
+        #status { margin: 20px 0; font-weight: bold; padding: 10px; border-radius: 5px; background: #eee; min-height: 40px; }
+        .btn-pay { background: linear-gradient(45deg, #673ab7, #9c27b0); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 18px; cursor: pointer; width: 100%; }
+    </style>
 </head>
+<body>
 
-<body style="text-align:center;font-family:Arial">
+    <div class="container">
+        <h2>ثقة ودليل الباي</h2>
+        <p>توثيق الخطوة العاشرة</p>
+        <div id="status">جاري فحص الاتصال...</div>
+        <button class="btn-pay" onclick="startPayment()">اضغط هنا لإتمام المعاملة</button>
+    </div>
 
-<h2>Pi Test Payment</h2>
+    <script>
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0", sandbox: false });
 
-<button onclick="payWithPi()" style="font-size:20px;padding:10px 20px">
-Pay with Pi
-</button>
+        async function startPayment() {
+            try {
+                const auth = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
+                document.getElementById('status').innerText = "مرحباً " + auth.user.username;
 
-<script>
+                const payment = await Pi.createPayment({
+                    amount: 0.1, // قللت المبلغ للتجربة
+                    memo: "Test Payment for Step 10",
+                    metadata: { orderId: "step10_" + Date.now() }
+                }, {
+                    onReadyForServerApproval: function(paymentId) {
+                        // هنا السر: هنبعت الموافقة للسيرفر فوراً باستخدام الـ API Key بتاعك
+                        document.getElementById('status').innerText = "⏳ يتم التوثيق الآن...";
+                        fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Key kt6zk72mbd5xyfqacqubmcltoynbvcs74uohmqe1b8vmz2g1wfspvbtgnoa8ycs2' }
+                        }).then(() => {
+                            document.getElementById('status').innerText = "✅ تمت الموافقة، انتظر الإكمال...";
+                        });
+                    },
+                    onReadyForServerCompletion: function(paymentId, txid) {
+                        // تأكيد الإكمال النهائي
+                        fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Key kt6zk72mbd5xyfqacqubmcltoynbvcs74uohmqe1b8vmz2g1wfspvbtgnoa8ycs2' }
+                        });
+                        document.getElementById('status').innerText = "✅ مبروك! اكتملت الخطوة العاشرة";
+                        alert("تمت المعاملة بنجاح! راجعي بوابة المطورين الآن.");
+                    },
+                    onCancel: function(paymentId) { document.getElementById('status').innerText = "❌ ألغيت"; },
+                    onError: function(error) { document.getElementById('status').innerText = "❌ خطأ: " + error.message; }
+                });
+            } catch (err) {
+                alert("افتح الرابط من Pi Browser");
+            }
+        }
 
-Pi.init({ version: "2.0", sandbox: true });
-
-async function payWithPi() {
-
-  try {
-
-    await Pi.authenticate(['payments']);
-
-    const paymentData = {
-      amount: 1,
-      memo: "Test payment",
-      metadata: { orderId: Date.now() }
-    };
-
-    Pi.createPayment(paymentData, {
-
-      onReadyForServerApproval: function(paymentId) {
-        console.log("Ready for approval", paymentId);
-      },
-
-      onReadyForServerCompletion: function(paymentId, txid) {
-        console.log("Payment complete", paymentId, txid);
-        alert("Payment successful");
-      },
-
-      onCancel: function(paymentId) {
-        console.log("Payment cancelled", paymentId);
-      },
-
-      onError: function(error) {
-        console.error(error);
-      }
-
-    });
-
-  } catch (err) {
-    console.error(err);
-  }
-
-}
-
-</script>
-
+        async function onIncompletePaymentFound(payment) {
+            // لو لقى معاملة معلقة (زي اللي حصلت معاكي) هيحاول يكملها فوراً
+            const paymentId = payment.identifier;
+            await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Key kt6zk72mbd5xyfqacqubmcltoynbvcs74uohmqe1b8vmz2g1wfspvbtgnoa8ycs2' }
+            });
+        }
+    </script>
 </body>
 </html>
