@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - توثيق</title>
+    <title>ثقة ودليل الباي - نظام الدفع</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; background-color: #f4f4f9; }
@@ -17,7 +17,7 @@
         <h2>ثقة ودليل الباي</h2>
         <div id="status">جاهز لتوثيق الخطوة العاشرة</div>
         <br>
-        <button class="btn-pay" onclick="startPayment()">ادفع وتوثق الآن</button>
+        <button class="btn-pay" onclick="startPayment()">اضغط هنا لإتمام المعاملة</button>
     </div>
 
     <script>
@@ -31,30 +31,31 @@
 
                 await Pi.createPayment({
                     amount: 0.1,
-                    memo: "Final Step 10 Verification",
+                    memo: "Verification Payment for Step 10",
                     metadata: { orderId: "verify_" + Date.now() }
                 }, {
                     onReadyForServerApproval: async function(paymentId) {
-                        document.getElementById('status').innerText = "⏳ جاري التوثيق السري...";
-                        // استبدلي الرابط التالي برابط الـ Worker الجديد اللي هتعمليه في الخطوة التانية
-                        await fetch(`https://pi-backend.trust-app.workers.dev/?paymentId=${paymentId}`);
-                        document.getElementById('status').innerText = "✅ تمت الموافقة!";
+                        document.getElementById('status').innerText = "⏳ جاري التوثيق...";
+                        // ده رابط الـ Worker بتاعك اللي نسخناه من كولدفلار
+                        await fetch(`https://morning-wildflower-d9b9.trust-app.workers.dev/?paymentId=${paymentId}`);
+                        document.getElementById('status').innerText = "✅ تمت الموافقة من السيرفر!";
                     },
                     onReadyForServerCompletion: function(paymentId, txid) {
-                        document.getElementById('status').innerText = "✅ اكتملت الخطوة العاشرة!";
-                        alert("مبروك! المعاملة اكتملت بنجاح.");
+                        document.getElementById('status').innerText = "✅ اكتملت المعاملة بنجاح!";
+                        alert("مبروك! تم الدفع والتوثيق.");
                     },
-                    onCancel: function(paymentId) { document.getElementById('status').innerText = "❌ تم الإلغاء"; },
+                    onCancel: function(paymentId) { document.getElementById('status').innerText = "❌ تم إلغاء المعاملة"; },
                     onError: function(error) { document.getElementById('status').innerText = "❌ خطأ: " + error.message; }
                 });
             } catch (err) {
-                alert("افتح الموقع من داخل Pi Browser");
+                alert("يرجى فتح الموقع من داخل Pi Browser");
             }
         }
 
         async function onIncompletePaymentFound(payment) {
+            // لو فيه معاملة قديمة معلقة، الرابط ده هيحاول يفكها فوراً
             const paymentId = payment.identifier;
-            await fetch(`https://pi-backend.trust-app.workers.dev/?paymentId=${paymentId}`);
+            await fetch(`https://morning-wildflower-d9b9.trust-app.workers.dev/?paymentId=${paymentId}`);
         }
     </script>
 </body>
