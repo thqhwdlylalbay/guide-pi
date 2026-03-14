@@ -3,23 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - توثيق الدفع</title>
+    <title>ثقة ودليل الباي - توثيق</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; background-color: #f4f4f9; color: #333; }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; background-color: #f4f4f9; }
         .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        h2 { color: #673ab7; margin-bottom: 5px; }
-        #status { margin: 20px 0; font-weight: bold; padding: 10px; border-radius: 5px; background: #eee; min-height: 40px; }
-        .btn-pay { background: linear-gradient(45deg, #673ab7, #9c27b0); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 18px; cursor: pointer; width: 100%; }
+        .btn-pay { background: #673ab7; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 18px; width: 100%; }
+        #status { margin-top: 20px; font-weight: bold; color: #555; min-height: 40px; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h2>ثقة ودليل الباي</h2>
-        <p>توثيق الخطوة العاشرة</p>
-        <div id="status">جاري فحص الاتصال...</div>
-        <button class="btn-pay" onclick="startPayment()">اضغط هنا لإتمام المعاملة</button>
+        <div id="status">جاهز لتوثيق الخطوة العاشرة</div>
+        <br>
+        <button class="btn-pay" onclick="startPayment()">ادفع وتوثق الآن</button>
     </div>
 
     <script>
@@ -31,45 +29,32 @@
                 const auth = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
                 document.getElementById('status').innerText = "مرحباً " + auth.user.username;
 
-                const payment = await Pi.createPayment({
-                    amount: 0.1, // قللت المبلغ للتجربة
-                    memo: "Test Payment for Step 10",
-                    metadata: { orderId: "step10_" + Date.now() }
+                await Pi.createPayment({
+                    amount: 0.1,
+                    memo: "Final Step 10 Verification",
+                    metadata: { orderId: "verify_" + Date.now() }
                 }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        // هنا السر: هنبعت الموافقة للسيرفر فوراً باستخدام الـ API Key بتاعك
-                        document.getElementById('status').innerText = "⏳ يتم التوثيق الآن...";
-                        fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
-                            method: 'POST',
-                            headers: { 'Authorization': 'Key kt6zk72mbd5xyfqacqubmcltoynbvcs74uohmqe1b8vmz2g1wfspvbtgnoa8ycs2' }
-                        }).then(() => {
-                            document.getElementById('status').innerText = "✅ تمت الموافقة، انتظر الإكمال...";
-                        });
+                    onReadyForServerApproval: async function(paymentId) {
+                        document.getElementById('status').innerText = "⏳ جاري التوثيق السري...";
+                        // استبدلي الرابط التالي برابط الـ Worker الجديد اللي هتعمليه في الخطوة التانية
+                        await fetch(`https://pi-backend.trust-app.workers.dev/?paymentId=${paymentId}`);
+                        document.getElementById('status').innerText = "✅ تمت الموافقة!";
                     },
                     onReadyForServerCompletion: function(paymentId, txid) {
-                        // تأكيد الإكمال النهائي
-                        fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
-                            method: 'POST',
-                            headers: { 'Authorization': 'Key kt6zk72mbd5xyfqacqubmcltoynbvcs74uohmqe1b8vmz2g1wfspvbtgnoa8ycs2' }
-                        });
-                        document.getElementById('status').innerText = "✅ مبروك! اكتملت الخطوة العاشرة";
-                        alert("تمت المعاملة بنجاح! راجعي بوابة المطورين الآن.");
+                        document.getElementById('status').innerText = "✅ اكتملت الخطوة العاشرة!";
+                        alert("مبروك! المعاملة اكتملت بنجاح.");
                     },
-                    onCancel: function(paymentId) { document.getElementById('status').innerText = "❌ ألغيت"; },
+                    onCancel: function(paymentId) { document.getElementById('status').innerText = "❌ تم الإلغاء"; },
                     onError: function(error) { document.getElementById('status').innerText = "❌ خطأ: " + error.message; }
                 });
             } catch (err) {
-                alert("افتح الرابط من Pi Browser");
+                alert("افتح الموقع من داخل Pi Browser");
             }
         }
 
         async function onIncompletePaymentFound(payment) {
-            // لو لقى معاملة معلقة (زي اللي حصلت معاكي) هيحاول يكملها فوراً
             const paymentId = payment.identifier;
-            await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
-                method: 'POST',
-                headers: { 'Authorization': 'Key kt6zk72mbd5xyfqacqubmcltoynbvcs74uohmqe1b8vmz2g1wfspvbtgnoa8ycs2' }
-            });
+            await fetch(`https://pi-backend.trust-app.workers.dev/?paymentId=${paymentId}`);
         }
     </script>
 </body>
