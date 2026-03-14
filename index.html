@@ -10,12 +10,16 @@
 
 Pi.init({ version: "2.0", sandbox: true });
 
-function payWithPi() {
+async function payWithPi() {
+
+try {
+
+await Pi.authenticate(['payments']);
 
 const paymentData = {
-  amount: 1,
-  memo: "Test payment",
-  metadata: { orderId: "12345" }
+amount: 1,
+memo: "Test payment",
+metadata: { orderId: "12345" }
 };
 
 Pi.createPayment(paymentData, {
@@ -24,9 +28,7 @@ onReadyForServerApproval: function(paymentId) {
 
 fetch("https://pi-payment-server--thqhwdlylalbay.replit.app/approve", {
 method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
+headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ paymentId: paymentId })
 });
 
@@ -36,16 +38,14 @@ onReadyForServerCompletion: function(paymentId, txid) {
 
 fetch("https://pi-payment-server--thqhwdlylalbay.replit.app/complete", {
 method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
+headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ paymentId: paymentId, txid: txid })
 });
 
 },
 
 onCancel: function(paymentId) {
-console.log("Payment cancelled");
+console.log("cancelled");
 },
 
 onError: function(error) {
@@ -53,6 +53,10 @@ console.log(error);
 }
 
 });
+
+} catch(e) {
+console.log(e);
+}
 
 }
 
