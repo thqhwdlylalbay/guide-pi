@@ -2,9 +2,19 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Pi Payment</title>
+<title>Pi Payment Test</title>
 
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
+</head>
+
+<body style="text-align:center;font-family:Arial">
+
+<h2>Pi Test Payment</h2>
+
+<button onclick="payWithPi()" style="font-size:20px;padding:10px 20px">
+Pay with Pi
+</button>
 
 <script>
 
@@ -12,65 +22,44 @@ Pi.init({ version: "2.0", sandbox: true });
 
 async function payWithPi() {
 
-try {
+  try {
 
-await Pi.authenticate(['payments']);
+    await Pi.authenticate(['payments']);
 
-const paymentData = {
-amount: 1,
-memo: "Test payment",
-metadata: { orderId: "12345" }
-};
+    const paymentData = {
+      amount: 1,
+      memo: "Test payment",
+      metadata: { orderId: Date.now() }
+    };
 
-Pi.createPayment(paymentData, {
+    Pi.createPayment(paymentData, {
 
-onReadyForServerApproval: function(paymentId) {
+      onReadyForServerApproval: function(paymentId) {
+        console.log("Ready for approval", paymentId);
+      },
 
-fetch("https://pi-payment-server--thqhwdlylalbay.replit.app/approve", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ paymentId: paymentId })
-});
+      onReadyForServerCompletion: function(paymentId, txid) {
+        console.log("Payment complete", paymentId, txid);
+        alert("Payment successful");
+      },
 
-},
+      onCancel: function(paymentId) {
+        console.log("Payment cancelled", paymentId);
+      },
 
-onReadyForServerCompletion: function(paymentId, txid) {
+      onError: function(error) {
+        console.error(error);
+      }
 
-fetch("https://pi-payment-server--thqhwdlylalbay.replit.app/complete", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ paymentId: paymentId, txid: txid })
-});
+    });
 
-},
-
-onCancel: function(paymentId) {
-console.log("cancelled");
-},
-
-onError: function(error) {
-console.log(error);
-}
-
-});
-
-} catch(e) {
-console.log(e);
-}
+  } catch (err) {
+    console.error(err);
+  }
 
 }
 
 </script>
-
-</head>
-
-<body style="text-align:center;font-family:Arial;margin-top:120px;">
-
-<h1>Pay with Pi</h1>
-
-<button onclick="payWithPi()" style="font-size:24px;padding:20px 40px;background:#f4b400;border:none;border-radius:10px;">
-Pay with Pi
-</button>
 
 </body>
 </html>
