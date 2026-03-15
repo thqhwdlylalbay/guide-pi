@@ -3,61 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - نظام الدفع</title>
+    <title>ثقة ودليل الباي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; background-color: #f4f4f9; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        .btn-pay { background: #673ab7; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 18px; width: 100%; }
-        #status { margin-top: 20px; font-weight: bold; color: #555; min-height: 40px; }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4; }
+        .btn { background-color: #673ab7; color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>ثقة ودليل الباي</h2>
-        <div id="status">جاهز لتوثيق الخطوة العاشرة</div>
-        <br>
-        <button class="btn-pay" onclick="startPayment()">اضغط هنا لإتمام المعاملة</button>
-    </div>
+
+    <h1>مشروع ثقة ودليل الباي</h1>
+    <p>اضغط أدناه لإتمام عملية الدفع المعلقة</p>
+    
+    <button class="btn" onclick="transferPi()">إتمام المعاملة الآن</button>
 
     <script>
         const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: false });
+        Pi.init({ version: "2.0" });
 
-        // الرابط الخاص بكِ في كولدفلار
-        const WORKER_URL = "https://trust-pi-guide.trust-app.workers.dev/"; 
-
-        async function startPayment() {
+        async function transferPi() {
             try {
-                const auth = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
-                document.getElementById('status').innerText = "مرحباً " + auth.user.username;
-
-                await Pi.createPayment({
-                    amount: 0.1,
-                    memo: "Verification Payment for Step 10",
-                    metadata: { orderId: "verify_" + Date.now() }
+                const payment = await Pi.createPayment({
+                    amount: 0.1, 
+                    memo: "إتمام عملية معلقة - مشروع ثقة",
+                    metadata: { orderId: "123" }
                 }, {
-                    onReadyForServerApproval: async function(paymentId) {
-                        document.getElementById('status').innerText = "⏳ جاري التوثيق...";
-                        await fetch(`${WORKER_URL}?paymentId=${paymentId}`);
-                        document.getElementById('status').innerText = "✅ تمت الموافقة من السيرفر!";
+                    onReadyForServerApproval: function(paymentId) {
+                        console.log("إرسال للموافقة: " + paymentId);
+                        // الرابط المظبوط اللي إنتي طلعتيه
+                        return axios.get('https://trust-pi-guide.trust-app.workers.dev/api/payment?paymentId=' + paymentId);
                     },
                     onReadyForServerCompletion: function(paymentId, txid) {
-                        document.getElementById('status').innerText = "✅ اكتملت المعاملة بنجاح!";
-                        alert("مبروك! تم الدفع والتوثيق.");
+                        console.log("إرسال للإكمال: " + paymentId);
+                        return axios.get('https://trust-pi-guide.trust-app.workers.dev/api/payment?paymentId=' + paymentId);
                     },
-                    onCancel: function(paymentId) { document.getElementById('status').innerText = "❌ تم إلغاء المعاملة"; },
-                    onError: function(error) { document.getElementById('status').innerText = "❌ خطأ: " + error.message; }
+                    onCancel: function(paymentId) { console.log("تم إلغاء العملية"); },
+                    onError: function(error, payment) { console.error("خطأ:", error); }
                 });
             } catch (err) {
-                alert("يرجى فتح الموقع من داخل Pi Browser");
+                console.error("عطل فني:", err);
             }
-        }
-
-        async function onIncompletePaymentFound(payment) {
-            const paymentId = payment.identifier;
-            document.getElementById('status').innerText = "⏳ جاري معالجة المعاملة المعلقة...";
-            await fetch(`${WORKER_URL}?paymentId=${paymentId}`);
         }
     </script>
 </body>
