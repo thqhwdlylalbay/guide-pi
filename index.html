@@ -5,44 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ثقة ودليل الباي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4; }
-        .btn { background-color: #673ab7; color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            padding: 40px 20px; 
+            background-color: #f0f2f5; 
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        h1 { color: #673ab7; font-size: 24px; }
+        p { color: #666; margin-bottom: 30px; }
+        .btn { 
+            background-color: #673ab7; 
+            color: white; 
+            padding: 15px 40px; 
+            border: none; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 6px rgba(103, 58, 183, 0.3);
+        }
+        .btn:active { transform: scale(0.95); background-color: #512da8; }
+        #status { margin-top: 20px; font-size: 14px; color: #888; }
     </style>
 </head>
 <body>
 
-    <h1>مشروع ثقة ودليل الباي</h1>
-    <p>اضغط أدناه لإتمام عملية الدفع المعلقة</p>
-    
-    <button class="btn" onclick="transferPi()">إتمام المعاملة الآن</button>
+    <div class="container">
+        <h1>ثقة ودليل الباي</h1>
+        <p>اضغط على الزر أدناه لمعالجة طلب الدفع الخاص بك بأمان عبر شبكة Pi</p>
+        
+        <button class="btn" onclick="transferPi()">إتمام المعاملة الآن</button>
+        
+        <div id="status">جاهز للبدء...</div>
+    </div>
 
     <script>
+        // تهيئة Pi SDK
         const Pi = window.Pi;
         Pi.init({ version: "2.0" });
 
         async function transferPi() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = "جاري الاتصال بمحفظة Pi...";
+            
             try {
                 const payment = await Pi.createPayment({
                     amount: 0.1, 
                     memo: "إتمام عملية معلقة - مشروع ثقة",
-                    metadata: { orderId: "123" }
+                    metadata: { orderId: "order_" + Date.now() }
                 }, {
                     onReadyForServerApproval: function(paymentId) {
-                        console.log("إرسال للموافقة: " + paymentId);
-                        // الرابط المظبوط اللي إنتي طلعتيه
-                        return axios.get('https://trust-pi-guide.trust-app.workers.dev/api/payment?paymentId=' + paymentId);
+                        statusDiv.innerText = "جاري الحصول على موافقة السيرفر...";
+                        return fetch(`https://trust-pi-guide.trust-app.workers.dev/api/payment?paymentId=${paymentId}`)
+                            .then(res => res.json());
                     },
                     onReadyForServerCompletion: function(paymentId, txid) {
-                        console.log("إرسال للإكمال: " + paymentId);
-                        return axios.get('https://trust-pi-guide.trust-app.workers.dev/api/payment?paymentId=' + paymentId);
+                        statusDiv.innerText = "جاري تأكيد العملية على الشبكة...";
+                        return fetch(`https://trust-pi-guide.trust-app.workers.dev/api/payment?paymentId=${paymentId}`)
+                            .then(res => res.json());
                     },
-                    onCancel: function(paymentId) { console.log("تم إلغاء العملية"); },
-                    onError: function(error, payment) { console.error("خطأ:", error); }
+                    onCancel: function(paymentId) { 
+                        statusDiv.innerText = "تم إلغاء العملية من قبل المستخدم.";
+                    },
+                    onError: function(error, payment) { 
+                        statusDiv.innerText = "حدث خطأ: " + error.message;
+                        console.error("Pi SDK Error:", error);
+                    }
                 });
+                
+                statusDiv.style.color = "green";
+                statusDiv.innerText = "تمت العملية بنجاح! شكراً لك.";
+                
             } catch (err) {
-                console.error("عطل فني:", err);
+                statusDiv.innerText = "فشل بدء العملية. تأكد أنك داخل Pi Browser.";
+                console.error("General Error:", err);
             }
         }
     </script>
