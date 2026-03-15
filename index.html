@@ -24,6 +24,9 @@
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: false });
 
+        // ملاحظة هامة: استبدلي الرابط بالأسفل برابط الـ Worker الجديد من حسابك الحالي
+        const WORKER_URL = "https://morning-wildflower-d9b9.trust-app.workers.dev/"; 
+
         async function startPayment() {
             try {
                 const auth = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
@@ -36,8 +39,7 @@
                 }, {
                     onReadyForServerApproval: async function(paymentId) {
                         document.getElementById('status').innerText = "⏳ جاري التوثيق...";
-                        // ده رابط الـ Worker بتاعك اللي نسخناه من كولدفلار
-                        await fetch(`https://morning-wildflower-d9b9.trust-app.workers.dev/?paymentId=${paymentId}`);
+                        await fetch(`${WORKER_URL}?paymentId=${paymentId}`);
                         document.getElementById('status').innerText = "✅ تمت الموافقة من السيرفر!";
                     },
                     onReadyForServerCompletion: function(paymentId, txid) {
@@ -53,9 +55,10 @@
         }
 
         async function onIncompletePaymentFound(payment) {
-            // لو فيه معاملة قديمة معلقة، الرابط ده هيحاول يفكها فوراً
             const paymentId = payment.identifier;
-            await fetch(`https://morning-wildflower-d9b9.trust-app.workers.dev/?paymentId=${paymentId}`);
+            document.getElementById('status').innerText = "⏳ جاري إنهاء معاملة سابقة...";
+            await fetch(`${WORKER_URL}?paymentId=${paymentId}`);
+            // بعد المحاولة، يفضل عمل ريفريش يدوي لو لم تختفِ الرسالة
         }
     </script>
 </body>
