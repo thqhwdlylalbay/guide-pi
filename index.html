@@ -24,8 +24,8 @@
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: false });
 
-        // ملاحظة هامة: استبدلي الرابط بالأسفل برابط الـ Worker الجديد من حسابك الحالي
-        const WORKER_URL = "https://morning-wildflower-d9b9.trust-app.workers.dev/"; 
+        // الرابط الخاص بكِ في كولدفلار
+        const WORKER_URL = "https://trust-pi-guide.trust-app.workers.dev/"; 
 
         async function startPayment() {
             try {
@@ -56,9 +56,8 @@
 
         async function onIncompletePaymentFound(payment) {
             const paymentId = payment.identifier;
-            document.getElementById('status').innerText = "⏳ جاري إنهاء معاملة سابقة...";
+            document.getElementById('status').innerText = "⏳ جاري معالجة المعاملة المعلقة...";
             await fetch(`${WORKER_URL}?paymentId=${paymentId}`);
-            // بعد المحاولة، يفضل عمل ريفريش يدوي لو لم تختفِ الرسالة
         }
     </script>
 </body>
