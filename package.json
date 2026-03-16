@@ -1,0 +1,14 @@
+{
+  "name": "trust-pi-guide",
+  "version": "2.0.0",
+  "description": "Pi Network Payment Integration with Cloudflare Workers",
+  "main": "index.js",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "start": "wrangler dev"
+  }
+}
