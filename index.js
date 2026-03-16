@@ -1,6 +1,4 @@
 // اسم الملف: index.js
-// المكان: يوضع في GitHub وفي خانة Edit Code في Cloudflare
-
 const html = `
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -11,42 +9,56 @@ const html = `
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .btn { background-color: #673ab7; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; }
+        #msg { margin-top: 20px; color: #d32f2f; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>بوابة دفع ثقة ودليل الباي</h1>
-    <button class="btn" onclick="transferPi()">دفع 0.1 Pi</button>
-    <div id="status"></div>
+    <div class="container">
+        <h1>بوابة دفع ثقة ودليل الباي</h1>
+        <p>توثيق الخطوة العاشرة (0.1 Pi)</p>
+        <button id="payBtn" class="btn">دفع 0.1 Pi الآن</button>
+        <p id="msg"></p>
+    </div>
 
     <script>
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: false });
 
-        async function transferPi() {
+        // التوثيق وطلب صلاحية الدفع (لحل مشكلة Scope)
+        async function authenticate() {
+            try {
+                await Pi.authenticate(['payments'], (payment) => {
+                    console.log("Incomplete payment found", payment);
+                });
+                console.log("Authenticated with payments scope");
+            } catch (err) {
+                document.getElementById('msg').innerText = "خطأ في التوثيق: " + err.message;
+            }
+        }
+
+        // تنفيذ التوثيق فور تحميل الصفحة
+        authenticate();
+
+        document.getElementById('payBtn').onclick = async () => {
+            const msg = document.getElementById('msg');
+            msg.innerText = "جاري فتح المحفظة...";
             try {
                 const payment = await Pi.createPayment({
                     amount: 0.1,
-                    memo: "دفع رسوم التوثيق - مشروع ثقة",
-                    metadata: { type: "test" },
+                    memo: "Mainnet Checklist Step 10",
+                    metadata: { orderId: "step-10-verify" },
                 }, {
-                    onReadyForServerApproval: (paymentId) => {
-                        fetch("/approve", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ paymentId })
-                        });
-                    },
-                    onReadyForServerCompletion: (paymentId, txid) => {
-                        document.getElementById('status').innerText = "تم الدفع بنجاح!";
-                    },
-                    onCancel: (paymentId) => console.log("Cancelled"),
-                    onError: (error) => console.error(error),
+                    onReadyForServerApproval: (id) => fetch("/approve?id=" + id, { method: "POST" }),
+                    onReadyForServerCompletion: (id, txid) => { msg.style.color="green"; msg.innerText = "تم الدفع بنجاح!"; },
+                    onCancel: (id) => { msg.innerText = "تم إلغاء العملية"; },
+                    onError: (e) => { msg.innerText = "خطأ: " + e.message; }
                 });
             } catch (err) {
-                document.getElementById('status').innerText = "خطأ: " + err.message;
+                msg.innerText = "يرجى استخدام Pi Browser";
             }
-        }
+        };
     </script>
 </body>
 </html>
@@ -56,22 +68,18 @@ export default {
     async fetch(request, env) {
         const url = new URL(request.url);
 
-        // مسار الربط مع باي (السيرفر)
+        // مسار السيرفر للموافقة على الدفع
         if (url.pathname === "/approve") {
-            try {
-                const { paymentId } = await request.json();
-                const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
-                    method: "POST",
-                    headers: { "Authorization": "Key " + env.PI_API_KEY }
-                });
-                const result = await response.json();
-                return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json" } });
-            } catch (e) {
-                return new Response(JSON.stringify({error: e.message}), { status: 500 });
-            }
+            const paymentId = url.searchParams.get("id");
+            const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+                method: "POST",
+                headers: { "Authorization": "Key " + env.PI_API_KEY }
+            });
+            const result = await response.json();
+            return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json" } });
         }
 
-        // مسار عرض الصفحة (الواجهة)
+        // مسار عرض الصفحة
         return new Response(html, {
             headers: { "Content-Type": "text/html; charset=utf-8" }
         });
