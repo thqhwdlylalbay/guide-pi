@@ -1,62 +1,72 @@
-// اسم الملف: index.js
+// ملف index.js - النسخة المعتمدة
 const html = `
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trust and Pi Guide</title>
+    <title>ثقة ودليل الباي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .btn { background-color: #673ab7; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; }
-        #msg { margin-top: 20px; color: #d32f2f; font-weight: bold; }
+        body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; color: #333; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: inline-block; max-width: 400px; }
+        .btn { background-color: #673ab7; color: white; padding: 15px 35px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
+        #status { margin-top: 20px; font-weight: bold; min-height: 24px; }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="card">
         <h1>بوابة دفع ثقة ودليل الباي</h1>
         <p>توثيق الخطوة العاشرة (0.1 Pi)</p>
-        <button id="payBtn" class="btn">دفع 0.1 Pi الآن</button>
-        <p id="msg"></p>
+        <button id="pay-button" class="btn">دفع الآن</button>
+        <div id="status"></div>
     </div>
 
     <script>
         const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: false });
-
-        // التوثيق وطلب صلاحية الدفع (لحل مشكلة Scope)
-        async function authenticate() {
+        
+        async function startApp() {
             try {
+                // 1. تشغيل المكتبة أولاً
+                await Pi.init({ version: "2.0", sandbox: false });
+                console.log("Pi SDK Initialized");
+
+                // 2. طلب التوثيق بعد التأكد من التشغيل
                 await Pi.authenticate(['payments'], (payment) => {
-                    console.log("Incomplete payment found", payment);
+                    console.log("Incomplete payment:", payment);
                 });
-                console.log("Authenticated with payments scope");
+                console.log("Authenticated");
             } catch (err) {
-                document.getElementById('msg').innerText = "خطأ في التوثيق: " + err.message;
+                const statusDiv = document.getElementById('status');
+                statusDiv.innerText = "خطأ: " + err.message;
+                statusDiv.style.color = "red";
             }
         }
 
-        // تنفيذ التوثيق فور تحميل الصفحة
-        authenticate();
+        // تشغيل الدالة فور تحميل الصفحة
+        startApp();
 
-        document.getElementById('payBtn').onclick = async () => {
-            const msg = document.getElementById('msg');
-            msg.innerText = "جاري فتح المحفظة...";
+        document.getElementById('pay-button').onclick = async () => {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = "جاري فتح المحفظة...";
+            statusDiv.style.color = "blue";
+
             try {
-                const payment = await Pi.createPayment({
+                await Pi.createPayment({
                     amount: 0.1,
-                    memo: "Mainnet Checklist Step 10",
-                    metadata: { orderId: "step-10-verify" },
+                    memo: "Checklist Step 10 - Trust Project",
+                    metadata: { type: "step_10" },
                 }, {
                     onReadyForServerApproval: (id) => fetch("/approve?id=" + id, { method: "POST" }),
-                    onReadyForServerCompletion: (id, txid) => { msg.style.color="green"; msg.innerText = "تم الدفع بنجاح!"; },
-                    onCancel: (id) => { msg.innerText = "تم إلغاء العملية"; },
-                    onError: (e) => { msg.innerText = "خطأ: " + e.message; }
+                    onReadyForServerCompletion: (id, txid) => {
+                        statusDiv.innerText = "✅ تمت العملية بنجاح!";
+                        statusDiv.style.color = "green";
+                    },
+                    onCancel: (id) => { statusDiv.innerText = "❌ تم الإلغاء"; statusDiv.style.color = "orange"; },
+                    onError: (e) => { statusDiv.innerText = "⚠️ خطأ: " + e.message; statusDiv.style.color = "red"; }
                 });
             } catch (err) {
-                msg.innerText = "يرجى استخدام Pi Browser";
+                statusDiv.innerText = "يرجى المحاولة من داخل Pi Browser";
             }
         };
     </script>
@@ -67,21 +77,15 @@ const html = `
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
-
-        // مسار السيرفر للموافقة على الدفع
-        if (url.pathname === "/approve") {
+        if (url.pathname === "/approve" && request.method === "POST") {
             const paymentId = url.searchParams.get("id");
-            const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+            const response = await fetch(\`https://api.minepi.com/v2/payments/\${paymentId}/approve\`, {
                 method: "POST",
                 headers: { "Authorization": "Key " + env.PI_API_KEY }
             });
-            const result = await response.json();
-            return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json" } });
+            const data = await response.json();
+            return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json" } });
         }
-
-        // مسار عرض الصفحة
-        return new Response(html, {
-            headers: { "Content-Type": "text/html; charset=utf-8" }
-        });
+        return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
     }
 };
