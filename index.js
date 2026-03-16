@@ -25,12 +25,18 @@ const html = `
         async function startApp() {
             try {
                 await Pi.init({ version: "2.0", sandbox: false });
-                await Pi.authenticate(['payments'], (p) => {});
+                
+                // التوثيق مع معالجة أي عملية معلقة قديمة
+                await Pi.authenticate(['payments'], async (payment) => {
+                    // إذا وجد عملية قديمة لم تكتمل، يرسلها للسيرفر للموافقة
+                    await fetch("/approve?id=" + payment.identifier, { method: "POST" });
+                });
             } catch (err) {
                 document.getElementById('status').innerText = err.message;
             }
         }
         startApp();
+
         document.getElementById('pay-button').onclick = async () => {
             const status = document.getElementById('status');
             status.innerText = "جاري فتح المحفظة...";
@@ -41,9 +47,18 @@ const html = `
                     metadata: { type: "step_10" },
                 }, {
                     onReadyForServerApproval: (id) => fetch("/approve?id=" + id, { method: "POST" }),
-                    onReadyForServerCompletion: (id, txid) => { status.innerText = "✅ نجاح!"; },
-                    onCancel: (id) => { status.innerText = "❌ إلغاء"; },
-                    onError: (e) => { status.innerText = "⚠️ خطأ: " + e.message; }
+                    onReadyForServerCompletion: (id, txid) => { 
+                        status.innerText = "✅ نجاح العملية!"; 
+                        status.style.color = "green";
+                    },
+                    onCancel: (id) => { status.innerText = "❌ تم إلغاء العملية"; },
+                    onError: (e) => { 
+                        if(e.message.includes("pending")) {
+                            status.innerText = "جاري معالجة عملية سابقة.. ارفرش الصفحة وجرب تاني";
+                        } else {
+                            status.innerText = "⚠️ خطأ: " + e.message;
+                        }
+                    }
                 });
             } catch (err) {
                 status.innerText = "افتح من Pi Browser";
@@ -59,12 +74,16 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/approve" && request.method === "POST") {
       const paymentId = url.searchParams.get("id");
-      const response = await fetch("https://api.minepi.com/v2/payments/" + paymentId + "/approve", {
-        method: "POST",
-        headers: { "Authorization": "Key " + env.PI_API_KEY }
-      });
-      const data = await response.json();
-      return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json" } });
+      try {
+        const response = await fetch("https://api.minepi.com/v2/payments/" + paymentId + "/approve", {
+          method: "POST",
+          headers: { "Authorization": "Key " + env.PI_API_KEY }
+        });
+        const data = await response.json();
+        return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json" } });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+      }
     }
     return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
