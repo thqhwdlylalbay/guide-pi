@@ -7,15 +7,15 @@ const html = `<!DOCTYPE html>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; color: #333; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: inline-block; max-width: 400px; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: inline-block; max-width: 400px; width: 90%; }
         .btn { background-color: #673ab7; color: white; padding: 15px 35px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
-        #status { margin-top: 20px; font-weight: bold; min-height: 50px; }
+        #status { margin-top: 20px; font-weight: bold; min-height: 50px; color: #d32f2f; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>بوابة دفع ثقة ودليل الباي</h1>
-        <p>توثيق الخطوة العاشرة (0.1 Pi)</p>
+        <p>توثيق الخطوة العاشرة (Pi 0.1)</p>
         <button id="pay-button" class="btn">دفع الآن</button>
         <div id="status"></div>
     </div>
@@ -24,18 +24,20 @@ const html = `<!DOCTYPE html>
         async function startApp() {
             try {
                 await Pi.init({ version: "2.0", sandbox: false });
+                
+                // التعديل هنا: لو فيه عملية قديمة معلقة، السطر ده هيخلي السيرفر يوافق عليها أوتوماتيكياً
                 await Pi.authenticate(['payments'], async (payment) => {
                     await fetch("/approve?id=" + payment.identifier, { method: "POST" });
                 });
             } catch (err) {
-                document.getElementById('status').innerText = "خطأ توثيق: " + err.message;
+                document.getElementById('status').innerText = "خطأ: " + err.message;
             }
         }
         startApp();
 
         document.getElementById('pay-button').onclick = async () => {
-            const status = document.getElementById('status');
-            status.innerText = "جاري فتح المحفظة...";
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = "جاري فتح المحفظة...";
             try {
                 await Pi.createPayment({
                     amount: 0.1,
@@ -44,20 +46,21 @@ const html = `<!DOCTYPE html>
                 }, {
                     onReadyForServerApproval: (id) => fetch("/approve?id=" + id, { method: "POST" }),
                     onReadyForServerCompletion: (id, txid) => { 
-                        status.innerText = "✅ تم الدفع بنجاح!"; 
-                        status.style.color = "green";
+                        statusDiv.style.color = "green";
+                        statusDiv.innerText = "✅ تمت العملية بنجاح!"; 
                     },
-                    onCancel: (id) => { status.innerText = "❌ تم إلغاء العملية"; },
+                    onCancel: (id) => { statusDiv.innerText = "❌ تم الإلغاء"; },
                     onError: (e) => { 
-                        if(e.message && e.message.includes("pending")) {
-                            status.innerText = "جاري تنظيف عملية سابقة.. ارفرش الصفحة وجرب تاني";
+                        // هننبه المستخدم يفرش الصفحة لو طلع الخطأ بتاع Pending
+                        if(e.message.includes("pending")) {
+                            statusDiv.innerText = "جاري تنظيف عملية معلقة.. ارفرش الصفحة وجرب تاني";
                         } else {
-                            status.innerText = "⚠️ عطل: " + (e.message || "خطأ غير معروف");
+                            statusDiv.innerText = "⚠️ خطأ: " + e.message;
                         }
                     }
                 });
             } catch (err) {
-                status.innerText = "افتح من Pi Browser";
+                statusDiv.innerText = "يرجى المحاولة من داخل Pi Browser";
             }
         };
     </script>
@@ -80,6 +83,7 @@ export default {
         return new Response(JSON.stringify({ error: e.message }), { status: 500 });
       }
     }
+    // مسار عرض الصفحة
     return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
 };
