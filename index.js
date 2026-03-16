@@ -8,16 +8,16 @@ const html = `
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: inline-block; }
-        .btn { background-color: #673ab7; color: white; padding: 15px 35px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; }
-        #status { margin-top: 20px; font-weight: bold; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: inline-block; max-width: 400px; }
+        .btn { background-color: #673ab7; color: white; padding: 15px 35px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
+        #status { margin-top: 20px; font-weight: bold; min-height: 50px; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>بوابة دفع ثقة ودليل الباي</h1>
-        <p>توثيق الخطوة العاشرة</p>
-        <button id="pay-button" class="btn">دفع 0.1 Pi</button>
+        <p>توثيق الخطوة العاشرة (0.1 Pi)</p>
+        <button id="pay-button" class="btn">دفع الآن</button>
         <div id="status"></div>
     </div>
     <script>
@@ -25,14 +25,12 @@ const html = `
         async function startApp() {
             try {
                 await Pi.init({ version: "2.0", sandbox: false });
-                
-                // التوثيق مع معالجة أي عملية معلقة قديمة
+                // تنظيف أي عمليات معلقة فور فتح الصفحة
                 await Pi.authenticate(['payments'], async (payment) => {
-                    // إذا وجد عملية قديمة لم تكتمل، يرسلها للسيرفر للموافقة
                     await fetch("/approve?id=" + payment.identifier, { method: "POST" });
                 });
             } catch (err) {
-                document.getElementById('status').innerText = err.message;
+                document.getElementById('status').innerText = "خطأ توثيق: " + err.message;
             }
         }
         startApp();
@@ -48,20 +46,20 @@ const html = `
                 }, {
                     onReadyForServerApproval: (id) => fetch("/approve?id=" + id, { method: "POST" }),
                     onReadyForServerCompletion: (id, txid) => { 
-                        status.innerText = "✅ نجاح العملية!"; 
+                        status.innerText = "✅ تم الدفع بنجاح!"; 
                         status.style.color = "green";
                     },
-                    onCancel: (id) => { status.innerText = "❌ تم إلغاء العملية"; },
+                    onCancel: (id) => { status.innerText = "❌ تم إلغاء العملية"; status.style.color = "orange"; },
                     onError: (e) => { 
                         if(e.message.includes("pending")) {
                             status.innerText = "جاري معالجة عملية سابقة.. ارفرش الصفحة وجرب تاني";
                         } else {
-                            status.innerText = "⚠️ خطأ: " + e.message;
+                            status.innerText = "⚠️ عطل: " + e.message;
                         }
                     }
                 });
             } catch (err) {
-                status.innerText = "افتح من Pi Browser";
+                status.innerText = "يرجى الفتح من Pi Browser";
             }
         };
     </script>
@@ -75,6 +73,10 @@ export default {
     if (url.pathname === "/approve" && request.method === "POST") {
       const paymentId = url.searchParams.get("id");
       try {
+        // حماية: التأكد من وجود المفتاح في الإعدادات
+        if (!env.PI_API_KEY) {
+            return new Response(JSON.stringify({ error: "API Key Missing" }), { status: 500 });
+        }
         const response = await fetch("https://api.minepi.com/v2/payments/" + paymentId + "/approve", {
           method: "POST",
           headers: { "Authorization": "Key " + env.PI_API_KEY }
