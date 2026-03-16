@@ -3,62 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trust Pi Guide | ثقة ودليل الباي</title>
+    <title>ثقة ودليل الباي - Testnet</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
-        h1 { color: #673ab7; margin-bottom: 1rem; }
-        p { color: #666; line-height: 1.6; }
-        .btn-pay { background-color: #673ab7; color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, background 0.2s; width: 100%; margin-top: 1.5rem; }
-        .btn-pay:hover { background-color: #5e35b1; transform: translateY(-2px); }
-        #status { margin-top: 1rem; font-weight: bold; color: #ff9800; }
+        body { font-family: sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { text-align: center; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
+        h1 { color: #673ab7; font-size: 24px; }
+        .status-box { margin: 20px 0; padding: 10px; border-radius: 8px; background: #fff3e0; color: #ef6c00; font-weight: bold; }
+        .pay-btn { background: #673ab7; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; width: 100%; transition: 0.3s; }
+        .pay-btn:disabled { background: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-    <div class="card">
+    <div class="container">
         <h1>ثقة ودليل الباي</h1>
-        <p>مشروع توثيق بيانات التجار وتسهيل عمليات الدفع. اضغط أدناه لإتمام عملية توثيق الخطوة العاشرة.</p>
-        
-        <button class="btn-pay" id="pay-button">دفع 0.1 Pi للتوثيق</button>
-        
-        <div id="status">جاهز للبدء...</div>
+        <p>مرحلة اختبار الشبكة (Testnet)</p>
+        <div id="status" class="status-box">جاري تهيئة النظام...</div>
+        <button id="pay-button" class="pay-btn" disabled>دفع 0.1 Test-Pi</button>
     </div>
 
     <script>
-        // تهيئة تطبيق Pi
         const Pi = window.Pi;
+        const status = document.getElementById('status');
+        const payBtn = document.getElementById('pay-button');
+
+        // 1. وظيفة المبرمجين لمعالجة المدفوعات المعلقة (Incomplete Payments)
+        const onIncompletePaymentFound = (payment) => {
+            status.innerText = "وجدنا معاملة معلقة.. جاري إكمالها..";
+            return fetch('/complete?id=' + payment.identifier).then(r => r.json());
+        };
+
+        // 2. تهيئة التطبيق وفحص الهوية
         Pi.init({ version: "2.0" });
 
-        const btn = document.getElementById('pay-button');
-        const status = document.getElementById('status');
+        Pi.authenticate(['payments', 'username'], onIncompletePaymentFound)
+          .then((auth) => {
+              status.innerText = "مرحباً " + auth.user.username + " (Testnet)";
+              payBtn.disabled = false;
+          })
+          .catch((err) => {
+              status.innerText = "يرجى الفتح من Pi Browser";
+              console.error(err);
+          });
 
-        btn.onclick = async () => {
-            status.innerText = "جاري الاتصال بالمحفظة...";
-            status.style.color = "#ff9800";
+        // 3. وظيفة الدفع الرئيسية
+        payBtn.onclick = async () => {
+            payBtn.disabled = true;
+            status.innerText = "جاري فتح المحفظة للتجربة...";
 
             try {
-                const payment = await Pi.createPayment({
+                await Pi.createPayment({
                     amount: 0.1,
-                    memo: "Mainnet Checklist Step 10 Verification",
-                    metadata: { orderId: "trust-guide-1001" }
+                    memo: "Testnet Payment Testing",
+                    metadata: { orderId: "test-123" }
                 }, {
-                    // الربط مع ملف السيرفر (index.js)
                     onReadyForServerApproval: (id) => fetch('/approve?id=' + id).then(r => r.json()),
                     onReadyForServerCompletion: (id) => fetch('/complete?id=' + id).then(r => r.json()),
                     onCancel: () => {
-                        status.innerText = "تم إلغاء العملية من قبلك.";
-                        status.style.color = "#f44336";
+                        status.innerText = "تم إلغاء العملية";
+                        payBtn.disabled = false;
                     },
-                    onError: (error) => {
-                        status.innerText = "حدث خطأ: " + error.message;
-                        status.style.color = "#f44336";
+                    onError: (e) => {
+                        status.innerText = "خطأ: " + e.message;
+                        payBtn.disabled = false;
                     }
                 });
             } catch (err) {
-                status.innerText = "يرجى فتح الموقع من داخل Pi Browser.";
-                status.style.color = "#f44336";
+                status.innerText = "فشلت العملية.. حاول مرة أخرى";
+                payBtn.disabled = false;
             }
         };
     </script>
