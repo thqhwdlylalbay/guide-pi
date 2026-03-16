@@ -1,58 +1,66 @@
-// كود معياري مستخدم في مشاريع GitHub المفتوحة لمطوري Pi
-async function handleRequest(request, env) {
-  const url = new URL(request.url);
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust Pi Guide | ثقة ودليل الباي</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
+        h1 { color: #673ab7; margin-bottom: 1rem; }
+        p { color: #666; line-height: 1.6; }
+        .btn-pay { background-color: #673ab7; color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, background 0.2s; width: 100%; margin-top: 1.5rem; }
+        .btn-pay:hover { background-color: #5e35b1; transform: translateY(-2px); }
+        #status { margin-top: 1rem; font-weight: bold; color: #ff9800; }
+    </style>
+</head>
+<body>
 
-  // 1. مسار الموافقة على الدفع (Standard Approval)
-  if (url.pathname.startsWith("/api/approve")) {
-    const paymentId = url.searchParams.get("id");
-    return await callPiAPI(paymentId, "approve", env.PI_API_KEY);
-  }
+    <div class="card">
+        <h1>ثقة ودليل الباي</h1>
+        <p>مشروع توثيق بيانات التجار وتسهيل عمليات الدفع. اضغط أدناه لإتمام عملية توثيق الخطوة العاشرة.</p>
+        
+        <button class="btn-pay" id="pay-button">دفع 0.1 Pi للتوثيق</button>
+        
+        <div id="status">جاهز للبدء...</div>
+    </div>
 
-  // 2. مسار إكمال الدفع (Standard Completion)
-  if (url.pathname.startsWith("/api/complete")) {
-    const paymentId = url.searchParams.get("id");
-    return await callPiAPI(paymentId, "complete", env.PI_API_KEY);
-  }
-
-  // 3. عرض الصفحة (Frontend)
-  return new Response(getHtml(url.origin), {
-    headers: { "content-type": "text/html;charset=UTF-8" },
-  });
-}
-
-// دالة الاتصال بخادم Pi الرسمي
-async function callPiAPI(paymentId, endpoint, apiKey) {
-  const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/${endpoint}`, {
-    method: "POST",
-    headers: { "Authorization": `Key ${apiKey}` },
-  });
-  const data = await response.json();
-  return new Response(JSON.stringify(data), {
-    headers: { "content-type": "application/json", "Access-Control-Allow-Origin": "*" },
-  });
-}
-
-// واجهة المستخدم القياسية (UI)
-function getHtml(origin) {
-  return `<!DOCTYPE html><html><head><script src="https://sdk.minepi.com/pi-sdk.js"></script></head>
-  <body style="text-align:center;padding-top:100px;font-family:sans-serif;">
-    <h1>ثقة ودليل الباي</h1>
-    <button id="pBtn" style="padding:20px;background:#673ab7;color:#fff;border-radius:10px;font-size:20px;">دفع 0.1 Pi للتوثيق</button>
-    <p id="s">جاهز...</p>
     <script>
-      const Pi = window.Pi; Pi.init({ version: "2.0" });
-      document.getElementById('pBtn').onclick = async () => {
-        const s = document.getElementById('s');
-        try {
-          await Pi.createPayment({ amount: 0.1, memo: "Step 10", metadata: { id: "1" } }, {
-            onReadyForServerApproval: (id) => fetch('${origin}/api/approve?id=' + id).then(r => r.json()),
-            onReadyForServerCompletion: (id) => fetch('${origin}/api/complete?id=' + id).then(r => r.json()),
-            onCancel: () => s.innerText = "Cancelled",
-            onError: (e) => s.innerText = "Error: " + e.message
-          });
-        } catch (e) { s.innerText = "Open in Pi Browser"; }
-      };
-    </script></body></html>`;
-}
+        // تهيئة تطبيق Pi
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0" });
 
-export default { fetch: handleRequest };
+        const btn = document.getElementById('pay-button');
+        const status = document.getElementById('status');
+
+        btn.onclick = async () => {
+            status.innerText = "جاري الاتصال بالمحفظة...";
+            status.style.color = "#ff9800";
+
+            try {
+                const payment = await Pi.createPayment({
+                    amount: 0.1,
+                    memo: "Mainnet Checklist Step 10 Verification",
+                    metadata: { orderId: "trust-guide-1001" }
+                }, {
+                    // الربط مع ملف السيرفر (index.js)
+                    onReadyForServerApproval: (id) => fetch('/approve?id=' + id).then(r => r.json()),
+                    onReadyForServerCompletion: (id) => fetch('/complete?id=' + id).then(r => r.json()),
+                    onCancel: () => {
+                        status.innerText = "تم إلغاء العملية من قبلك.";
+                        status.style.color = "#f44336";
+                    },
+                    onError: (error) => {
+                        status.innerText = "حدث خطأ: " + error.message;
+                        status.style.color = "#f44336";
+                    }
+                });
+            } catch (err) {
+                status.innerText = "يرجى فتح الموقع من داخل Pi Browser.";
+                status.style.color = "#f44336";
+            }
+        };
+    </script>
+</body>
+</html>
