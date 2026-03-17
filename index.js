@@ -23,7 +23,7 @@ const html = `<!DOCTYPE html>
         const Pi = window.Pi;
         async function startApp() {
             try {
-                await Pi.init({ version: "2.0", sandbox: false });
+                await Pi.init({ version: "2.0", sandbox: true });
                 await Pi.authenticate(['payments'], async (payment) => {
                     // لو فيه عملية قديمة، هينظفها فوراً من غير ما تحسي
                     await fetch("/approve?id=" + payment.identifier, { method: "POST" });
