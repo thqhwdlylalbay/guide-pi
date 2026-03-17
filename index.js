@@ -8,46 +8,36 @@ const html = `<!DOCTYPE html>
     <style>
         body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; }
         .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: inline-block; max-width: 400px; }
-        .btn { background-color: #673ab7; color: white; padding: 15px 35px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
-        #status { margin-top: 20px; font-weight: bold; min-height: 50px; }
+        .btn { background-color: #673ab7; color: white; padding: 15px 35px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; width: 100%; margin-top: 20px; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1>بوابة دفع ثقة ودليل الباي</h1>
-        <p>توثيق الخطوة العاشرة (0.1 Pi)</p>
-        <button id="pay-button" class="btn">دفع الآن</button>
-        <div id="status">جاري التحقق من الحساب...</div>
+        <h1>تجربة شبكة التيست نت</h1>
+        <button id="pay-button" class="btn">دفع 0.1 Pi (تجريبي)</button>
+        <div id="status" style="margin-top:20px;">جاري التحقق...</div>
     </div>
     <script>
         const Pi = window.Pi;
-        async function startApp() {
+        async function init() {
             try {
-                await Pi.init({ version: "2.0", sandbox: true });
-                await Pi.authenticate(['payments'], async (payment) => {
-                    // لو فيه عملية قديمة، هينظفها فوراً من غير ما تحسي
-                    await fetch("/approve?id=" + payment.identifier, { method: "POST" });
-                    document.getElementById('status').innerText = "تم تنظيف الحساب، جرب الدفع الآن.";
-                });
-                document.getElementById('status').innerText = "جاهز للدفع";
-            } catch (err) {
-                document.getElementById('status').innerText = "خطأ: " + err.message;
-            }
+                await Pi.init({ version: "2.0", sandbox: true }); // خليناها true للتجربة
+                document.getElementById('status').innerText = "✅ متصل بالتيست نت";
+            } catch (e) { document.getElementById('status').innerText = e.message; }
         }
-        startApp();
+        init();
+
         document.getElementById('pay-button').onclick = async () => {
-            const status = document.getElementById('status');
-            status.innerText = "جاري فتح المحفظة...";
             try {
                 await Pi.createPayment({
-                    amount: 0.1, memo: "Step 10", metadata: { type: "step_10" },
+                    amount: 0.1, memo: "Test Payment", metadata: { type: "test" }
                 }, {
                     onReadyForServerApproval: (id) => fetch("/approve?id=" + id, { method: "POST" }),
-                    onReadyForServerCompletion: (id, txid) => { status.innerText = "✅ نجاح!"; },
-                    onCancel: (id) => { status.innerText = "❌ إلغاء"; },
-                    onError: (e) => { status.innerText = "⚠️ عطل: " + e.message; }
+                    onReadyForServerCompletion: (id, txid) => { alert("نجحت التجربة!"); },
+                    onCancel: (id) => { },
+                    onError: (e) => { alert("الخطأ: " + e.message); }
                 });
-            } catch (err) { status.innerText = "افتح من Pi Browser"; }
+            } catch (err) { alert("افتحي من Pi Browser"); }
         };
     </script>
 </body>
@@ -57,14 +47,13 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/approve" && request.method === "POST") {
-      const paymentId = url.searchParams.get("id");
-      const response = await fetch("https://api.minepi.com/v2/payments/" + paymentId + "/approve", {
+      const id = url.searchParams.get("id");
+      const res = await fetch("https://api.minepi.com/v2/payments/" + id + "/approve", {
         method: "POST",
         headers: { "Authorization": "Key " + env.PI_API_KEY }
       });
-      const data = await response.json();
-      return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json" } });
+      return new Response(await res.text());
     }
-    return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+    return new Response(html, { headers: { "Content-Type": "text/html;charset=UTF-8" } });
   }
 };
