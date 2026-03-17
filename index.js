@@ -14,7 +14,7 @@ const html = `<!DOCTYPE html>
 <body>
     <div class="card">
         <h1>تجربة شبكة التيست نت</h1>
-        <button id="pay-button" class="btn">دفع 0.1 Pi (تجريبي)</button>
+        <button id="pay-button" class="btn">دفع 0.2 Pi (تجريبي)</button>
         <div id="status" style="margin-top:20px;">جاري التحقق...</div>
     </div>
     <script>
