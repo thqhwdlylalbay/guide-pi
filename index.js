@@ -1,8 +1,21 @@
-const html = `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Trust and Pi Guide</title><script src="https://sdk.minepi.com/pi-sdk.js"></script><style>body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f9; } .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: inline-block; } .btn { background-color: #673ab7; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; font-weight: bold; } .btn:disabled { background-color: #ccc; }</style></head><body><div class="card"><h2>تحديث بوابة الدفع</h2><p>مبلغ الفحص: 0.1 Pi</p><button id="p-btn" class="btn" disabled>انتظار التحديث...</button><p id="s"></p></div><script>const Pi = window.Pi; async function init() { try { await Pi.init({ version: "2.0", sandbox: true }); await Pi.authenticate(['payments'], (p) => {}); document.getElementById('p-btn').disabled = false; document.getElementById('p-btn').innerText = 'دفع 0.1 Pi ⚡'; } catch (e) { document.getElementById('s').innerText = '⚠️ افتحي من Pi Browser'; } } init(); document.getElementById('p-btn').onclick = async () => { try { await Pi.createPayment({ amount: 0.1, memo: "Refresh Connection", metadata: { id: "ref_" + Date.now() } }, { onReadyForServerApproval: (id) => fetch("/approve?id=" + id, { method: "POST" }), onReadyForServerCompletion: (id, txid) => alert("تم فك التعليقة بنجاح!"), onCancel: (id) => {}, onError: (e) => alert("الرسالة: " + e.message) }); } catch (err) { alert(err.message); } };</script></body></html>`;
+// 1. انسخي الكود (Validation Key) اللي ظاهر عندك في صفحة المطورين مكان النقط
+const validationKey = "13074bc87cb82050e631cac2243884873eabd53e19a9acfd751457bb5c50b97d68f42c55f941a83aca4597888de22b4ee4e0334282f18dba6381d8beac452758";
+
+const htmlPage = `... كود الصفحة اللي بعتهولك قبل كدة ...`;
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    // الخطوة اللي هتحل مشكلة الصورة 1000096527.jpg
+    // لما باي تدخل تدور على ملف التأكيد، الكود ده هيرد عليها فوراً
+    if (url.pathname === "/.well-known/pi-common-configuration.txt") {
+      return new Response(validationKey, {
+        headers: { "Content-Type": "text/plain" }
+      });
+    }
+
+    // كود الموافقة على الدفع (Approve)
     if (url.pathname === "/approve" && request.method === "POST") {
       const paymentId = url.searchParams.get("id");
       const res = await fetch("https://api.minepi.com/v2/payments/" + paymentId + "/approve", {
@@ -12,8 +25,9 @@ export default {
           "Content-Type": "application/json"
         }
       });
-      return new Response(await res.text(), { status: 200 });
+      return new Response(await res.text());
     }
-    return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+
+    return new Response(htmlPage, { headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
 };
