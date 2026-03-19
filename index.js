@@ -1,11 +1,11 @@
-here// 1. ضع كود التحقق (Validation Key) هنا
+// 1. كود التحقق (Validation Key) - تأكد من وجود علامات التنصيص في البداية والنهاية
 const validationKey = "pi-site-verification: 13074bc87cb82050e631cac2243884873eabd53e19a9acfd751457bb5c50b97d68f42c55f941a83aca4597888de22b4ee4e0334282f18dba6381d8beac452758"; 
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // --- مسار ملف التحقق (Public .txt) للخطوة 8 ---
+    // --- حل الخطوة رقم 8: إظهار ملف التحقق النصي ---
     if (url.pathname === "/.well-known/pi-common-configuration.txt") {
       return new Response(validationKey, {
         headers: { 
@@ -15,11 +15,11 @@ export default {
       });
     }
 
-    // --- نظام معالجة الدفع (Approve & Complete) ---
+    // --- نظام معالجة عمليات الدفع (Approve & Complete) ---
     if (request.method === "POST") {
       const paymentId = url.searchParams.get("id");
       
-      // الموافقة (Approve)
+      // مرحلة الموافقة (Approve)
       if (url.pathname === "/approve") {
         const res = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
           method: "POST",
@@ -28,7 +28,7 @@ export default {
         return new Response(await res.text());
       }
 
-      // الإكمال (Complete)
+      // مرحلة التأكيد النهائي (Complete)
       if (url.pathname === "/complete") {
         const txid = url.searchParams.get("txid");
         const res = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
@@ -43,7 +43,7 @@ export default {
       }
     }
 
-    // --- واجهة المستخدم (HTML) الخاصة بمشروع ثقة ودليل الباي ---
+    // --- واجهة الموقع (HTML) ---
     const html = `
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -53,25 +53,26 @@ export default {
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <title>ثقة ودليل الباي</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px 20px; background: #f9f9f9; }
-        .card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        .btn { background: #673ab7; color: #fff; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%; }
+        body { font-family: sans-serif; text-align: center; padding: 50px 20px; background: #f4f4f4; }
+        .card { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: inline-block; min-width: 300px; }
+        h1 { color: #673ab7; }
+        .btn { background: #673ab7; color: #fff; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-size: 18px; width: 100%; margin-top: 20px; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>ثقة ودليل الباي</h1>
-        <p>اختبار جاهزية التطبيق للـ Mainnet</p>
-        <button class="btn" onclick="pay()">دفع 0.1 Pi</button>
+        <p>جاهز لتخطي الخطوة 8 وتفعيل الدفع</p>
+        <button class="btn" onclick="startPayment()">دفع 0.1 Pi للتجربة</button>
     </div>
     <script>
         Pi.init({ version: "2.0", sandbox: false });
-        async function pay() {
+        async function startPayment() {
             try {
                 await Pi.createPayment({
                     amount: 0.1,
                     memo: "تجربة دفع - ثقة ودليل الباي",
-                    metadata: { step: "verification" },
+                    metadata: { type: "verification" },
                 }, {
                     onReadyForServerApproval: (id) => fetch('/approve?id=' + id, { method: 'POST' }),
                     onReadyForServerCompletion: (id, tx) => {
