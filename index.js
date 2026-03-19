@@ -22,10 +22,17 @@ const html = `<!DOCTYPE html>
 
     <script>
         const Pi = window.Pi;
+        
         async function init() {
             try {
                 await Pi.init({ version: "2.0", sandbox: true });
                 document.getElementById('status').innerText = "✅ متصل بـ Pi Browser";
+                
+                // إضافة المصادقة للحصول على صلاحية payments
+                await Pi.authenticate(['payments'], (payment) => {
+                    console.log("Authenticated");
+                });
+                
             } catch (e) {
                 document.getElementById('status').innerText = "⚠️ افتحي من Pi Browser";
             }
@@ -34,9 +41,12 @@ const html = `<!DOCTYPE html>
 
         document.getElementById('pay-btn').onclick = async () => {
             try {
+                // التأكد من المصادقة مرة أخرى قبل الدفع
+                const auth = await Pi.authenticate(['payments'], (payment) => {});
+                
                 await Pi.createPayment({
                     amount: 0.5,
-                    memo: "Test Order New",
+                    memo: "Test Final Fix",
                     metadata: { order_id: "order_" + Date.now() }
                 }, {
                     onReadyForServerApproval: (id) => fetch("/approve?id=" + id, { method: "POST" }),
@@ -45,7 +55,7 @@ const html = `<!DOCTYPE html>
                     onError: (error) => alert("خطأ: " + error.message)
                 });
             } catch (err) {
-                alert("خطأ فني: " + err.message);
+                alert("خطأ في الصلاحيات: " + err.message);
             }
         };
     </script>
