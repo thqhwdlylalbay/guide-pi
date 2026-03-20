@@ -1,28 +1,35 @@
 const validationKey = "pi-site-verification: 3562fc6b6931e1cd41c68c41949a0ec339d9cecfdcfa4b7ea0c73ce38fd1f058b217b7dca4f706885139f2c5ff8a94a0a686f57ace7f071a73ae9f48d0589f4e"; 
+const MY_OLD_TXID = "7aadb13583c9982f7650e8619153f87775a80768116fcf2c2f8451ef8dfbcf17";
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // التحقق من الدومين (الخطوة 8)
     if (url.pathname === "/.well-known/pi-common-configuration.txt") {
       return new Response(validationKey, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
     }
 
     if (request.method === "POST") {
       const paymentId = url.searchParams.get("id");
+      
+      // أمر الإكمال اليدوي باستخدام رقم العملية القديم
+      if (url.pathname === "/complete") {
+        const res = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+          method: "POST",
+          headers: { 
+            "Authorization": "Key " + env.PI_API_KEY, 
+            "Content-Type": "application/json" 
+          },
+          body: JSON.stringify({ txid: MY_OLD_TXID }) // نرسل رقم العملية القديم غصباً عن النظام
+        });
+        return new Response(await res.text());
+      }
+
       if (url.pathname === "/approve") {
         const res = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
           method: "POST",
           headers: { "Authorization": "Key " + env.PI_API_KEY }
-        });
-        return new Response(await res.text());
-      }
-      if (url.pathname === "/complete") {
-        const txid = url.searchParams.get("txid");
-        const res = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
-          method: "POST",
-          headers: { "Authorization": "Key " + env.PI_API_KEY, "Content-Type": "application/json" },
-          body: JSON.stringify({ txid: txid || "no_txid" })
         });
         return new Response(await res.text());
       }
@@ -33,52 +40,27 @@ export default {
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <title>ثقة ودليل الباي</title>
+    <title>فك المعاملة المعلقة</title>
 </head>
-<body style="text-align:center; padding:50px; font-family:sans-serif; background:#f4f4f4;">
-    <div style="background:white; padding:30px; border-radius:15px; display:inline-block; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
-        <h2>مشروع ثقة ودليل الباي</h2>
-        <div id="msg" style="margin-bottom:20px; color:#666;">جاري التحقق...</div>
-        <button id="payBtn" style="display:none; padding:15px 30px; background:#673ab7; color:white; border:none; border-radius:10px; cursor:pointer; font-size:18px;" onclick="pay()">دفع 0.1 Pi</button>
-    </div>
+<body style="text-align:center; padding:50px; font-family:sans-serif;">
+    <h2>محاولة فك حظر المعاملة القديمة</h2>
+    <div id="msg" style="color:red; font-weight:bold; margin-bottom:20px;">اضغط على الزر أدناه لإرسال رقم العملية يدويًا</div>
+    <button style="padding:15px; background:green; color:white; border:none; border-radius:10px; cursor:pointer;" onclick="fixPayment()">إنهاء المعاملة المعلقة الآن</button>
 
     <script>
-        async function onIncompletePaymentFound(payment) {
-            document.getElementById('msg').innerText = "وجدنا معاملة معلقة.. جاري تنظيفها";
-            // نرسل أمر الإكمال للسيرفر
-            await fetch('/complete?id=' + payment.identifier + '&txid=' + payment.transaction.txid, { method: 'POST' });
-            document.getElementById('msg').innerText = "تم إرسال أمر الإكمال بنجاح. يمكنك الآن المحاولة مجدداً.";
-            document.getElementById('payBtn').style.display = 'inline-block';
-        };
+        Pi.init({ version: "2.0", sandbox: false });
 
-        window.onload = function() {
-            setTimeout(async () => {
-                try {
-                    await Pi.init({ version: "2.0", sandbox: false });
-                    await Pi.authenticate(['payments'], onIncompletePaymentFound);
-                    document.getElementById('msg').innerText = "النظام جاهز للعمل";
-                    document.getElementById('payBtn').style.display = 'inline-block';
-                } catch (e) {
-                    document.getElementById('msg').innerText = "خطأ: " + e.message;
-                }
-            }, 1000);
-        };
-
-        async function pay() {
+        async function fixPayment() {
             try {
-                await Pi.createPayment({
-                    amount: 0.1,
-                    memo: "تجربة دفع جديدة",
-                    metadata: { type: "test" }
-                }, {
-                    onReadyForServerApproval: (id) => fetch('/approve?id=' + id, { method: 'POST' }),
-                    onReadyForServerCompletion: (id, txid) => fetch('/complete?id=' + id + '&txid=' + txid, { method: 'POST' }),
-                    onCancel: (id) => alert("تم الإلغاء"),
-                    onError: (error) => alert("خطأ: " + error.message)
+                // نبحث عن المعاملة المعلقة
+                await Pi.authenticate(['payments'], async (payment) => {
+                    const res = await fetch('/complete?id=' + payment.identifier, { method: 'POST' });
+                    const result = await res.text();
+                    alert("رد السيرفر: " + result);
+                    location.reload();
                 });
-            } catch (e) { alert(e.message); }
+            } catch (e) { alert("خطأ: " + e.message); }
         }
     </script>
 </body>
