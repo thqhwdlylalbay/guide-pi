@@ -4,12 +4,10 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // الخطوة 8
     if (url.pathname === "/.well-known/pi-common-configuration.txt") {
       return new Response(validationKey, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
     }
 
-    // أوامر السيرفر (Approve & Complete)
     if (request.method === "POST") {
       const paymentId = url.searchParams.get("id");
       if (url.pathname === "/approve") {
@@ -30,7 +28,6 @@ export default {
       }
     }
 
-    // واجهة المستخدم
     const html = `
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -43,35 +40,30 @@ export default {
 <body style="text-align:center; padding:50px; font-family:sans-serif; background:#f4f4f4;">
     <div style="background:white; padding:30px; border-radius:15px; display:inline-block; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
         <h2>مشروع ثقة ودليل الباي</h2>
-        <div id="msg" style="margin-bottom:20px; color:#666;">جاري تهيئة النظام...</div>
+        <div id="msg" style="margin-bottom:20px; color:#666;">جاري التحقق...</div>
         <button id="payBtn" style="display:none; padding:15px 30px; background:#673ab7; color:white; border:none; border-radius:10px; cursor:pointer; font-size:18px;" onclick="pay()">دفع 0.1 Pi</button>
     </div>
 
     <script>
-        // دالة إنهاء المعاملات القديمة
         async function onIncompletePaymentFound(payment) {
             document.getElementById('msg').innerText = "وجدنا معاملة معلقة.. جاري تنظيفها";
+            // نرسل أمر الإكمال للسيرفر
             await fetch('/complete?id=' + payment.identifier + '&txid=' + payment.transaction.txid, { method: 'POST' });
-            alert("تم إكمال المعاملة المعلقة! الصفحة ستعيد التحميل الآن.");
-            location.reload();
+            document.getElementById('msg').innerText = "تم إرسال أمر الإكمال بنجاح. يمكنك الآن المحاولة مجدداً.";
+            document.getElementById('payBtn').style.display = 'inline-block';
         };
 
-        // تشغيل النظام
         window.onload = function() {
             setTimeout(async () => {
                 try {
                     await Pi.init({ version: "2.0", sandbox: false });
-                    console.log("SDK Initialized");
-                    
-                    // تسجيل الدخول وفحص المعاملات المعلقة
                     await Pi.authenticate(['payments'], onIncompletePaymentFound);
-                    
-                    document.getElementById('msg').innerText = "النظام جاهز";
+                    document.getElementById('msg').innerText = "النظام جاهز للعمل";
                     document.getElementById('payBtn').style.display = 'inline-block';
                 } catch (e) {
-                    document.getElementById('msg').innerText = "خطأ في التشغيل: " + e.message;
+                    document.getElementById('msg').innerText = "خطأ: " + e.message;
                 }
-            }, 1000); // تأخير ثانية واحدة لضمان تحميل المكتبة
+            }, 1000);
         };
 
         async function pay() {
