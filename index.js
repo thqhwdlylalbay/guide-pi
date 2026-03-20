@@ -8,86 +8,68 @@ export default {
       return new Response(validationKey, { headers: { "Content-Type": "text/plain" } });
     }
 
-    // جزء معالجة الدفع السحابي (Server-side)
     if (request.method === "POST" && url.pathname === "/payment/complete") {
-      const { paymentId, txid } = await request.json();
-      const API_KEY = "zyvmbsgd34hfnvzncx5y1laa9vglewchvytvs2hlh3y3b3peqlib6qqzjwcrqnj0"; // حطي المفتاح الجديد هنا
+      try {
+        const { paymentId, txid } = await request.json();
+        
+        // هنا يتم سحب المفتاح السري من إعدادات Cloudflare بأمان
+        const API_KEY = env.PI_API_KEY; 
 
-      const res = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
-        method: "POST",
-        headers: { 
-          "Authorization": `Key ${API_KEY}`,
-          "Content-Type": "application/json" 
-        },
-        body: JSON.stringify({ txid })
-      });
-      const result = await res.text();
-      return new Response(result);
+        if (!API_KEY) {
+          return new Response(JSON.stringify({ error: "المفتاح غير معرف في Cloudflare" }), { status: 500 });
+        }
+
+        const res = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+          method: "POST",
+          headers: { 
+            "Authorization": `Key ${API_KEY}`,
+            "Content-Type": "application/json" 
+          },
+          body: JSON.stringify({ txid })
+        });
+        const result = await res.text();
+        return new Response(result);
+      } catch (err) {
+        return new Response(err.message, { status: 500 });
+      }
     }
 
-    // واجهة المستخدم (Client-side)
-    const html = `
+    // واجهة المستخدم (لا تحتوي على أي مفاتيح)
+    return new Response(`
 <!DOCTYPE html>
 <html>
 <head>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>تجربة الخطوة 10</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background: #eee; }
-        .pay-btn { background: #6200ee; color: white; padding: 20px; border-radius: 15px; border: none; font-size: 20px; width: 100%; cursor: pointer; }
-        #status { margin-top: 20px; color: #555; font-weight: bold; }
-    </style>
+    <title>اختبار الأمان</title>
 </head>
-<body>
-    <div style="background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-        <h2>اختبار الدفع الجديد ⚡</h2>
-        <p>اضغطي بالأسفل لتجربة دفع 0.01 Pi</p>
-        <button class="pay-btn" onclick="pay()">دفع الآن للاختبار</button>
-        <div id="status"></div>
+<body style="text-align:center; padding:50px; font-family:sans-serif;">
+    <div style="padding:20px; border:2px solid #6200ee; border-radius:20px;">
+        <h2>اختبار الدفع الآمن 🔒</h2>
+        <p>تم إخفاء المفتاح في إعدادات السيرفر.</p>
+        <button id="payBtn" style="background:#6200ee; color:white; padding:15px; border-radius:10px; border:none; width:100%;">دفع للاختبار (0.01 Pi)</button>
+        <div id="status" style="margin-top:20px;"></div>
     </div>
-
     <script>
         Pi.init({ version: "2.0", sandbox: false });
-
-        async function pay() {
+        document.getElementById('payBtn').onclick = async () => {
             const status = document.getElementById('status');
-            status.innerHTML = "جاري تحضير المعاملة...";
-            
             try {
-                const payment = await Pi.createPayment({
-                    amount: 0.01,
-                    memo: "اختبار الخطوة 10",
-                    metadata: { test: "true" }
-                }, {
-                    onReadyForServerApproval: (paymentId) => {
-                        status.innerHTML = "تمت الموافقة.. جاري التأكيد من باي...";
-                    },
+                await Pi.createPayment({ amount: 0.01, memo: "Secure Test", metadata: {test: true} }, {
                     onReadyForServerCompletion: async (paymentId, txid) => {
-                        status.innerHTML = "جاري إنهاء المعاملة على السيرفر...";
-                        const response = await fetch('/payment/complete', {
+                        status.innerHTML = "جاري التأكيد السري...";
+                        const res = await fetch('/payment/complete', {
                             method: 'POST',
                             body: JSON.stringify({ paymentId, txid })
                         });
-                        const result = await response.text();
-                        if(result.includes("success") || result.includes("already")) {
-                            status.innerHTML = "✅ نجحت المعاملة! الخطوة 10 كملت.";
-                            alert("مبروك! العملية تمت بنجاح.");
-                        } else {
-                            status.innerHTML = "❌ الرد: " + result;
-                        }
-                    },
-                    onCancel: () => status.innerHTML = "تم إلغاء العملية",
-                    onError: (error) => status.innerHTML = "خطأ: " + error.message
+                        const out = await res.text();
+                        status.innerHTML = out.includes("success") ? "✅ نجح الأمان!" : "❌ رد: " + out;
+                    }
                 });
-            } catch (err) {
-                status.innerHTML = "فشل: " + err.message;
-            }
-        }
+            } catch (e) { status.innerHTML = "خطأ: " + e.message; }
+        };
     </script>
 </body>
-</html>`;
-
-    return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+</html>`, { headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
 };
