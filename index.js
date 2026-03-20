@@ -4,19 +4,19 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // 1. ملف التحقق الخاص بباي (لازم يفضل موجود)
     if (url.pathname === "/.well-known/pi-common-configuration.txt") {
       return new Response(validationKey, { headers: { "Content-Type": "text/plain" } });
     }
 
+    // 2. معالجة إتمام الدفع (Server-Side) - بتستخدم المفتاح السري من Cloudflare
     if (request.method === "POST" && url.pathname === "/payment/complete") {
       try {
         const { paymentId, txid } = await request.json();
-        
-        // هنا يتم سحب المفتاح السري من إعدادات Cloudflare بأمان
-        const API_KEY = env.PI_API_KEY; 
+        const API_KEY = env.PI_API_KEY; // بيسحب المفتاح بأمان من إعدادات كولد فلير
 
         if (!API_KEY) {
-          return new Response(JSON.stringify({ error: "المفتاح غير معرف في Cloudflare" }), { status: 500 });
+          return new Response(JSON.stringify({ error: "API Key missing in Cloudflare settings" }), { status: 500 });
         }
 
         const res = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
@@ -34,40 +34,70 @@ export default {
       }
     }
 
-    // واجهة المستخدم (لا تحتوي على أي مفاتيح)
+    // 3. واجهة المستخدم (Client-Side) - بتطلب إذن المستخدم أولاً
     return new Response(`
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>اختبار الأمان</title>
+    <title>تفعيل مشروع ثقة ودليل الباي</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 30px; background: #f0f2f5; }
+        .container { max-width: 400px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid #6200ee; }
+        .btn { background: #6200ee; color: white; padding: 18px; border-radius: 12px; border: none; width: 100%; font-size: 18px; cursor: pointer; font-weight: bold; }
+        #status { margin-top: 20px; font-size: 14px; color: #555; white-space: pre-wrap; text-align: right; }
+    </style>
 </head>
-<body style="text-align:center; padding:50px; font-family:sans-serif;">
-    <div style="padding:20px; border:2px solid #6200ee; border-radius:20px;">
-        <h2>اختبار الدفع الآمن 🔒</h2>
-        <p>تم إخفاء المفتاح في إعدادات السيرفر.</p>
-        <button id="payBtn" style="background:#6200ee; color:white; padding:15px; border-radius:10px; border:none; width:100%;">دفع للاختبار (0.01 Pi)</button>
-        <div id="status" style="margin-top:20px;"></div>
+<body>
+    <div class="container">
+        <h2 style="color: #6200ee;">تنشيط التطبيق الآمن 🔒</h2>
+        <p>الخطوة الأخيرة لتفعيل الخطوة 10 في الـ Checklist.</p>
+        <button class="btn" onclick="startSecurePayment()">دفع 0.01 Pi لتأكيد الربط</button>
+        <div id="status"></div>
     </div>
+
     <script>
         Pi.init({ version: "2.0", sandbox: false });
-        document.getElementById('payBtn').onclick = async () => {
+
+        async function startSecurePayment() {
             const status = document.getElementById('status');
+            status.innerHTML = "> جاري طلب الأذونات من محفظتك...\\n";
+            
             try {
-                await Pi.createPayment({ amount: 0.01, memo: "Secure Test", metadata: {test: true} }, {
+                // طلب الإذن (Scope) أولاً لضمان عدم التعليق
+                const auth = await Pi.authenticate(['payments']);
+                status.innerHTML += "> تم الحصول على إذن الدفع ✅\\n";
+
+                const payment = await Pi.createPayment({
+                    amount: 0.01,
+                    memo: "تفعيل الخطوة 10 - مشروع ثقة",
+                    metadata: { type: "activation" }
+                }, {
+                    onReadyForServerApproval: (id) => { status.innerHTML += "> المعاملة معتمدة من باي..\\n"; },
                     onReadyForServerCompletion: async (paymentId, txid) => {
-                        status.innerHTML = "جاري التأكيد السري...";
-                        const res = await fetch('/payment/complete', {
+                        status.innerHTML += "> جاري التأكيد النهائي من السيرفر...\\n";
+                        const response = await fetch('/payment/complete', {
                             method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId, txid })
                         });
-                        const out = await res.text();
-                        status.innerHTML = out.includes("success") ? "✅ نجح الأمان!" : "❌ رد: " + out;
-                    }
+                        const result = await response.text();
+                        if(result.includes("success")) {
+                            status.innerHTML += "> ✅ تم بنجاح! مبروك تفعيل الخطوة 10.";
+                            alert("نجحت العملية! يمكنك الآن التحقق من قائمة المطورين.");
+                        } else {
+                            status.innerHTML += "> ❌ الرد: " + result;
+                        }
+                    },
+                    onCancel: () => { status.innerHTML = "تم إلغاء العملية."; },
+                    onError: (error) => { status.innerHTML = "خطأ في الدفع: " + error.message; }
                 });
-            } catch (e) { status.innerHTML = "خطأ: " + e.message; }
-        };
+            } catch (err) {
+                status.innerHTML = "فشل في تسجيل الدخول: " + err.message;
+            }
+        }
     </script>
 </body>
 </html>`, { headers: { "Content-Type": "text/html; charset=utf-8" } });
