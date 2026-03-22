@@ -1,9 +1,11 @@
 export default {
   async fetch(request, env) {
-    // قراءة المفتاح السري اللي ضفته في إعدادات Cloudflare
-    const mySecretKey = env.PI_API_KEY;
+    const url = new URL(request.url);
 
-    // هنا الكود بيمرر الطلب للموقع عادي مع الحفاظ على سرية المفتاح في الخلفية
-    return await fetch(request);
+    // ده السطر اللي بيخلي المفتاح متاح للاستخدام لو احتجناه
+    const mySecret = env.PI_API_KEY;
+
+    // السطر ده هو "المنقذ" اللي بيخلي كلوود فلير يفتح ملف index.html وباقي الصور والمفات
+    return env.ASSETS.fetch(request);
   },
 };
