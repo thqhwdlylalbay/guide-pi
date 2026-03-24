@@ -3,36 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي | Trust and Pi Guide</title>
-    <link rel="stylesheet" href="style.css">
+    <title>تنشيط الخطوة 10 - ثقة ودليل الباي</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 50px 20px; background-color: #f0f2f5; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        .btn-pay { background-color: #6d28d9; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-pay:hover { background-color: #5b21b6; }
+        .btn-pay:disabled { background-color: #a78bfa; cursor: not-allowed; }
+        #status { margin-top: 20px; color: #4b5563; line-height: 1.6; }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>مشروع ثقة ودليل الباي</h1>
-        <p>دليلك الآمن في شبكة Pi Network</p>
-    </header>
-
-    <main>
-        <section id="merchant-list">
-            <h2>قائمة التجار الموثوقين</h2>
-            <div id="merchants-container">
-                <p>جاري تحميل قائمة التجار...</p>
-            </div>
-        </section>
-
-        <section id="security-tips">
-            <h2>نصائح الأمان</h2>
-            <ul>
-                <li>لا تشارك "كلمة السر" (Passphrase) مع أحد.</li>
-                <li>تأكد من روابط المواقع قبل إدخال بياناتك.</li>
-            </ul>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2026 جميع الحقوق محفوظة - فريق ثقة</p>
-    </footer>
-
-    <script src="script.js"></script>
+    <div class="card">
+        <h2>ثقة ودليل الباي</h2>
+        <p>اضغطي لتنفيذ عملية الدفع التجريبية</p>
+        <button id="pay-button" class="btn-pay">دفع 0.1 Pi</button>
+        <div id="status">جاهز للبدء...</div>
+    </div>
+    <script src="app.js"></script>
 </body>
 </html>
