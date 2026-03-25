@@ -1,24 +1,26 @@
-// مصفوفة تجريبية للتجار (ممكن نحدثها لملف JSON لاحقاً)
-const merchants = [
-    { name: "متجر الأمل", category: "إلكترونيات", status: "موثوق" },
-    { name: "خدمات التقنية", category: "برمجيات", status: "موثوق" }
-];
+// 1. تعريف الصلاحيات والدوال المطلوبة
+const scopes = ['payments'];
 
-function displayMerchants() {
-    const container = document.getElementById('merchants-container');
-    container.innerHTML = ''; // مسح رسالة التحميل
+function onIncompletePaymentFound(payment) { 
+    /* ... */ 
+};
 
-    merchants.forEach(m => {
-        const card = document.createElement('div');
-        card.className = 'merchant-card';
-        card.innerHTML = `
-            <h3>${m.name}</h3>
-            <p>التخصص: ${m.category}</p>
-            <span style="color: green; font-weight: bold;">✔️ ${m.status}</span>
-        `;
-        container.appendChild(card);
-    });
-}
+// 2. عملية المصادقة (Authentication)
+Pi.authenticate(scopes, onIncompletePaymentFound).then(function(auth) {
+  console.log("Hi there! You're ready to make payments!");
+}).catch(function(error) {
+  console.error(error);
+});
 
-// تشغيل الدالة عند تحميل الصفحة
-window.onload = displayMerchants;
+// 3. كود إنشاء عملية الدفع (Create Payment)
+// ملحوظة: الكورتيم ينصح بوضع هذا الكود داخل "حدث" مثل ضغطة زرار
+Pi.createPayment({
+  amount: 3.14,
+  memo: "...", 
+  metadata: { /* ... */ }, 
+}, {
+  onReadyForServerApproval: function(paymentId) { /* ... */ },
+  onReadyForServerCompletion: function(paymentId, txid) { /* ... */ },
+  onCancel: function(paymentId) { /* ... */ },
+  onError: function(error, payment) { /* ... */ },
+});
