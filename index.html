@@ -1,36 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ثقة ودليل الباي - إتمام الخطوة 10</title>
+    
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <script>Pi.init({ version: "2.0" })</script>
+    
+    <script>
+        Pi.init({ version: "2.0" });
+    </script>
 </head>
 <body>
-    <button id="pay-btn">اضغط هنا لإتمام الخطوة 10</button>
+
+    <div style="text-align: center; margin-top: 50px;">
+        <h1>مشروع ثقة ودليل الباي</h1>
+        <p>اضغط على الزرار بالأسفل لإتمام عملية الدفع التجريبية</p>
+        
+        <button id="pay-button" style="padding: 15px 30px; background-color: #673ab7; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer;">
+            اضغط هنا لإتمام الخطوة 10
+        </button>
+    </div>
 
     <script>
-        // كود المصادقة (Authentication)
+        // 3. إعدادات المصادقة والدفع
         const scopes = ['payments'];
-        function onIncompletePaymentFound(payment) { /* ... */ };
 
+        // دالة حل مشكلة المعاملة المعلقة (عشان الرسالة اللي ظهرتلك تختفي)
+        function onIncompletePaymentFound(payment) {
+            console.log("جاري إنهاء معاملة قديمة معلقة...");
+            const paymentId = payment.identifier;
+            const txid = payment.transaction.txid;
+            // إنهاء المعاملة القديمة أوتوماتيكياً
+            Pi.completePayment(paymentId, txid);
+        };
+
+        // 4. تنفيذ المصادقة أول ما الصفحة تفتح
         Pi.authenticate(scopes, onIncompletePaymentFound).then(function(auth) {
-          console.log("Hi there! You're ready to make payments!");
+            console.log("جاهز لإتمام عملية الدفع!");
         }).catch(function(error) {
-          console.error(error);
+            console.error("خطأ في المصادقة: ", error);
         });
 
-        // كود الدفع (Payment) - بنربطه بالزرار عشان يشتغل لما تضغطي عليه
-        document.getElementById('pay-btn').onclick = function() {
+        // 5. كود إنشاء عملية الدفع عند الضغط على الزرار
+        document.getElementById('pay-button').onclick = function() {
             Pi.createPayment({
-              amount: 3.14,
-              memo: "Digital kitten #1234",
-              metadata: { kittenId: 1234 }
+                amount: 3.14,
+                memo: "اختبار دفع - مشروع ثقة ودليل الباي",
+                metadata: { orderId: "step-10-test" },
             }, {
-              onReadyForServerApproval: function(paymentId) { /* ... */ },
-              onReadyForServerCompletion: function(paymentId, txid) { /* ... */ },
-              onCancel: function(paymentId) { /* ... */ },
-              onError: function(error, payment) { /* ... */ },
+                onReadyForServerApproval: function(paymentId) {
+                    console.log("المعاملة بانتظار موافقة السيرفر: " + paymentId);
+                },
+                onReadyForServerCompletion: function(paymentId, txid) {
+                    alert("تمت العملية بنجاح! رقم المعاملة: " + txid);
+                },
+                onCancel: function(paymentId) {
+                    console.log("تم إلغاء العملية");
+                },
+                onError: function(error, payment) {
+                    console.error("حدث خطأ أثناء الدفع: ", error);
+                },
             });
         };
     </script>
+
 </body>
 </html>
