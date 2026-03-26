@@ -3,87 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - النظام المتكامل</title>
+    <title>ثقة ودليل الباي</title>
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <script>
-        Pi.init({ version: "2.0", sandbox: true });
-    </script>
-
+    <script>Pi.init({ version: "2.0", sandbox: true });</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { --primary: #673ab7; --bg: #f4f0fa; --card: #fff; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; direction: rtl; }
-        .header { background: var(--card); padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); sticky; top: 0; z-index: 100; }
+        :root { --primary: #673ab7; --bg: #f4f0fa; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; direction: rtl; padding-bottom: 80px; }
+        .header { background: #fff; padding: 15px; display: flex; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); sticky; top: 0; z-index: 100; }
         .container { padding: 20px; max-width: 500px; margin: auto; }
-        .top-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .action-card { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); cursor: pointer; border: none; }
-        .action-card.purple { background: var(--primary); color: white; }
-        .action-card.outlined { border: 2px solid var(--primary); color: var(--primary); }
-        .list-card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border-right: 5px solid #ff9800; }
-        .btn-pay { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-        #status-bar { background: #333; color: #fff; padding: 10px; text-align: center; font-size: 13px; position: fixed; top: 60px; width: 100%; z-index: 99; display: none; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #ddd; }
-        .nav-item { color: #888; text-decoration: none; font-size: 12px; text-align: center; }
-        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .action-card { background: #fff; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .btn-pay { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
+        .status-bar { background: #333; color: #fff; padding: 8px; text-align: center; font-size: 12px; position: fixed; top: 55px; width: 100%; display: none; }
+        .nav-bottom { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #ddd; }
     </style>
 </head>
 <body>
 
-    <div id="status-bar">جاري معالجة الطلب...</div>
+    <div id="status" class="status-bar">جاري معالجة الطلب...</div>
 
     <header class="header">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <div style="background:var(--primary); color:white; width:35px; height:35px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold;">π</div>
-            <div>
-                <b style="display:block; font-size:14px;">ثقة ودليل الباي</b>
-                <small id="user-name" style="color:#666;">جاري التحقق...</small>
-            </div>
-        </div>
-        <i class="fas fa-globe" style="color:var(--primary);"></i>
+        <b style="color: var(--primary); font-size: 20px;">ثقة ودليل الباي</b>
     </header>
 
-    <main class="container">
-        <div class="top-actions">
-            <button class="action-card outlined" onclick="alert('حاسبة الأرباح ستتوفر قريباً في التحديث القادم!')">
+    <div class="container">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div class="action-card" style="border: 2px solid var(--primary); color: var(--primary); cursor: pointer;" onclick="alert('سيتم تفعيل الحاسبة قريباً')">
                 <i class="fas fa-chart-line"></i><br><b>احسب أرباحك</b>
-            </button>
-            <button class="action-card purple" onclick="window.open('https://docs.google.com/forms/d/YOUR_FORM_HERE', '_blank')">
+            </div>
+            <div class="action-card" style="background: var(--primary); color: white; cursor: pointer;" onclick="window.open('https://docs.google.com/forms/d/your-id', '_blank')">
                 <i class="fas fa-store"></i><br><b>أضف متجرك</b>
-            </button>
+            </div>
         </div>
 
-        <h4 style="color:var(--primary);"><i class="fas fa-utensils"></i> مطاعم تقبل الدفع (اختبار الخطوة 10)</h4>
-        
-        <div class="list-card">
-            <div style="display:flex; justify-content:space-between;">
+        <div class="action-card" style="border-right: 5px solid #ff9800;">
+            <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
                 <b>Pi Pizza Hub</b>
                 <span style="color:#ffc107;">4.6 <i class="fas fa-star"></i></span>
             </div>
-            <p style="font-size:13px; color:#666;">ادفع 1 Pi لتأكيد هويتك وإتمام الخطوة 10 بنجاح الصاروخ.</p>
-            <button class="btn-pay" id="main-pay-btn">اطلب الآن (دفع 1 Pi)</button>
+            <p style="font-size:13px; color:#666; text-align: right;">دعم نظام المقايضة وتأكيد الخطوة 10.</p>
+            <button id="pay-button" class="btn-pay">اطلب الآن (1 Pi)</button>
         </div>
-    </main>
+    </div>
 
-    <nav class="bottom-nav">
-        <a href="#" class="nav-item active"><i class="fas fa-home"></i><br>الرئيسية</a>
-        <a href="#" class="nav-item"><i class="fas fa-pie-chart"></i><br>أرباح</a>
-        <a href="#" class="nav-item"><i class="fas fa-medal"></i><br>توثيق</a>
-        <a href="#" class="nav-item"><i class="fas fa-bullhorn"></i><br>إبلاغ</a>
+    <nav class="nav-bottom">
+        <span style="color: var(--primary);">الرئيسية</span>
+        <span>أرباح</span>
+        <span>توثيق</span>
     </nav>
 
     <script>
-        const statusBar = document.getElementById('status-bar');
-        const payBtn = document.getElementById('main-pay-btn');
+        const statusDiv = document.getElementById('status');
+        const payBtn = document.getElementById('pay-button');
 
-        function showStatus(msg, color = "#333") {
-            statusBar.innerText = msg;
-            statusBar.style.background = color;
-            statusBar.style.display = 'block';
+        function updateStatus(msg, show = true) {
+            statusDiv.innerText = msg;
+            statusDiv.style.display = show ? 'block' : 'none';
         }
 
-        async function completePaymentOnServer(paymentId, txid) {
-            showStatus("جاري تأكيد المعاملة بالسيرفر...");
+        async function handleServerCompletion(paymentId, txid) {
+            updateStatus("جاري التأكيد النهائي بالسيرفر...");
             try {
                 const response = await fetch('/complete', {
                     method: 'POST',
@@ -91,35 +72,29 @@
                     body: JSON.stringify({ paymentId, txid })
                 });
                 if (response.ok) {
-                    showStatus("مبروك! تم تأكيد الخطوة 10 بنجاح الصاروخ ✅", "green");
-                    alert("تمت العملية! راجعي لوحة المطورين الآن.");
+                    updateStatus("✅ تمت العملية بنجاح!");
+                    alert("تم تأكيد المعاملة بنجاح الصاروخ!");
                 }
-            } catch (err) { showStatus("خطأ في الاتصال بالسيرفر", "red"); }
+            } catch (e) { updateStatus("❌ خطأ في السيرفر"); }
         }
 
-        const onIncompletePaymentFound = (payment) => {
-            showStatus("اكتشاف معاملة قديمة.. جاري إنهائها فوراً", "orange");
-            if (payment.transaction && payment.transaction.txid) {
-                completePaymentOnServer(payment.identifier, payment.transaction.txid);
-            }
-        };
-
-        Pi.authenticate(['payments', 'username'], onIncompletePaymentFound).then(auth => {
-            document.getElementById('user-name').innerText = "مرحباً، " + auth.user.username;
-        }).catch(err => showStatus("يرجى الفتح من Pi Browser", "red"));
+        // تسجيل الدخول بدون عرض أي أسماء شخصية
+        Pi.authenticate(['payments']).then(() => {
+            console.log("App Ready");
+        }).catch(() => { updateStatus("يرجى الفتح من Pi Browser"); });
 
         payBtn.onclick = () => {
             payBtn.disabled = true;
-            showStatus("جاري فتح المحفظة...");
+            updateStatus("جاري فتح المحفظة...");
             Pi.createPayment({
                 amount: 1,
-                memo: "تفعيل الخطوة 10 - ثقة ودليل الباي",
-                metadata: { orderId: "TRUST_PI_" + Date.now() }
+                memo: "تأكيد معاملة ثقة ودليل الباي",
+                metadata: { orderId: "ID_" + Date.now() }
             }, {
-                onReadyForServerApproval: (id) => showStatus("في انتظار موافقة السيرفر..."),
-                onReadyForServerCompletion: (id, txid) => completePaymentOnServer(id, txid),
-                onCancel: (id) => { showStatus("تم الإلغاء"); payBtn.disabled = false; },
-                onError: (err) => { showStatus("خطأ: " + err.message, "red"); payBtn.disabled = false; }
+                onReadyForServerApproval: () => updateStatus("في انتظار الموافقة..."),
+                onReadyForServerCompletion: (id, txid) => handleServerCompletion(id, txid),
+                onCancel: () => { updateStatus("", false); payBtn.disabled = false; },
+                onError: (err) => { updateStatus("خطأ: " + err.message); payBtn.disabled = false; }
             });
         };
     </script>
