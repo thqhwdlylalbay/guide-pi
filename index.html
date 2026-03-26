@@ -3,97 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - التحقق من المعاملات</title>
-    
+    <title>ثقة ودليل الباي - الإصدار النهائي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-        // التهيئة الرسمية للإصدار 2.0
-        // ملاحظة: sandbox: true ضروري طالما أنكِ في مرحلة الاختبار
         Pi.init({ version: "2.0", sandbox: true });
     </script>
 </head>
-<body style="font-family: Arial, sans-serif; text-align: center; background-color: #f0f2f5; padding-top: 50px;">
+<body style="font-family: sans-serif; text-align: center; background-color: #f8f9fa; padding: 20px;">
 
-    <div style="background: white; max-width: 450px; margin: auto; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-        <h1 style="color: #673ab7;">ثقة ودليل الباي</h1>
-        <hr>
-        <p id="status-text" style="color: #444; font-weight: bold;">جاري فحص حالة الحساب...</p>
+    <div style="background: white; max-width: 400px; margin: 40px auto; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="color: #673ab7;">ثقة ودليل الباي</h2>
+        <p id="status" style="color: #d32f2f; font-weight: bold;">جاري فحص المعاملات المعلقة...</p>
         
-        <button id="pay-button" style="padding: 15px 35px; background-color: #673ab7; color: white; border: none; border-radius: 50px; font-size: 20px; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.3s;">
-            إتمام المعاملة (الخطوة 10)
+        <button id="pay-button" style="padding: 15px 30px; background-color: #673ab7; color: white; border: none; border-radius: 30px; font-size: 18px; cursor: pointer; width: 100%; display: none;">
+            إتمام الخطوة 10 الآن
         </button>
-        
-        <div id="info-box" style="margin-top: 20px; font-size: 13px; color: #666; text-align: right; background: #eee; padding: 10px; border-radius: 10px;">
-            * هذا التطبيق يعمل في بيئة الاختبار (Sandbox).
-        </div>
     </div>
 
     <script>
-        // تعريف الصلاحيات المطلوبة
-        const scopes = ['username', 'payments'];
-
-        /**
-         * دالة معالجة المدفوعات غير المكتملة
-         * يتم استدعاؤها إذا وجد النظام معاملة قديمة لم يتم إغلاقها بـ /complete
-         */
+        // 1. التعامل مع المعاملات المعلقة (الحل الجذري)
         const onIncompletePaymentFound = (payment) => {
-            console.warn("Incomplete payment found!", payment);
-            document.getElementById('status-text').innerText = "تم اكتشاف معاملة معلقة، جاري معالجتها...";
+            console.log("وجدت معاملة غير مكتملة:", payment);
             
-            // بناءً على التعليمات، يجب إغلاق المعاملة لإتاحة دفع جديد
-            // سنحاول إكمالها برمجياً إذا وجد txid، وإلا سننتظر تدخل النظام
+            // إذا كانت المعاملة وصلت للبلوكشين ولها txid
             if (payment.transaction && payment.transaction.txid) {
+                console.log("جاري إكمال المعاملة المعلقة برقم:", payment.transaction.txid);
+                
+                // إرسال إشارة الإتمام فوراً للسيرفر لإغلاقها
                 Pi.completePayment(payment.identifier, payment.transaction.txid);
-                document.getElementById('status-text').innerText = "تم إغلاق المعاملة القديمة بنجاح.";
+                
+                document.getElementById('status').innerText = "تم إغلاق المعاملة المعلقة. يمكنك الآن الضغط على الزرار.";
+                document.getElementById('pay-button').style.display = "block";
             } else {
-                // إذا لم يتم الدفع فعلياً، نقوم بإلغائها لفتح السكة
-                // ملحوظة: إلغاء المعاملة متاح عبر الـ SDK في حالات معينة
-                console.log("العملية لم تصل للبلوكشين بعد، يرجى المحاولة مرة أخرى.");
+                // إذا لم تكن قد وصلت للبلوكشين، يجب إلغاؤها لبدء واحدة جديدة
+                // ملاحظة: التعليمات تشير إلى أن الإلغاء يتم عبر الـ API، سنحاول هنا برمجياً
+                document.getElementById('status').innerText = "يوجد معاملة لم تكتمل، يرجى إعادة تحميل الصفحة.";
             }
         };
 
-        // 1. بدء عملية المصادقة فور فتح التطبيق
-        Pi.authenticate(scopes, onIncompletePaymentFound).then(function(auth) {
-            document.getElementById('status-text').innerText = "مرحباً: " + auth.user.username;
-            console.log("Auth Success", auth);
-        }).catch(function(error) {
-            console.error(error);
-            document.getElementById('status-text').innerText = "خطأ في المصادقة، تأكدي من فتح الموقع من Pi Browser.";
+        // 2. تسجيل الدخول
+        Pi.authenticate(['payments', 'username'], onIncompletePaymentFound).then(function(auth) {
+            document.getElementById('status').style.color = "green";
+            document.getElementById('status').innerText = "متصل: " + auth.user.username;
+            document.getElementById('pay-button').style.display = "block";
+        }).catch(function(err) {
+            document.getElementById('status').innerText = "خطأ في الاتصال: " + err.message;
         });
 
-        // 2. إنشاء الدفع عند الضغط على الزرار
+        // 3. زر إنشاء الدفع
         document.getElementById('pay-button').onclick = function() {
-            const paymentData = {
-                amount: 1, // الكمية
-                memo: "اختبار الخطوة 10 - مشروع ثقة ودليل الباي", // المذكرات
-                metadata: { orderId: "step_10_" + Date.now() }, // بيانات إضافية
-            };
-
-            const callbacks = {
-                onReadyForServerApproval: (paymentId) => {
-                    // هنا يجب إرسال paymentId للسيرفر للموافقة
-                    // في وضع Sandbox وللخطوة 10، المنصة تعالج هذا الجزء أحياناً تلقائياً
-                    console.log("Payment ID obtained:", paymentId);
-                    document.getElementById('status-text').innerText = "المعاملة قيد الموافقة...";
+            Pi.createPayment({
+                amount: 1,
+                memo: "إتمام المرحلة 10 - ثقة ودليل الباي",
+                metadata: { orderId: "TRUST_FINAL_10" }
+            }, {
+                onReadyForServerApproval: function(paymentId) {
+                    document.getElementById('status').innerText = "جاري معالجة الطلب...";
                 },
-                onReadyForServerCompletion: (paymentId, txid) => {
-                    // عند نجاح الدفع في البلوكشين، يجب إرسال txid للسيرفر
-                    console.log("Transaction ID (txid):", txid);
-                    Pi.completePayment(paymentId, txid); // إغلاق المعاملة برمجياً
-                    document.getElementById('status-text').innerText = "مبروك! تمت المعاملة بنجاح.";
-                    alert("تمت المعاملة بنجاح، يمكنك الآن العودة للوحة المطورين.");
+                onReadyForServerCompletion: function(paymentId, txid) {
+                    // أهم خطوة: إخبار Pi أن العملية تمت بنجاح
+                    Pi.completePayment(paymentId, txid);
+                    document.getElementById('status').innerText = "مبروك! تمت العملية بنجاح.";
+                    alert("تمت العملية! تفقد الخطوة 10 في لوحة المطورين.");
                 },
-                onCancel: (paymentId) => {
-                    console.log("Payment cancelled", paymentId);
-                    document.getElementById('status-text').innerText = "تم إلغاء المعاملة.";
+                onCancel: function(paymentId) {
+                    document.getElementById('status').innerText = "تم إلغاء المعاملة.";
                 },
-                onError: (error, payment) => {
-                    console.error("Payment Error", error);
-                    document.getElementById('status-text').innerText = "حدث خطأ أثناء المعاملة.";
-                },
-            };
-
-            Pi.createPayment(paymentData, callbacks);
+                onError: function(error, payment) {
+                    document.getElementById('status').innerText = "خطأ: " + error.message;
+                }
+            });
         };
     </script>
 </body>
