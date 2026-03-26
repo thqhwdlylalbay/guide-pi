@@ -3,78 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - نظام المدفوعات v2</title>
+    <title>ثقة ودليل الباي - حل مشكلة خطوة 10</title>
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-        // تهيئة الإصدار الثاني (v2) بناءً على تعليمات الملخص
+        // تهيئة الإصدار 2.0 كما في التعليمات
         Pi.init({ version: "2.0" });
     </script>
 </head>
-<body>
+<body style="font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; padding-top: 50px;">
 
-    <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
-        <img src="https://minepi.com/wp-content/uploads/2021/03/logo.png" width="100" alt="Pi Logo">
-        <h2>منصة تطبيقات Pi - مشروع ثقة ودليل الباي</h2>
-        <p>اختبار واجهة برمجة تطبيقات النظام الأساسي (U2A Payment)</p>
+    <div style="background: white; max-width: 400px; margin: auto; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <h2 style="color: #673ab7;">ثقة ودليل الباي</h2>
+        <p id="status" style="color: #555;">جاري التحقق من الاتصال...</p>
         
-        <button id="pay-button" style="padding: 15px 30px; background-color: #673ab7; color: white; border: none; border-radius: 25px; font-size: 18px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+        <button id="pay-button" style="padding: 15px 30px; background-color: #673ab7; color: white; border: none; border-radius: 25px; font-size: 18px; cursor: pointer; width: 100%; margin-top: 20px;">
             إرسال 1 Pi للتجربة
         </button>
-        <div id="status" style="margin-top: 20px; color: #555;"></div>
+        
+        <p style="font-size: 12px; color: #888; margin-top: 15px;">تأكد من استخدام محفظة Testnet فقط</p>
     </div>
 
     <script>
-        // 1. تحديد النطاق (Scopes) المطلوب للوصول لموارد المستخدم
         const scopes = ['payments', 'username'];
 
-        // 2. دالة التعامل مع المدفوعات غير المكتملة (بناءً على مرجع PaymentDTO)
+        // 2. دالة "تنظيف" العمليات المعلقة (حل مشكلة الرسالة اللي ظهرتلك)
         function onIncompletePaymentFound(payment) {
-            console.log("Incomplete payment found:", payment.identifier);
-            // إبلاغ المنصة بأننا نعالج المعاملة المعلقة لتجنب خطأ الـ Pending
-            // في حالة عدم وجود خادم (Backend)، نقوم بإكمالها محلياً إذا توفر txid
-            if (payment.transaction && payment.transaction.txid) {
-                Pi.completePayment(payment.identifier, payment.transaction.txid);
-            }
+            console.log("وجدت معاملة معلقة، جاري إلغاؤها لفتح السكة...");
+            // هذا الأمر يخبر السيرفر بإلغاء المعاملة القديمة فوراً
+            Pi.cancelPayment(payment.identifier);
+            document.getElementById('status').innerText = "تم تنظيف العمليات القديمة. جرب الآن!";
         };
 
-        // 3. إجراء المصادقة (Authentication) للحصول على رمز الوصول (Access Token)
+        // 3. المصادقة التلقائية عند فتح الصفحة
         Pi.authenticate(scopes, onIncompletePaymentFound).then(function(auth) {
+            console.log("تم تسجيل الدخول بنجاح باسم: " + auth.user.username);
             document.getElementById('status').innerText = "تم الاتصال: " + auth.user.username;
-            console.log("User Authenticated. Access Token obtained.");
         }).catch(function(error) {
-            console.error("Auth Error:", error);
-            document.getElementById('status').innerText = "خطأ في الاتصال بالمنصة.";
+            console.error(error);
+            document.getElementById('status').innerText = "فشل الاتصال بالشبكة.";
         });
 
-        // 4. إنشاء عملية الدفع (U2A) عند الضغط على الزرار
+        // 4. تنفيذ عملية الدفع عند الضغط على الزرار
         document.getElementById('pay-button').onclick = function() {
+            document.getElementById('status').innerText = "جاري إنشاء المعاملة...";
+            
             Pi.createPayment({
-                amount: 1, // المبلغ المحدد في مثال التعليمات
-                memo: "اختبار دفع من مستخدم إلى تطبيق - ثقة ودليل الباي",
-                metadata: { orderId: "step-10-verification" },
+                amount: 1,
+                memo: "اختبار خطوة 10 - مشروع ثقة",
+                metadata: { orderId: "step-10-fix" },
             }, {
-                // استدعاءات الـ Callbacks المطلوبة في المرجع
                 onReadyForServerApproval: function(paymentId) {
-                    console.log("Payment created. ID:", paymentId);
-                    // تنبيه: في التطبيقات الحقيقية، هنا ترسل paymentId لخادمك لعمل /approve
-                    // للخطوة 10، المنصة تراقب مجرد استدعاء هذه الدالة بنجاح
-                    document.getElementById('status').innerText = "بانتظار موافقة الشبكة...";
+                    console.log("المعاملة جاهزة للموافقة. ID: " + paymentId);
+                    document.getElementById('status').innerText = "بانتظار تأكيد المحفظة...";
                 },
                 onReadyForServerCompletion: function(paymentId, txid) {
-                    console.log("Transaction verified on Blockchain. TXID:", txid);
-                    // إتمام العملية برمجياً لإغلاق الدفع
+                    console.log("تمت المعاملة بنجاح! TXID: " + txid);
+                    // إكمال المعاملة رسمياً
                     Pi.completePayment(paymentId, txid);
-                    document.getElementById('status').innerText = "تمت المعاملة بنجاح!";
-                    alert("تم دفع 1 Pi بنجاح لخطوة 10");
+                    document.getElementById('status').innerText = "مبروك! تمت العملية بنجاح.";
+                    alert("تمت العملية! ارجع للوحة المطورين لتجد خطوة 10 خضراء.");
                 },
                 onCancel: function(paymentId) {
-                    console.log("Payment cancelled by user.");
-                    document.getElementById('status').innerText = "تم إلغاء المعاملة.";
+                    console.log("تم إلغاء العملية.");
+                    document.getElementById('status').innerText = "تم إلغاء الدفع.";
                 },
                 onError: function(error, payment) {
-                    console.error("Payment Error:", error);
-                    document.getElementById('status').innerText = "فشلت المعاملة.";
+                    console.error("خطأ:", error);
+                    document.getElementById('status').innerText = "فشلت المعاملة، حاول مرة أخرى.";
                 },
             });
         };
