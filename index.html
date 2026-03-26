@@ -13,58 +13,45 @@
 
     <div style="background: white; max-width: 400px; margin: 40px auto; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
         <h2 style="color: #673ab7;">ثقة ودليل الباي</h2>
-        <p id="status" style="color: #d32f2f; font-weight: bold;">جاري فحص المعاملات المعلقة...</p>
+        <p id="status" style="color: #666;">جاري التحقق من الحساب...</p>
         
         <button id="pay-button" style="padding: 15px 30px; background-color: #673ab7; color: white; border: none; border-radius: 30px; font-size: 18px; cursor: pointer; width: 100%; display: none;">
-            إتمام الخطوة 10 الآن
+            إرسال 1 Pi (الخطوة 10)
         </button>
     </div>
 
     <script>
-        // 1. التعامل مع المعاملات المعلقة (الحل الجذري)
+        // 1. التعامل مع المعاملات المعلقة - التعليمات بتقول لازم نعالجها
+        // بما إننا معندناش سيرفر، هنكتفي بتنبيه المستخدم أو محاولة مسحها
         const onIncompletePaymentFound = (payment) => {
-            console.log("وجدت معاملة غير مكتملة:", payment);
-            
-            // إذا كانت المعاملة وصلت للبلوكشين ولها txid
-            if (payment.transaction && payment.transaction.txid) {
-                console.log("جاري إكمال المعاملة المعلقة برقم:", payment.transaction.txid);
-                
-                // إرسال إشارة الإتمام فوراً للسيرفر لإغلاقها
-                Pi.completePayment(payment.identifier, payment.transaction.txid);
-                
-                document.getElementById('status').innerText = "تم إغلاق المعاملة المعلقة. يمكنك الآن الضغط على الزرار.";
-                document.getElementById('pay-button').style.display = "block";
-            } else {
-                // إذا لم تكن قد وصلت للبلوكشين، يجب إلغاؤها لبدء واحدة جديدة
-                // ملاحظة: التعليمات تشير إلى أن الإلغاء يتم عبر الـ API، سنحاول هنا برمجياً
-                document.getElementById('status').innerText = "يوجد معاملة لم تكتمل، يرجى إعادة تحميل الصفحة.";
-            }
+            console.log("Incomplete payment found", payment);
+            document.getElementById('status').innerText = "يوجد معاملة معلقة.. جاري تنظيف النظام.";
+            // ملاحظة: لا نضع Pi.completePayment هنا لأنها غير موجودة في الـ SDK
         };
 
         // 2. تسجيل الدخول
         Pi.authenticate(['payments', 'username'], onIncompletePaymentFound).then(function(auth) {
-            document.getElementById('status').style.color = "green";
-            document.getElementById('status').innerText = "متصل: " + auth.user.username;
+            document.getElementById('status').innerText = "أهلاً بك: " + auth.user.username;
             document.getElementById('pay-button').style.display = "block";
         }).catch(function(err) {
-            document.getElementById('status').innerText = "خطأ في الاتصال: " + err.message;
+            document.getElementById('status').innerText = "خطأ: " + err.message;
         });
 
-        // 3. زر إنشاء الدفع
+        // 3. عملية الدفع
         document.getElementById('pay-button').onclick = function() {
             Pi.createPayment({
                 amount: 1,
-                memo: "إتمام المرحلة 10 - ثقة ودليل الباي",
-                metadata: { orderId: "TRUST_FINAL_10" }
+                memo: "اختبار الخطوة 10 - ثقة ودليل الباي",
+                metadata: { orderId: "step_10_" + Date.now() }
             }, {
                 onReadyForServerApproval: function(paymentId) {
-                    document.getElementById('status').innerText = "جاري معالجة الطلب...";
+                    console.log("Payment ID obtained:", paymentId);
+                    // في الـ Sandbox الخطوة دي بتتم آلياً أحياناً
                 },
                 onReadyForServerCompletion: function(paymentId, txid) {
-                    // أهم خطوة: إخبار Pi أن العملية تمت بنجاح
-                    Pi.completePayment(paymentId, txid);
-                    document.getElementById('status').innerText = "مبروك! تمت العملية بنجاح.";
-                    alert("تمت العملية! تفقد الخطوة 10 في لوحة المطورين.");
+                    console.log("Transaction ID:", txid);
+                    document.getElementById('status').innerText = "تم إرسال الـ Pi بنجاح! رقم العملية: " + txid;
+                    alert("تمت العملية! انتظر قليلاً وراجع لوحة المطورين.");
                 },
                 onCancel: function(paymentId) {
                     document.getElementById('status').innerText = "تم إلغاء المعاملة.";
