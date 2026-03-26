@@ -7,64 +7,84 @@
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>Pi.init({ version: "2.0", sandbox: true });</script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <style>
-        :root { --primary: #673ab7; --bg: #f4f0fa; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; direction: rtl; padding-bottom: 80px; }
-        .header { background: #fff; padding: 15px; display: flex; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); sticky; top: 0; z-index: 100; }
+        :root { --primary: #673ab7; --bg: #f4f0fa; --card: #fff; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 80px; color: #333; }
+        
+        .header { background: var(--card); padding: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .header b { color: var(--primary); font-size: 20px; }
+
         .container { padding: 20px; max-width: 500px; margin: auto; }
-        .action-card { background: #fff; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .btn-pay { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
-        .status-bar { background: #333; color: #fff; padding: 8px; text-align: center; font-size: 12px; position: fixed; top: 55px; width: 100%; display: none; }
-        .nav-bottom { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #ddd; }
+
+        /* الأزرار العلوية */
+        .top-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .action-card { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); cursor: pointer; text-decoration: none; color: inherit; }
+        .action-card.purple { background: var(--primary); color: white; }
+        .action-card.outlined { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
+
+        /* قسم الدليل */
+        .section-title { font-size: 16px; font-weight: bold; margin: 20px 0 10px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+        .list-card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-right: 5px solid #ff9800; margin-bottom: 15px; }
+        
+        /* زرار الدفع (الصاروخ) */
+        .btn-pay { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; transition: 0.3s; }
+        .btn-pay:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* شريط التنقل السفلي */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #ddd; }
+        .nav-item { color: #888; text-decoration: none; font-size: 12px; text-align: center; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="status" class="status-bar">جاري معالجة الطلب...</div>
-
     <header class="header">
-        <b style="color: var(--primary); font-size: 20px;">ثقة ودليل الباي</b>
+        <b>ثقة ودليل الباي</b>
     </header>
 
-    <div class="container">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-            <div class="action-card" style="border: 2px solid var(--primary); color: var(--primary); cursor: pointer;" onclick="alert('سيتم تفعيل الحاسبة قريباً')">
+    <main class="container">
+        <section class="top-actions">
+            <div class="action-card outlined" onclick="alert('حاسبة الأرباح ستتوفر قريباً!')">
                 <i class="fas fa-chart-line"></i><br><b>احسب أرباحك</b>
             </div>
-            <div class="action-card" style="background: var(--primary); color: white; cursor: pointer;" onclick="window.open('https://docs.google.com/forms/d/your-id', '_blank')">
+            <div class="action-card purple" onclick="window.open('https://docs.google.com/forms/d/your-id', '_blank')">
                 <i class="fas fa-store"></i><br><b>أضف متجرك</b>
             </div>
+        </section>
+
+        <div class="section-title">
+            <i class="fas fa-utensils"></i> <span>مطاعم تقبل الدفع بـ Pi</span>
         </div>
 
-        <div class="action-card" style="border-right: 5px solid #ff9800;">
-            <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
+        <div class="list-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom: 5px;">
                 <b>Pi Pizza Hub</b>
                 <span style="color:#ffc107;">4.6 <i class="fas fa-star"></i></span>
             </div>
-            <p style="font-size:13px; color:#666; text-align: right;">دعم نظام المقايضة وتأكيد الخطوة 10.</p>
-            <button id="pay-button" class="btn-pay">اطلب الآن (1 Pi)</button>
+            <p style="font-size:13px; color:#666; margin-bottom: 15px;">ادفع 0.1 Pi لتجربة سرعة الدفع ودعم مشروعنا.</p>
+            
+            <button id="pay-button" class="btn-pay">اطلب الآن (0.1 Pi)</button>
         </div>
-    </div>
 
-    <nav class="nav-bottom">
-        <span style="color: var(--primary);">الرئيسية</span>
-        <span>أرباح</span>
-        <span>توثيق</span>
+        <div style="background: #fff; padding: 15px; border-radius: 15px; border-right: 5px solid #e91e63; margin-top: 20px;">
+            <b style="color:#e91e63;"><i class="fas fa-shield-alt"></i> ركن الأمان:</b>
+            <p style="font-size: 12px; color: #777; margin: 5px 0 0;">لا تشارك كلمة سر محفظتك مع أي شخص أو موقع غير رسمي.</p>
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active"><i class="fas fa-home"></i><br>الرئيسية</a>
+        <a href="#" class="nav-item"><i class="fas fa-pie-chart"></i><br>أرباح</a>
+        <a href="#" class="nav-item"><i class="fas fa-medal"></i><br>توثيق</a>
     </nav>
 
     <script>
-        const statusDiv = document.getElementById('status');
-        const payBtn = document.getElementById('pay-button');
-
-        function updateStatus(msg, show = true) {
-            statusDiv.innerText = msg;
-            statusDiv.style.display = show ? 'block' : 'none';
-        }
-
-        async function handleServerCompletion(paymentId, txid) {
-            updateStatus("جاري التأكيد النهائي بالسيرفر...");
+        // --- الجزء البرمجي (الصاروخ) ---
+        
+        async function completeOnServer(paymentId, txid) {
             try {
                 const response = await fetch('/complete', {
                     method: 'POST',
@@ -72,31 +92,41 @@
                     body: JSON.stringify({ paymentId, txid })
                 });
                 if (response.ok) {
-                    updateStatus("✅ تمت العملية بنجاح!");
-                    alert("تم تأكيد المعاملة بنجاح الصاروخ!");
+                    alert("✅ تم الدفع والتأكيد بنجاح الصاروخ!");
                 }
-            } catch (e) { updateStatus("❌ خطأ في السيرفر"); }
+            } catch (e) { console.error("Server Error"); }
         }
 
-        // تسجيل الدخول بدون عرض أي أسماء شخصية
-        Pi.authenticate(['payments']).then(() => {
-            console.log("App Ready");
-        }).catch(() => { updateStatus("يرجى الفتح من Pi Browser"); });
-
-        payBtn.onclick = () => {
-            payBtn.disabled = true;
-            updateStatus("جاري فتح المحفظة...");
-            Pi.createPayment({
-                amount: 1,
-                memo: "تأكيد معاملة ثقة ودليل الباي",
-                metadata: { orderId: "ID_" + Date.now() }
-            }, {
-                onReadyForServerApproval: () => updateStatus("في انتظار الموافقة..."),
-                onReadyForServerCompletion: (id, txid) => handleServerCompletion(id, txid),
-                onCancel: () => { updateStatus("", false); payBtn.disabled = false; },
-                onError: (err) => { updateStatus("خطأ: " + err.message); payBtn.disabled = false; }
-            });
+        const onIncomplete = (payment) => {
+            if (payment.transaction && payment.transaction.txid) {
+                completeOnServer(payment.identifier, payment.transaction.txid);
+            }
         };
+
+        Pi.authenticate(['payments'], onIncomplete).catch(() => {});
+
+        const payBtn = document.getElementById('pay-button');
+        if (payBtn) {
+            payBtn.onclick = () => {
+                payBtn.disabled = true;
+                Pi.createPayment({
+                    amount: 0.1,
+                    memo: "دفع 0.1 باي - ثقة ودليل الباي",
+                    metadata: { orderId: "PI_ORDER_" + Date.now() }
+                }, {
+                    onReadyForServerApproval: (id) => {},
+                    onReadyForServerCompletion: (id, txid) => {
+                        completeOnServer(id, txid);
+                        payBtn.disabled = false;
+                    },
+                    onCancel: () => { payBtn.disabled = false; },
+                    onError: (err) => { 
+                        alert("خطأ: " + err.message); 
+                        payBtn.disabled = false; 
+                    }
+                });
+            };
+        }
     </script>
 </body>
     </html>
