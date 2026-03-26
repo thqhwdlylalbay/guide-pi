@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - استثمر عملاتك بأمان</title>
+    <title>ثقة ودليل الباي - النظام المتكامل</title>
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
@@ -11,385 +11,117 @@
     </script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <style>
-        :root {
-            --primary-color: #673ab7; /* البنفسجي الأساسي */
-            --bg-color: #f4f0faff; /* الخلفية الفاتحة جداً */
-            --text-color: #333;
-            --card-bg: #fff;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
-            color: var(--text-color);
-            padding-bottom: 70px; /* مساحة لشريط التنقل السفلي */
-        }
-
-        /* رأس الصفحة (Header) */
-        .header {
-            background-color: var(--card-bg);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo-placeholder {
-            width: 40px;
-            height: 40px;
-            background-color: var(--primary-color);
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 20px;
-        }
-
-        .header-titles h1 {
-            font-size: 18px;
-            margin: 0;
-            color: var(--text-color);
-        }
-
-        .header-titles p {
-            font-size: 12px;
-            margin: 0;
-            color: #666;
-        }
-
-        .header-left .icon-globe {
-            color: var(--primary-color);
-            font-size: 20px;
-        }
-
-        /* الحاوية الرئيسية (Main Container) */
-        .container {
-            padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* قسم الأزرار العلوية (Top Buttons) */
-        .top-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .action-card {
-            background-color: var(--card-bg);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: var(--shadow);
-            text-decoration: none;
-            color: var(--text-color);
-            transition: transform 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .action-card.purple {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .action-card.purple .action-icon {
-            color: white;
-        }
-
-        .action-card:active {
-            transform: scale(0.98);
-        }
-
-        .action-icon {
-            font-size: 24px;
-            color: var(--primary-color);
-        }
-
-        .action-card.outlined {
-            border: 2px solid var(--primary-color);
-            background-color: transparent;
-            color: var(--primary-color);
-        }
-
-        .action-text {
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        /* العناوين الفرعية (Section Titles) */
-        .section-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-title.purple {
-            color: var(--primary-color);
-        }
-
-        /* بطاقات القوائم (List Cards) */
-        .list-card {
-            background-color: var(--card-bg);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .list-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 5px;
-            height: 100%;
-            background-color: #ff9800; /* الخط البرتقالي الجانبي */
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .card-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .card-rating {
-            color: #ffc107;
-            font-weight: bold;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .card-description {
-            font-size: 14px;
-            color: #666;
-            margin: 0 0 15px 0;
-            line-height: 1.5;
-        }
-
-        .card-action-link {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* ركن الأمان والموثوقية (Security Section) */
-        .security-section {
-            margin-top: 30px;
-        }
-
-        .security-card {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            border-right: 5px solid #e91e63; /* الخط الوردي الجانبي */
-            display: flex;
-            gap: 15px;
-            align-items: start;
-        }
-
-        .security-icon {
-            color: #e91e63;
-            font-size: 20px;
-            margin-top: 3px;
-        }
-
-        .security-content h4 {
-            font-size: 16px;
-            margin: 0 0 10px 0;
-            color: var(--text-color);
-        }
-
-        .security-content p {
-            font-size: 13px;
-            color: #777;
-            margin: 0;
-            line-height: 1.6;
-        }
-
-        /* شريط التنقل السفلي (Bottom Navigation) */
-        .bottom-nav {
-            background-color: var(--card-bg);
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            z-index: 100;
-        }
-
-        .nav-item {
-            text-decoration: none;
-            color: #888;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            font-size: 12px;
-        }
-
-        .nav-item.active {
-            color: var(--primary-color);
-            font-weight: bold;
-        }
-
-        .nav-icon {
-            font-size: 20px;
-        }
-
+        :root { --primary: #673ab7; --bg: #f4f0fa; --card: #fff; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; direction: rtl; }
+        .header { background: var(--card); padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); sticky; top: 0; z-index: 100; }
+        .container { padding: 20px; max-width: 500px; margin: auto; }
+        .top-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .action-card { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); cursor: pointer; border: none; }
+        .action-card.purple { background: var(--primary); color: white; }
+        .action-card.outlined { border: 2px solid var(--primary); color: var(--primary); }
+        .list-card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; border-right: 5px solid #ff9800; }
+        .btn-pay { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        #status-bar { background: #333; color: #fff; padding: 10px; text-align: center; font-size: 13px; position: fixed; top: 60px; width: 100%; z-index: 99; display: none; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #ddd; }
+        .nav-item { color: #888; text-decoration: none; font-size: 12px; text-align: center; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
     </style>
 </head>
 <body>
 
+    <div id="status-bar">جاري معالجة الطلب...</div>
+
     <header class="header">
-        <div class="header-right">
-            <div class="logo-placeholder">π</div>
-            <div class="header-titles">
-                <h1>ثقة ودليل الباي</h1>
-                <p>استثمر عملاتك بأمان</p>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="background:var(--primary); color:white; width:35px; height:35px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold;">π</div>
+            <div>
+                <b style="display:block; font-size:14px;">ثقة ودليل الباي</b>
+                <small id="user-name" style="color:#666;">جاري التحقق...</small>
             </div>
         </div>
-        <div class="header-left">
-            <a href="#" class="icon-globe"><i class="fas fa-globe"></i></a>
-        </div>
+        <i class="fas fa-globe" style="color:var(--primary);"></i>
     </header>
 
     <main class="container">
+        <div class="top-actions">
+            <button class="action-card outlined" onclick="alert('حاسبة الأرباح ستتوفر قريباً في التحديث القادم!')">
+                <i class="fas fa-chart-line"></i><br><b>احسب أرباحك</b>
+            </button>
+            <button class="action-card purple" onclick="window.open('https://docs.google.com/forms/d/YOUR_FORM_HERE', '_blank')">
+                <i class="fas fa-store"></i><br><b>أضف متجرك</b>
+            </button>
+        </div>
 
-        <section class="top-actions">
-            <a href="#" class="action-card outlined">
-                <i class="fas fa-chart-line action-icon"></i>
-                <span class="action-text">احسب أرباحك</span>
-            </a>
-            <a href="#" class="action-card purple">
-                <i class="fas fa-store action-icon"></i>
-                <span class="action-text">أضف متجرك</span>
-            </a>
-        </section>
-
-        <section>
-            <div class="section-title">
-                <i class="fas fa-th-large action-icon"></i>
-                <span>تطبيقات المايننت الموثقة</span>
+        <h4 style="color:var(--primary);"><i class="fas fa-utensils"></i> مطاعم تقبل الدفع (اختبار الخطوة 10)</h4>
+        
+        <div class="list-card">
+            <div style="display:flex; justify-content:space-between;">
+                <b>Pi Pizza Hub</b>
+                <span style="color:#ffc107;">4.6 <i class="fas fa-star"></i></span>
             </div>
-            
-            <div class="list-card">
-                <div class="card-header">
-                    <h3 class="card-title">Fireside Forum</h3>
-                </div>
-                <p class="card-description">اربح عملات Pi مقابل المحتوى المميز.</p>
-            </div>
-        </section>
-
-        <section>
-            <div class="section-title">
-                <i class="fas fa-utensils action-icon"></i>
-                <span>مطاعم تقبل الدفع بـ Pi</span>
-            </div>
-            
-            <div class="list-card">
-                <div class="card-header">
-                    <h3 class="card-title">Pi Pizza Hub</h3>
-                    <div class="card-rating">
-                        <span>4.6</span>
-                        <i class="fas fa-star"></i>
-                    </div>
-                </div>
-                <p class="card-description">خدمات توصيل ووجبات سريعة تدعم نظام المقايضة.</p>
-                <a href="#" class="card-action-link">
-                    <span>اطلب الآن</span>
-                    <i class="fas fa-external-link-alt"></i>
-                </a>
-            </div>
-        </section>
-
-        <section class="security-section">
-            <div class="section-title purple">
-                <i class="fas fa-shield-alt"></i>
-                <span>ركن الأمان والموثوقية</span>
-            </div>
-            
-            <div class="security-card">
-                <i class="fas fa-exclamation-triangle security-icon"></i>
-                <div class="security-content">
-                    <h4>نصيحة للمحافظة على حسابك</h4>
-                    <p>لا تقم أبداً بإدخال "كلمة سر المحفظة" في أي موقع خارج متصفح Pi الرسمي. فريق العمل لن يطلبها منك أبداً.</p>
-                </div>
-            </div>
-        </section>
-
+            <p style="font-size:13px; color:#666;">ادفع 1 Pi لتأكيد هويتك وإتمام الخطوة 10 بنجاح الصاروخ.</p>
+            <button class="btn-pay" id="main-pay-btn">اطلب الآن (دفع 1 Pi)</button>
+        </div>
     </main>
 
     <nav class="bottom-nav">
-        <a href="#" class="nav-item active">
-            <i class="fas fa-home nav-icon"></i>
-            <span>الرئيسية</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fas fa-pie-chart nav-icon"></i>
-            <span>أرباح</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fas fa-medal nav-icon"></i>
-            <span>توثيق</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fas fa-bullhorn nav-icon"></i>
-            <span>إبلاغ</span>
-        </a>
+        <a href="#" class="nav-item active"><i class="fas fa-home"></i><br>الرئيسية</a>
+        <a href="#" class="nav-item"><i class="fas fa-pie-chart"></i><br>أرباح</a>
+        <a href="#" class="nav-item"><i class="fas fa-medal"></i><br>توثيق</a>
+        <a href="#" class="nav-item"><i class="fas fa-bullhorn"></i><br>إبلاغ</a>
     </nav>
 
     <script>
-        // دالة المصادقة الأساسية عند فتح التطبيق
-        Pi.authenticate(['payments', 'username']).then(function(auth) {
-            console.log("متصل باسم: " + auth.user.username);
-        }).catch(function(err) {
-            console.error("خطأ في المصادقة: " + err.message);
-        });
-    </script>
+        const statusBar = document.getElementById('status-bar');
+        const payBtn = document.getElementById('main-pay-btn');
 
+        function showStatus(msg, color = "#333") {
+            statusBar.innerText = msg;
+            statusBar.style.background = color;
+            statusBar.style.display = 'block';
+        }
+
+        async function completePaymentOnServer(paymentId, txid) {
+            showStatus("جاري تأكيد المعاملة بالسيرفر...");
+            try {
+                const response = await fetch('/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId, txid })
+                });
+                if (response.ok) {
+                    showStatus("مبروك! تم تأكيد الخطوة 10 بنجاح الصاروخ ✅", "green");
+                    alert("تمت العملية! راجعي لوحة المطورين الآن.");
+                }
+            } catch (err) { showStatus("خطأ في الاتصال بالسيرفر", "red"); }
+        }
+
+        const onIncompletePaymentFound = (payment) => {
+            showStatus("اكتشاف معاملة قديمة.. جاري إنهائها فوراً", "orange");
+            if (payment.transaction && payment.transaction.txid) {
+                completePaymentOnServer(payment.identifier, payment.transaction.txid);
+            }
+        };
+
+        Pi.authenticate(['payments', 'username'], onIncompletePaymentFound).then(auth => {
+            document.getElementById('user-name').innerText = "مرحباً، " + auth.user.username;
+        }).catch(err => showStatus("يرجى الفتح من Pi Browser", "red"));
+
+        payBtn.onclick = () => {
+            payBtn.disabled = true;
+            showStatus("جاري فتح المحفظة...");
+            Pi.createPayment({
+                amount: 1,
+                memo: "تفعيل الخطوة 10 - ثقة ودليل الباي",
+                metadata: { orderId: "TRUST_PI_" + Date.now() }
+            }, {
+                onReadyForServerApproval: (id) => showStatus("في انتظار موافقة السيرفر..."),
+                onReadyForServerCompletion: (id, txid) => completePaymentOnServer(id, txid),
+                onCancel: (id) => { showStatus("تم الإلغاء"); payBtn.disabled = false; },
+                onError: (err) => { showStatus("خطأ: " + err.message, "red"); payBtn.disabled = false; }
+            });
+        };
+    </script>
 </body>
-                    </html>
+    </html>
