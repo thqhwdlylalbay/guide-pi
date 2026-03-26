@@ -1,66 +1,50 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - الإصدار النهائي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <script>
-        Pi.init({ version: "2.0", sandbox: true });
-    </script>
+    <title>Pi App</title>
 </head>
-<body style="font-family: sans-serif; text-align: center; background-color: #f8f9fa; padding: 20px;">
-
-    <div style="background: white; max-width: 400px; margin: 40px auto; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-        <h2 style="color: #673ab7;">ثقة ودليل الباي</h2>
-        <p id="status" style="color: #666;">جاري التحقق من الحساب...</p>
-        
-        <button id="pay-button" style="padding: 15px 30px; background-color: #673ab7; color: white; border: none; border-radius: 30px; font-size: 18px; cursor: pointer; width: 100%; display: none;">
-            إرسال 1 Pi (الخطوة 10)
-        </button>
-    </div>
+<body style="text-align: center; font-family: sans-serif;">
+    <h1>Pi Payment Test</h1>
+    <button id="pay_btn" style="padding: 15px; background: #673ab7; color: #fff; border: none; border-radius: 5px;">Pay 1 Pi</button>
 
     <script>
-        // 1. التعامل مع المعاملات المعلقة - التعليمات بتقول لازم نعالجها
-        // بما إننا معندناش سيرفر، هنكتفي بتنبيه المستخدم أو محاولة مسحها
-        const onIncompletePaymentFound = (payment) => {
-            console.log("Incomplete payment found", payment);
-            document.getElementById('status').innerText = "يوجد معاملة معلقة.. جاري تنظيف النظام.";
-            // ملاحظة: لا نضع Pi.completePayment هنا لأنها غير موجودة في الـ SDK
-        };
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0", sandbox: false });
 
-        // 2. تسجيل الدخول
-        Pi.authenticate(['payments', 'username'], onIncompletePaymentFound).then(function(auth) {
-            document.getElementById('status').innerText = "أهلاً بك: " + auth.user.username;
-            document.getElementById('pay-button').style.display = "block";
-        }).catch(function(err) {
-            document.getElementById('status').innerText = "خطأ: " + err.message;
+        async function auth() {
+            try {
+                const user = await Pi.authenticate(['payments', 'username'], onIncompletePaymentFound);
+                console.log(user);
+            } catch (err) { console.error(err); }
+        }
+
+        async function createPayment() {
+            const payment = await Pi.createPayment({
+                amount: 1,
+                memo: "Test Payment",
+                metadata: { orderId: "123" }
+            }, {
+                onReadyForServerApproval: (paymentId) => {
+                    console.log("Payment ID:", paymentId);
+                    alert("Order Submitted! ID: " + paymentId);
+                    // في الفيديو: هنا كان بيتوقف ويوافق يدوياً من السيرفر
+                },
+                onReadyForServerCompletion: (paymentId, txid) => {
+                    alert("Success! TXID: " + txid);
+                },
+                onCancel: (paymentId) => { console.log("Cancelled"); },
+                onError: (error, payment) => { console.error(error); },
+            });
+        }
+
+        document.getElementById('pay_btn').addEventListener('click', () => {
+            auth().then(createPayment);
         });
 
-        // 3. عملية الدفع
-        document.getElementById('pay-button').onclick = function() {
-            Pi.createPayment({
-                amount: 1,
-                memo: "اختبار الخطوة 10 - ثقة ودليل الباي",
-                metadata: { orderId: "step_10_" + Date.now() }
-            }, {
-                onReadyForServerApproval: function(paymentId) {
-                    console.log("Payment ID obtained:", paymentId);
-                    // في الـ Sandbox الخطوة دي بتتم آلياً أحياناً
-                },
-                onReadyForServerCompletion: function(paymentId, txid) {
-                    console.log("Transaction ID:", txid);
-                    document.getElementById('status').innerText = "تم إرسال الـ Pi بنجاح! رقم العملية: " + txid;
-                    alert("تمت العملية! انتظر قليلاً وراجع لوحة المطورين.");
-                },
-                onCancel: function(paymentId) {
-                    document.getElementById('status').innerText = "تم إلغاء المعاملة.";
-                },
-                onError: function(error, payment) {
-                    document.getElementById('status').innerText = "خطأ: " + error.message;
-                }
-            });
-        };
+        function onIncompletePaymentFound(payment) { /* ... */ }
     </script>
 </body>
 </html>
