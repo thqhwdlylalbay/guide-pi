@@ -4,30 +4,31 @@ export async function onRequestPost(context) {
     const { paymentId, txid } = await context.request.json();
     const apiKey = context.env.PI_API_KEY;
 
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: "Key Missing" }), { status: 500 });
-    }
+    if (!apiKey) return new Response("Missing API Key", { status: 500 });
 
-    // التعديل هنا: التأكد من إرسال الـ txid في JSON سليمة
+    // الخطوة 1: الموافقة (Approve) - دي اللي الكورتيم بيطلبها الأول
+    await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+      method: "POST",
+      headers: { "Authorization": `Key ${apiKey}` }
+    });
+
+    // الخطوة 2: الإتمام (Complete) - نبعت الـ txid رسمياً
     const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
       method: "POST",
       headers: {
         "Authorization": `Key ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ txid: txid }), // تأكدي إنها txid مش حاجة تانية
+      body: JSON.stringify({ txid: txid }),
     });
 
-    // لو السيرفر رد بـ 200 يبقى العملية تمت بنجاح عند Pi
-    if (response.ok) {
-        const result = await response.json();
-        return new Response(JSON.stringify(result), { status: 200 });
-    } else {
-        const errorData = await response.text();
-        return new Response(JSON.stringify({ error: "Pi Server Refused", details: errorData }), { status: 400 });
-    }
+    const result = await response.json();
+    return new Response(JSON.stringify(result), { 
+      status: response.status,
+      headers: { "Content-Type": "application/json" }
+    });
 
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
-          }
+}
