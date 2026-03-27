@@ -1,5 +1,4 @@
 export async function onRequestPost(context) {
-  // 1. تعريف تصاريح العبور (جواز السفر)
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -7,34 +6,36 @@ export async function onRequestPost(context) {
   };
 
   try {
-    const { paymentId, txid } = await context.request.json();
+    const data = await context.request.json();
+    const paymentId = data.paymentId;
+    const txid = data.txid;
     const apiKey = context.env.PI_API_KEY;
 
-    // 2. خطوة الـ Approve
-    await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+    if (!paymentId || !txid) {
+      return new Response(JSON.stringify({ error: "Missing Data" }), { status: 400, headers: corsHeaders });
+    }
+
+    // 1. Approve
+    const approveReq = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
       method: "POST",
       headers: { "Authorization": `Key ${apiKey}` }
     });
 
-    // 3. خطوة الـ Complete
-    const piResponse = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+    // 2. Complete
+    const completeReq = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
       method: "POST",
       headers: {
         "Authorization": `Key ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ txid }),
+      body: JSON.stringify({ txid: txid }),
     });
 
-    const result = await piResponse.json();
+    const result = await completeReq.json();
 
-    // 4. الرد مع تصاريح العبور (CORS)
     return new Response(JSON.stringify(result), { 
       status: 200, 
-      headers: { 
-        ...corsHeaders,
-        "Content-Type": "application/json" 
-      } 
+      headers: { ...corsHeaders, "Content-Type": "application/json" } 
     });
 
   } catch (error) {
@@ -45,7 +46,6 @@ export async function onRequestPost(context) {
   }
 }
 
-// إضافة التعامل مع طلبات Preflight (مهم جداً لـ Cloudflare)
 export async function onRequestOptions() {
   return new Response(null, {
     headers: {
@@ -54,4 +54,4 @@ export async function onRequestOptions() {
       "Access-Control-Allow-Headers": "Content-Type",
     }
   });
-    }
+}
