@@ -148,25 +148,25 @@
         // تهيئة الـ SDK
         Pi.init({ version: "2.0", sandbox: true });
 
-        // دالة التواصل مع السيرفر لإتمام الدفع
+        // التواصل مع السيرفر لإتمام الدفع
         async function completeTrustPayment(paymentId, txid) {
             try {
-                const response = await fetch('/complete', { // المسار المباشر لـ Functions
+                // استخدام الرابط الكامل لضمان نجاح الـ CORS
+                const response = await fetch('https://thqhwdlylalbay-github-io.pages.dev/complete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ paymentId: paymentId, txid: txid })
                 });
-                
+
                 if (response.ok) {
-                    alert("✅ مبروك! تم الانضمام لقائمة الثقة بنجاح.");
+                    alert("✅ مبروك! تم الانضمام بنجاح.");
                     location.reload();
                 } else {
-                    const errData = await response.json();
-                    alert("عذراً، لم نتمكن من تأكيد العملية: " + (errData.error || "خطأ في السيرفر"));
+                    const err = await response.json();
+                    alert("فشل التأكيد: " + (err.error || "خطأ مجهول"));
                 }
-            } catch (e) { 
-                console.error("Connection Error", e);
-                alert("حدث خطأ في الاتصال بالسيرفر، تأكد من إعدادات Cloudflare.");
+            } catch (e) {
+                alert("مشكلة في الاتصال بالسيرفر");
             }
         }
 
@@ -181,35 +181,31 @@
             payBtn.onclick = async () => {
                 payBtn.disabled = true;
                 try {
-                    // 1. المصادقة
                     await Pi.authenticate(['payments'], onIncomplete);
-                    
-                    // 2. طلب الدفع
                     await Pi.createPayment({
                         amount: 0.1,
-                        memo: "Verification - Trust & Pi Guide",
+                        memo: "Verify Store",
                         metadata: { type: "verification" }
                     }, {
-                        onReadyForServerApproval: (id) => { console.log("Approved ID: " + id); },
+                        onReadyForServerApproval: (id) => { console.log("Approved"); },
                         onReadyForServerCompletion: (id, txid) => {
                             completeTrustPayment(id, txid);
                             payBtn.disabled = false;
                         },
                         onCancel: () => { payBtn.disabled = false; },
                         onError: (err) => { 
-                            console.error(err);
-                            alert("خطأ في العملية: " + err.message);
+                            alert("خطأ: " + err.message);
                             payBtn.disabled = false; 
                         }
                     });
                 } catch (e) {
-                    alert("يرجى فتح التطبيق من داخل Pi Browser");
+                    alert("افتح التطبيق من Pi Browser");
                     payBtn.disabled = false;
                 }
             };
         }
 
-        // باقي الوظائف (اللغة، الحساب، التنقل)
+        // التحكم في الصفحات واللغة والحسابات
         let isAr = true;
         function showPage(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -265,4 +261,4 @@
         }
     </script>
 </body>
-        </html>
+    </html>
