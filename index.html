@@ -24,9 +24,9 @@
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; font-weight: bold; }
         .res-highlight { background: #fff9c4; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); margin-top: 15px; }
         
-        /* تصميم زرار الدفع الموثق (نحيف وشيك) */
-        .btn-trust { background: linear-gradient(45deg, var(--p), #9c27b0); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; box-shadow: 0 4px 10px rgba(103, 58, 183, 0.2); display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: -10px; margin-bottom: 20px; }
-        .btn-trust:disabled { background: #ccc; cursor: not-allowed; }
+        /* استايل زرار الانضمام (نحيف وشيك) */
+        .btn-trust { background: linear-gradient(45deg, var(--p), #8e44ad); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; }
+        .btn-trust:disabled { background: #aaa; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -45,7 +45,7 @@
     </div>
 
     <div id="home" class="section active">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
             <div onclick="showPage('add_form', this)" style="background: var(--p); color:white; padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
                 <i class="fa fa-store"></i> <br><span id="t-b-add">أضف متجرك</span>
             </div>
@@ -88,18 +88,10 @@
 
     <div id="verify_list" class="section">
         <h3 id="t-v-title" style="text-align:center;">دليل المشاريع الرسمية</h3>
-        <a href="https://www.pichainmall.com" class="card-bar">
-            <strong>Pi Chain Mall</strong><br><small id="t-v1">أكبر سوق تجاري لشراء المنتجات بـ Pi.</small>
-        </a>
-        <a href="https://pibridge.org" class="card-bar" style="border-right-color: #2196f3;">
-            <strong>Pi Bridge</strong><br><small id="t-v-bridge">جسر نقل الأصول والتبادل الموثق.</small>
-        </a>
-        <a href="https://workforcepool.com" class="card-bar" style="border-right-color: #9c27b0;">
-            <strong>Workforce Pool</strong><br><small id="t-v2">منصة الخدمات المصغرة والمهام.</small>
-        </a>
-        <a href="https://pibartermall.com" class="card-bar" style="border-right-color: #ff9800;">
-            <strong>Pi Barter Mall</strong><br><small id="t-v3">تبادل السلع والمنتجات محلياً وعالمياً.</small>
-        </a>
+        <a href="https://www.pichainmall.com" class="card-bar"><strong>Pi Chain Mall</strong><br><small id="t-v1">أكبر سوق تجاري لشراء المنتجات بـ Pi.</small></a>
+        <a href="https://pibridge.org" class="card-bar" style="border-right-color: #2196f3;"><strong>Pi Bridge</strong><br><small id="t-v-bridge">جسر نقل الأصول والتبادل الموثق.</small></a>
+        <a href="https://workforcepool.com" class="card-bar" style="border-right-color: #9c27b0;"><strong>Workforce Pool</strong><br><small id="t-v2">منصة الخدمات المصغرة والمهام.</small></a>
+        <a href="https://pibartermall.com" class="card-bar" style="border-right-color: #ff9800;"><strong>Pi Barter Mall</strong><br><small id="t-v3">تبادل السلع والمنتجات محلياً وعالمياً.</small></a>
     </div>
 
     <div id="stake" class="section">
@@ -134,9 +126,7 @@
         <div class="card-bar" style="text-align:center;">
             <i class="fab fa-whatsapp" style="font-size:45px; color:var(--green); margin-bottom:10px;"></i>
             <p id="t-a-desc">ارسل بيانات متجرك الآن ليظهر في الدليل العالمي.</p>
-            <a href="whatsapp://send?phone=201220469415&text=أريد_تسجيل_متجري" class="btn-main" style="background:var(--green);">
-                <span id="t-a-btn">اضغط للمراسلة فوراً</span>
-            </a>
+            <a href="whatsapp://send?phone=201220469415&text=أريد_تسجيل_متجري" class="btn-main" style="background:var(--green);"><span id="t-a-btn">اضغط للمراسلة فوراً</span></a>
         </div>
     </div>
 
@@ -145,9 +135,7 @@
         <div class="card-bar" style="border-right-color: var(--red); text-align:center;">
             <i class="fa fa-user-shield" style="font-size:45px; color:var(--red); margin-bottom:10px;"></i>
             <p id="t-r-desc">أبلغ عن أي نصاب لحماية المجتمع.</p>
-            <a href="whatsapp://send?phone=201220469415&text=بلاغ_عن_محاولة_احتيال" class="btn-main" style="background:var(--red);">
-                <span id="t-r-btn">إرسال بلاغ واتساب</span>
-            </a>
+            <a href="whatsapp://send?phone=201220469415&text=بلاغ_عن_محاولة_احتيال" class="btn-main" style="background:var(--red);"><span id="t-r-btn">إرسال بلاغ واتساب</span></a>
         </div>
     </div>
 
@@ -159,55 +147,60 @@
     </div>
 
     <script>
-        // 1. تهيئة الـ SDK
+        // تهيئة الـ SDK
         Pi.init({ version: "2.0", sandbox: true });
 
-        // 2. وظيفة إرسال التأكيد للسيرفر (المفتاح)
-        async function completeOnServer(paymentId, txid) {
+        async function completeTrustPayment(paymentId, txid) {
             try {
-                const response = await fetch('/complete', {
+                await fetch('/complete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ paymentId, txid })
                 });
-                if (response.ok) {
-                    alert("✅ مبروك! تم التوثيق بنجاح وتأكيد المعاملة.");
-                }
+                alert("✅ مبروك! تم الانضمام لقائمة الثقة بنجاح.");
             } catch (e) { console.error("Server Error"); }
         }
 
-        // 3. معالجة المعاملات المعلقة (تعليمات الكورتيم)
+        // التعامل مع المعاملات المعلقة (حسب تعليمات الكورتيم)
         const onIncomplete = (payment) => {
             if (payment.transaction && payment.transaction.txid) {
-                completeOnServer(payment.identifier, payment.transaction.txid);
+                completeTrustPayment(payment.identifier, payment.transaction.txid);
             }
         };
 
-        // 4. تسجيل الدخول لبدء نظام الدفع
-        Pi.authenticate(['payments'], onIncomplete).catch(e => console.log("Open in Pi Browser"));
-
-        // 5. برمجة زرار الدفع
         const payBtn = document.getElementById('pay-button');
         if (payBtn) {
-            payBtn.onclick = () => {
+            payBtn.onclick = async () => {
                 payBtn.disabled = true;
-                Pi.createPayment({
-                    amount: 0.1,
-                    memo: "رسوم توثيق متجر - ثقة ودليل الباي",
-                    metadata: { type: "merchant_verification" }
-                }, {
-                    onReadyForServerApproval: (id) => {},
-                    onReadyForServerCompletion: (id, txid) => {
-                        completeOnServer(id, txid);
-                        payBtn.disabled = false;
-                    },
-                    onCancel: () => { payBtn.disabled = false; },
-                    onError: (err) => { alert("خطأ: " + err.message); payBtn.disabled = false; }
-                });
+                try {
+                    // نطلب المصادقة أولاً عند الضغط لفتح المحفظة
+                    await Pi.authenticate(['payments'], onIncomplete);
+                    
+                    // إنشاء المعاملة
+                    Pi.createPayment({
+                        amount: 0.1,
+                        memo: "انضمام للمتاجر الموثقة - ثقة ودليل الباي",
+                        metadata: { type: "verification" }
+                    }, {
+                        onReadyForServerApproval: (id) => { console.log("Approved"); },
+                        onReadyForServerCompletion: (id, txid) => {
+                            completeTrustPayment(id, txid);
+                            payBtn.disabled = false;
+                        },
+                        onCancel: () => { payBtn.disabled = false; },
+                        onError: (err) => { 
+                            alert("خطأ: " + err.message); 
+                            payBtn.disabled = false; 
+                        }
+                    });
+                } catch (e) {
+                    alert("يرجى فتح التطبيق من داخل Pi Browser");
+                    payBtn.disabled = false;
+                }
             };
         }
 
-        // (وظائف التحكم في الصفحة واللغة الأصلية الخاصة بك)
+        // التحكم في الصفحات واللغة
         let isAr = true;
         function showPage(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -281,4 +274,4 @@
         }
     </script>
 </body>
-                                                                                                                                                                            </html>
+            </html>
