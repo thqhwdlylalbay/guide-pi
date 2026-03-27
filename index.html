@@ -3,100 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي</title>
+    <title>ثقة ودليل الباي - Trust & Pi Guide</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --p: #673ab7; --bg: #f3e5f5; --gold: #ffd700; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; text-align: center; }
-        .header { background: #fff; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .btn-trust { background: var(--p); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 90%; margin: 20px auto; display: block; cursor: pointer; }
-        #status-box { margin: 10px; padding: 10px; font-size: 14px; color: var(--p); font-weight: bold; }
+        :root { --p: #673ab7; --bg: #f3e5f5; --gold: #ffd700; --red: #e91e63; --ora: #ff9800; --green: #25D366; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; transition: 0.3s; overflow-x: hidden; }
+        
+        .header { background: #fff; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .logo-box { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); background: var(--p); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; }
+        
+        /* القائمة الجانبية */
+        .sidebar { position: fixed; right: -280px; top: 0; width: 280px; height: 100%; background: #fff; box-shadow: -5px 0 15px rgba(0,0,0,0.1); transition: 0.3s; z-index: 2000; padding: 20px; box-sizing: border-box; }
+        .sidebar.active { right: 0; }
+        .sidebar-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; color: var(--p); font-weight: bold; cursor: pointer; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 1500; }
+        .overlay.active { display: block; }
+
+        .section { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .card-bar { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-right: 5px solid var(--p); text-decoration: none; color: inherit; display: block; }
+        .footer { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000; }
+        .f-item { flex: 1; text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
+        .f-item.active { color: var(--p); font-weight: bold; }
+        .f-item i { display: block; font-size: 22px; margin-bottom: 4px; }
+
+        .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn-trust { background: linear-gradient(45deg, var(--p), #8e44ad); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; font-weight: bold; }
+        #status-msg { text-align: center; color: var(--p); font-weight: bold; margin-bottom: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div style="text-align: right;">
-            <b>ثقة ودليل الباي</b><br>
-            <small>نظام التوثيق المعتمد</small>
-        </div>
-        <div style="width:40px; height:40px; background:var(--p); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center;">π</div>
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="sidebar" id="sidebar">
+        <h3 id="t-menu">القائمة</h3>
+        <div class="sidebar-item" onclick="toggleLang()"><i class="fa fa-language"></i> <span id="t-lang">English</span></div>
+        <div class="sidebar-item" onclick="showPage('add_form')"><i class="fa fa-plus-circle"></i> <span id="t-add-s">أضف متجرك</span></div>
+        <div class="sidebar-item"><i class="fa fa-question-circle"></i> <span id="t-help">مساعدة</span></div>
     </div>
 
-    <div id="status-box">جاري الاتصال بـ Pi Network...</div>
+    <div class="header">
+        <button onclick="toggleMenu()" style="background:none; border:none; font-size:24px; color:var(--p); cursor:pointer;"><i class="fa fa-bars"></i></button>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <div style="text-align: right;">
+                <b id="t-title">ثقة ودليل الباي</b><br>
+                <small id="t-desc">استثمر عملاتك بأمان</small>
+            </div>
+            <div class="logo-box">π</div>
+        </div>
+    </div>
 
-    <button id="pay-button" class="btn-trust" style="display:none;">
-        <i class="fa fa-certificate"></i> انضم للمتاجر الموثقة بـ 0.1 Pi
-    </button>
+    <div id="home" class="section active">
+        <div id="status-msg">جاري التحقق...</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+            <div onclick="showPage('add_form')" style="background: var(--p); color:white; padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
+                <i class="fa fa-store" style="font-size:24px;"></i> <br><span id="t-b-add">أضف متجرك</span>
+            </div>
+            <div onclick="showPage('stake')" style="background:#fff; border:1px solid var(--p); color:var(--p); padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
+                <i class="fa fa-chart-line" style="font-size:24px;"></i> <br><span id="t-b-calc">احسب أرباحك</span>
+            </div>
+        </div>
+
+        <button id="pay-button" class="btn-trust" style="display:none;">
+            <i class="fa fa-certificate"></i> <span id="t-b-verify">انضم للمتاجر الموثقة بـ 0.1 Pi</span>
+        </button>
+
+        <h4 id="t-feat-h">تطبيقات المايننت الموثقة</h4>
+        <a href="https://fireside.pinet.com" class="card-bar" style="border-right-color: var(--ora);">
+            <strong>Fireside Forum</strong><br><small id="t-fire-d">اربح عملات Pi مقابل المحتوى المميز.</small>
+        </a>
+
+        <div class="card-bar" style="border-right-color: var(--red); background: #fff5f5; margin-top: 20px;">
+            <strong id="t-safe-t" style="color:var(--red);">ركن الأمان</strong>
+            <p id="t-safe-d" style="font-size: 13px; color: #666; margin-top: 8px;">لا تدخل كلمة سر المحفظة خارج متصفح Pi.</p>
+        </div>
+    </div>
+
+    <div id="stake" class="section">
+        <h3 id="t-s-h" style="text-align:center;">مركز أرباح Pi</h3>
+        <div class="card-bar">
+            <input type="number" id="p_amount" placeholder="أدخل الكمية">
+            <button class="btn-main" onclick="calc()" id="t-s-b">احسب</button>
+            <div id="res_box" style="display:none; margin-top:15px; text-align:center; background:#fff9c4; padding:20px; border-radius:15px; border:2px solid var(--gold);">
+                <span id="t-s-res">الرصيد المتوقع:</span> <br> <b id="total_v" style="font-size:28px; color:var(--p);"></b> π
+            </div>
+        </div>
+    </div>
+
+    <div id="verify_list" class="section">
+        <h3 id="t-v-h" style="text-align:center;">دليل المتاجر الموثقة</h3>
+        <div id="merchants-list"></div>
+    </div>
+
+    <div id="add_form" class="section">
+        <h3 id="t-a-h" style="text-align:center;">سجل متجرك</h3>
+        <div class="card-bar">
+            <input type="text" id="m-name" placeholder="اسم المتجر">
+            <select id="m-cat"><option value="tech">إلكترونيات</option><option value="food">مطاعم</option></select>
+            <textarea id="m-desc" placeholder="وصف المتجر"></textarea>
+            <button class="btn-main" id="t-a-b">إرسال الطلب</button>
+        </div>
+    </div>
+
+    <div id="report" class="section">
+        <h3 style="color:var(--red); text-align:center;">إبلاغ عن احتيال</h3>
+        <div class="card-bar" style="border-right-color: var(--red);">
+            <input type="text" placeholder="رابط الموقع المشبوه">
+            <button class="btn-main" style="background:var(--red);">إبلاغ</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="f-item" onclick="showPage('report', this)"><i class="fa fa-bullhorn"></i><span>إبلاغ</span></div>
+        <div class="f-item" onclick="showPage('verify_list', this)"><i class="fa fa-medal"></i><span>توثيق</span></div>
+        <div class="f-item" onclick="showPage('stake', this)"><i class="fa fa-chart-pie"></i><span>أرباح</span></div>
+        <div class="f-item active" onclick="showPage('home', this)"><i class="fa fa-house"></i><span>الرئيسية</span></div>
+    </div>
 
     <script>
-        // 1. التفعيل (Sandbox للتيستنت)
         Pi.init({ version: "2.0", sandbox: true });
 
-        const statusBox = document.getElementById('status-box');
+        const statusMsg = document.getElementById('status-msg');
         const payBtn = document.getElementById('pay-button');
 
-        // 2. دالة التواصل مع السيرفر لإتمام الدورة كاملة
-        async function handleServerSide(paymentId, txid = null, endpoint) {
+        async function callServer(paymentId, txid, endpoint) {
             try {
                 const response = await fetch('/complete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paymentId, txid, endpoint }) // ببعت نوع العملية (approve أو complete)
+                    body: JSON.stringify({ paymentId, txid, endpoint })
                 });
                 return await response.json();
-            } catch (e) {
-                console.error("خطأ في السيرفر:", e);
-                return { error: "Connection Error" };
-            }
+            } catch (e) { return { error: "Error" }; }
         }
 
-        // 3. المصادقة (دي اللي كانت ناقصة بتفاصيلها)
         Pi.authenticate(['payments', 'username'], (payment) => {
-            // لو فيه معاملة قديمة معلقة، السيرفر يخلصها فوراً
             if (payment.transaction && payment.transaction.txid) {
-                handleServerSide(payment.identifier, payment.transaction.txid, 'complete');
+                callServer(payment.identifier, payment.transaction.txid, 'complete');
             }
         }).then(function(auth) {
-            statusBox.innerText = "مرحباً " + auth.user.username + "، يمكنك التوثيق الآن.";
-            payBtn.style.display = "block";
+            statusMsg.innerText = "أهلاً " + auth.user.username;
+            payBtn.style.display = "flex";
         }).catch(function(err) {
-            statusBox.innerText = "برجاء فتح التطبيق من داخل Pi Browser";
+            statusMsg.innerText = "افتح من Pi Browser";
         });
 
-        // 4. تنفيذ الدفع الجديد
         payBtn.onclick = function() {
             payBtn.disabled = true;
-            statusBox.innerText = "جاري إنشاء المعاملة...";
-
+            statusMsg.innerText = "جاري الدفع...";
             Pi.createPayment({
                 amount: 0.1,
-                memo: "Trust & Pi Guide Verification",
+                memo: "Verification - Trust & Pi Guide",
                 metadata: { orderId: "verify_" + Date.now() }
             }, {
-                onReadyForServerApproval: async (paymentId) => {
-                    statusBox.innerText = "جاري مراجعة المعاملة من السيرفر...";
-                    await handleServerSide(paymentId, null, 'approve'); 
-                },
-                onReadyForServerCompletion: async (paymentId, txid) => {
-                    statusBox.innerText = "جاري تأكيد الدفع...";
-                    const res = await handleServerSide(paymentId, txid, 'complete');
-                    if(res.result) {
-                        alert("✅ مبروك! تم التوثيق بنجاح.");
+                onReadyForServerApproval: (id) => callServer(id, null, 'approve'),
+                onReadyForServerCompletion: (id, txid) => {
+                    callServer(id, txid, 'complete').then(() => {
+                        alert("✅ تم التوثيق!");
                         location.reload();
-                    }
+                    });
                 },
-                onCancel: (paymentId) => { 
-                    statusBox.innerText = "تم إلغاء المعاملة.";
-                    payBtn.disabled = false; 
-                },
-                onError: (error) => { 
-                    alert("خطأ: " + error.message);
-                    payBtn.disabled = false;
-                }
+                onCancel: () => { payBtn.disabled = false; statusMsg.innerText = ""; },
+                onError: (err) => { alert(err.message); payBtn.disabled = false; }
             });
         };
+
+        function showPage(id, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.f-item').forEach(i => i.classList.remove('active'));
+            if(el) el.classList.add('active');
+            toggleMenu(false);
+        }
+
+        function toggleMenu(show = true) {
+            const side = document.getElementById('sidebar');
+            const over = document.getElementById('overlay');
+            if (show && !side.classList.contains('active')) { side.classList.add('active'); over.classList.add('active'); }
+            else { side.classList.remove('active'); over.classList.remove('active'); }
+        }
+
+        function calc() {
+            let a = document.getElementById('p_amount').value;
+            if(a > 0) { document.getElementById('total_v').innerText = (a * 1.2).toFixed(2); document.getElementById('res_box').style.display = 'block'; }
+        }
+
+        let currentLang = 'ar';
+        const translations = {
+            ar: { title: "ثقة ودليل الباي", desc: "استثمر عملاتك بأمان", lang: "English" },
+            en: { title: "Trust & Pi Guide", desc: "Invest Safely", lang: "العربية" }
+        };
+        function toggleLang() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            document.getElementById('t-title').innerText = translations[currentLang].title;
+            document.getElementById('t-desc').innerText = translations[currentLang].desc;
+            document.getElementById('t-lang').innerText = translations[currentLang].lang;
+        }
     </script>
 </body>
-</html>
+                </html>
