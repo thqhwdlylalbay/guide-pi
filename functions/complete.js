@@ -11,18 +11,18 @@ export async function onRequestPost(context) {
     const txid = data.txid;
     const apiKey = context.env.PI_API_KEY;
 
-    if (!paymentId || !txid) {
-      return new Response(JSON.stringify({ error: "Missing Data" }), { status: 400, headers: corsHeaders });
+    if (!paymentId || !txid || !apiKey) {
+      return new Response(JSON.stringify({ error: "بيانات ناقصة أو مفتاح API مفقود" }), { status: 400, headers: corsHeaders });
     }
 
-    // 1. Approve
-    const approveReq = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+    // المرحلة 2: الموافقة (Approve)
+    await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
       method: "POST",
       headers: { "Authorization": `Key ${apiKey}` }
     });
 
-    // 2. Complete
-    const completeReq = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+    // المرحلة 3: الإتمام (Complete)
+    const piResponse = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
       method: "POST",
       headers: {
         "Authorization": `Key ${apiKey}`,
@@ -31,8 +31,7 @@ export async function onRequestPost(context) {
       body: JSON.stringify({ txid: txid }),
     });
 
-    const result = await completeReq.json();
-
+    const result = await piResponse.json();
     return new Response(JSON.stringify(result), { 
       status: 200, 
       headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -54,4 +53,4 @@ export async function onRequestOptions() {
       "Access-Control-Allow-Headers": "Content-Type",
     }
   });
-}
+                                       }
