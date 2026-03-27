@@ -23,8 +23,6 @@
         .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; display: block; box-sizing: border-box; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; font-weight: bold; }
         .res-highlight { background: #fff9c4; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); margin-top: 15px; }
-        
-        /* استايل زرار الانضمام (نحيف وشيك) */
         .btn-trust { background: linear-gradient(45deg, var(--p), #8e44ad); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; }
         .btn-trust:disabled { background: #aaa; cursor: not-allowed; }
     </style>
@@ -150,18 +148,28 @@
         // تهيئة الـ SDK
         Pi.init({ version: "2.0", sandbox: true });
 
+        // دالة التواصل مع السيرفر لإتمام الدفع
         async function completeTrustPayment(paymentId, txid) {
             try {
-                await fetch('/complete', {
+                const response = await fetch('/complete', { // المسار المباشر لـ Functions
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paymentId, txid })
+                    body: JSON.stringify({ paymentId: paymentId, txid: txid })
                 });
-                alert("✅ مبروك! تم الانضمام لقائمة الثقة بنجاح.");
-            } catch (e) { console.error("Server Error"); }
+                
+                if (response.ok) {
+                    alert("✅ مبروك! تم الانضمام لقائمة الثقة بنجاح.");
+                    location.reload();
+                } else {
+                    const errData = await response.json();
+                    alert("عذراً، لم نتمكن من تأكيد العملية: " + (errData.error || "خطأ في السيرفر"));
+                }
+            } catch (e) { 
+                console.error("Connection Error", e);
+                alert("حدث خطأ في الاتصال بالسيرفر، تأكد من إعدادات Cloudflare.");
+            }
         }
 
-        // التعامل مع المعاملات المعلقة (حسب تعليمات الكورتيم)
         const onIncomplete = (payment) => {
             if (payment.transaction && payment.transaction.txid) {
                 completeTrustPayment(payment.identifier, payment.transaction.txid);
@@ -173,23 +181,24 @@
             payBtn.onclick = async () => {
                 payBtn.disabled = true;
                 try {
-                    // نطلب المصادقة أولاً عند الضغط لفتح المحفظة
+                    // 1. المصادقة
                     await Pi.authenticate(['payments'], onIncomplete);
                     
-                    // إنشاء المعاملة
-                    Pi.createPayment({
+                    // 2. طلب الدفع
+                    await Pi.createPayment({
                         amount: 0.1,
-                        memo: "انضمام للمتاجر الموثقة - ثقة ودليل الباي",
+                        memo: "Verification - Trust & Pi Guide",
                         metadata: { type: "verification" }
                     }, {
-                        onReadyForServerApproval: (id) => { console.log("Approved"); },
+                        onReadyForServerApproval: (id) => { console.log("Approved ID: " + id); },
                         onReadyForServerCompletion: (id, txid) => {
                             completeTrustPayment(id, txid);
                             payBtn.disabled = false;
                         },
                         onCancel: () => { payBtn.disabled = false; },
                         onError: (err) => { 
-                            alert("خطأ: " + err.message); 
+                            console.error(err);
+                            alert("خطأ في العملية: " + err.message);
                             payBtn.disabled = false; 
                         }
                     });
@@ -200,7 +209,7 @@
             };
         }
 
-        // التحكم في الصفحات واللغة
+        // باقي الوظائف (اللغة، الحساب، التنقل)
         let isAr = true;
         function showPage(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -222,26 +231,8 @@
             isAr = !isAr;
             document.dir = isAr ? 'rtl' : 'ltr';
             const d = {
-                ar: { 
-                    title: "ثقة ودليل الباي", desc: "استثمر عملاتك بأمان", badd: "أضف متجرك", bcalc: "احسب أرباحك", 
-                    bverify: "انضم للمتاجر الموثقة بـ 0.1 Pi", feat: "تطبيقات المايننت الموثقة", vtitle: "دليل المشاريع الرسمية", stitle: "مركز استثمار وأرباح Pi", promo: "لماذا الاستيكنج (Stake)؟",
-                    l1: "أرباح صافية تضاف لرصيدك الحالي.", l2: "مضاعفة سرعة تعدينك اليومي فوراً.", l3: "دعم قيمة العملة عالمياً.",
-                    res: "رصيدك الإجمالي المتوقع:", btn: "احسب أرباحي الآن", atitle: "سجل كتاجر موثق", 
-                    adesc: "ارسل بيانات متجرك الآن ليظهر في الدليل العالمي.", abtn: "اضغط للمراسلة فوراً",
-                    rtitle: "مركز الأمان", rdesc: "أبلغ عن أي نصاب لحماية المجتمع.", rbtn: "إرسال بلاغ واتساب",
-                    nhom: "الرئيسية", nver: "توثيق", nsta: "أرباح", nrep: "إبلاغ",
-                    safeT: "نصيحة للمحافظة على حسابك", safeD: "لا تقم أبداً بإدخال كلمة سر المحفظة خارج متصفح Pi الرسمي.", pizzaD: "خدمات توصيل ووجبات سريعة تدعم نظام المقايضة."
-                },
-                en: { 
-                    title: "Trust & Pi Guide", desc: "Invest your Pi Safely", badd: "Add Store", bcalc: "Calc Profits", 
-                    bverify: "Join Verified Stores for 0.1 Pi", feat: "Verified Mainnet Apps", vtitle: "Official Projects Directory", stitle: "Pi Investment Center", promo: "Why Staking?",
-                    l1: "Get net profits added to your balance.", l2: "Instantly double your mining rate.", l3: "Support Pi value globally.",
-                    res: "Expected total balance:", btn: "Calculate My Profits", atitle: "Register Store", 
-                    adesc: "Send your store info to join the global list.", abtn: "Message Now",
-                    rtitle: "Security Center", rdesc: "Report scammers to protect the community.", rbtn: "Send WhatsApp Report",
-                    nhom: "Home", nver: "Verify", nsta: "Earnings", nrep: "Report",
-                    safeT: "Security Tip", safeD: "Never enter your passphrase outside the Pi Browser.", pizzaD: "Delivery services supporting Pi Barter."
-                }
+                ar: { title: "ثقة ودليل الباي", desc: "استثمر عملاتك بأمان", badd: "أضف متجرك", bcalc: "احسب أرباحك", bverify: "انضم للمتاجر الموثقة بـ 0.1 Pi", feat: "تطبيقات المايننت الموثقة", vtitle: "دليل المشاريع الرسمية", stitle: "مركز استثمار وأرباح Pi", promo: "لماذا الاستيكنج (Stake)؟", l1: "أرباح صافية تضاف لرصيدك الحالي.", l2: "مضاعفة سرعة تعدينك اليومي فوراً.", l3: "دعم قيمة العملة عالمياً.", res: "رصيدك الإجمالي المتوقع:", btn: "احسب أرباحي الآن", atitle: "سجل كتاجر موثق", adesc: "ارسل بيانات متجرك الآن ليظهر في الدليل العالمي.", abtn: "اضغط للمراسلة فوراً", rtitle: "مركز الأمان", rdesc: "أبلغ عن أي نصاب لحماية المجتمع.", rbtn: "إرسال بلاغ واتساب", nhom: "الرئيسية", nver: "توثيق", nsta: "أرباح", nrep: "إبلاغ", safeT: "نصيحة للمحافظة على حسابك", safeD: "لا تقم أبداً بإدخال كلمة سر المحفظة خارج متصفح Pi الرسمي.", pizzaD: "خدمات توصيل ووجبات سريعة تدعم نظام المقايضة." },
+                en: { title: "Trust & Pi Guide", desc: "Invest your Pi Safely", badd: "Add Store", bcalc: "Calc Profits", bverify: "Join Verified Stores for 0.1 Pi", feat: "Verified Mainnet Apps", vtitle: "Official Projects Directory", stitle: "Pi Investment Center", promo: "Why Staking?", l1: "Get net profits added to your balance.", l2: "Instantly double your mining rate.", l3: "Support Pi value globally.", res: "Expected total balance:", btn: "Calculate My Profits", atitle: "Register Store", adesc: "Send your store info to join the global list.", abtn: "Message Now", rtitle: "Security Center", rdesc: "Report scammers to protect the community.", rbtn: "Send WhatsApp Report", nhom: "Home", nver: "Verify", nsta: "Earnings", nrep: "Report", safeT: "Security Tip", safeD: "Never enter your passphrase outside the Pi Browser.", pizzaD: "Delivery services supporting Pi Barter." }
             };
             const t = isAr ? d.ar : d.en;
             document.getElementById('t-title').innerText = t.title;
@@ -274,4 +265,4 @@
         }
     </script>
 </body>
-            </html>
+        </html>
