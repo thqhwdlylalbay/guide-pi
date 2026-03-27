@@ -1,35 +1,33 @@
-// هذا الملف يجب أن يكون في المسار: functions/complete.js
+// functions/complete.js
 export async function onRequestPost(context) {
   try {
-    // 1. استقبال البيانات من صفحة الموقع (الـ Frontend)
     const { paymentId, txid } = await context.request.json();
-    
-    // 2. سحب المفتاح السري من متغيرات البيئة في Cloudflare
     const apiKey = context.env.PI_API_KEY;
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "API Key is missing in Cloudflare settings" }), { status: 500 });
+      return new Response(JSON.stringify({ error: "Key Missing" }), { status: 500 });
     }
 
-    // 3. مراسلة سيرفرات Pi لإتمام المعاملة رسمياً
+    // التعديل هنا: التأكد من إرسال الـ txid في JSON سليمة
     const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
       method: "POST",
       headers: {
         "Authorization": `Key ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ txid }),
+      body: JSON.stringify({ txid: txid }), // تأكدي إنها txid مش حاجة تانية
     });
 
-    const result = await response.json();
-
-    // 4. إرسال النتيجة النهائية للمتصفح
-    return new Response(JSON.stringify(result), { 
-      status: response.status,
-      headers: { "Content-Type": "application/json" }
-    });
+    // لو السيرفر رد بـ 200 يبقى العملية تمت بنجاح عند Pi
+    if (response.ok) {
+        const result = await response.json();
+        return new Response(JSON.stringify(result), { status: 200 });
+    } else {
+        const errorData = await response.text();
+        return new Response(JSON.stringify({ error: "Pi Server Refused", details: errorData }), { status: 400 });
+    }
 
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
-}
+          }
