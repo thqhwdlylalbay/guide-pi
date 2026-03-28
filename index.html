@@ -19,10 +19,17 @@
         .f-item { flex: 1; text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
         .f-item.active { color: var(--p); font-weight: bold; }
         .f-item i { display: block; font-size: 22px; margin-bottom: 4px; }
-        .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; display: block; box-sizing: border-box; }
+        .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; font-weight: bold; }
-        /* زر الدفع - جعلته ظاهر (flex) بشكل افتراضي */
-        .btn-pay-pi { background: linear-gradient(45deg, var(--p), #8e44ad); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; margin: 10px 0 20px 0; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.3); font-size: 16px; }
+        
+        /* زر توثيق العضوية الجديد */
+        .btn-verify { 
+            background: linear-gradient(45deg, var(--p), #8e44ad); 
+            color: white; border: none; padding: 15px; border-radius: 12px; 
+            font-weight: bold; width: 100%; margin: 10px 0 20px 0; 
+            cursor: pointer; display: flex; align-items: center; 
+            justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -41,7 +48,7 @@
     </div>
 
     <div id="home" class="section active">
-        <div id="status-msg" style="text-align:center; font-size:12px; color:var(--p); margin-bottom:10px; font-weight:bold;">جاهز للعمل</div>
+        <div id="status-msg" style="text-align:center; font-size:12px; color:var(--p); margin-bottom:10px; font-weight:bold;">جاري فحص حالة الشبكة...</div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
             <div onclick="showPage('add_form', this)" style="background: var(--p); color:white; padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
@@ -52,8 +59,8 @@
             </div>
         </div>
 
-        <button id="pay-button" class="btn-pay-pi">
-            <i class="fa fa-certificate"></i> <span id="t-pay-text">توثيق العضوية (0.1 Pi)</span>
+        <button id="pay-button" class="btn-verify">
+            <i class="fa fa-medal"></i> <span id="t-pay-text">توثيق العضوية (0.1 Pi)</span>
         </button>
 
         <h4 id="t-feat-h">تطبيقات المايننت الموثقة</h4>
@@ -63,11 +70,8 @@
         </a>
 
         <div class="card-bar" style="border-right-color: var(--red); background: #fff5f5; margin-top:20px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <i class="fa fa-exclamation-triangle" style="color:var(--red); font-size: 20px;"></i>
-                <strong id="t-safe-t">نصيحة للمحافظة على حسابك</strong>
-            </div>
-            <p id="t-safe-d" style="font-size: 13px; color: #666; margin-top: 8px;">لا تقم أبداً بإدخال "كلمة سر المحفظة" خارج متصفح Pi الرسمي.</p>
+            <strong id="t-safe-t" style="color:var(--red);">نصيحة الأمان</strong>
+            <p id="t-safe-d" style="font-size: 13px; color: #666; margin-top: 8px;">لا تدخل كلمة سر المحفظة خارج متصفح Pi.</p>
         </div>
     </div>
 
@@ -84,6 +88,7 @@
     </div>
 
     <script>
+        // دمج السكريبت الذكي الذي لقط المعاملة المعلقة
         Pi.init({ version: "2.0", sandbox: true });
 
         const statusMsg = document.getElementById('status-msg');
@@ -97,35 +102,38 @@
                     body: JSON.stringify({ paymentId, txid, endpoint })
                 });
                 return await response.json();
-            } catch (e) { return { error: "Error" }; }
+            } catch (e) { return { error: "خطأ اتصال" }; }
         }
 
+        // الوظيفة التي أنقذت الخطوة 10: معالجة المعاملات التائهة فوراً
         Pi.authenticate(['payments', 'username'], (payment) => {
+            // إذا وجد SDK معاملة معلقة، يرسلها للسيرفر فوراً للإغلاق
             if (payment.transaction && payment.transaction.txid) {
                 callServer(payment.identifier, payment.transaction.txid, 'complete');
             }
         }).then(function(auth) {
-            statusMsg.innerText = "أهلاً " + auth.user.username;
+            statusMsg.innerText = "مرحباً " + auth.user.username;
         }).catch(function(err) {
-            statusMsg.innerText = "افتح من Pi Browser";
+            statusMsg.innerText = "افتح التطبيق من Pi Browser";
         });
 
         payBtn.onclick = function() {
             payBtn.disabled = true;
-            statusMsg.innerText = "جاري الاتصال بالمحفظة...";
+            statusMsg.innerText = "جاري طلب المعاملة...";
+            
             Pi.createPayment({
                 amount: 0.1,
-                memo: "Trust & Pi Guide Verification",
-                metadata: { orderId: "verify_" + Date.now() }
+                memo: "Trust & Pi Guide Membership",
+                metadata: { orderId: "membership_" + Date.now() }
             }, {
                 onReadyForServerApproval: (id) => callServer(id, null, 'approve'),
                 onReadyForServerCompletion: (id, txid) => {
                     callServer(id, txid, 'complete').then(() => {
-                        alert("✅ تم التوثيق!");
+                        alert("✅ تم توثيق العضوية بنجاح!");
                         location.reload();
                     });
                 },
-                onCancel: () => { payBtn.disabled = false; statusMsg.innerText = "تم الإلغاء"; },
+                onCancel: () => { payBtn.disabled = false; statusMsg.innerText = ""; },
                 onError: (err) => { alert(err.message); payBtn.disabled = false; }
             });
         };
