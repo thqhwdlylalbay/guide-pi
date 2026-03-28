@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - النسخة المطورة</title>
+    <title>ثقة ودليل الباي</title>
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-        // تفعيل وضع الاختبار (Testnet) لضمان الأمان أثناء البرمجة
+        // تفعيل وضع الاختبار - Testnet
         Pi.init({ version: "2.0", sandbox: true });
     </script>
 
@@ -29,9 +29,7 @@
         .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; display: block; box-sizing: border-box; font-size: 16px; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; font-weight: bold; }
         .res-highlight { background: #fff9c4; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); margin-top: 15px; }
-        
-        /* صندوق حالة الدفع */
-        #payment-status { margin-top: 15px; padding: 12px; border-radius: 10px; background: #eee; font-weight: bold; font-size: 14px; display: none; color: #333; border: 1px solid #ccc; }
+        #payment-status { margin-top: 10px; padding: 10px; border-radius: 10px; background: #eee; font-size: 13px; display: none; text-align: center; border: 1px solid #ccc; }
     </style>
 </head>
 <body>
@@ -65,13 +63,33 @@
             <small id="t-fire-d">اربح عملات Pi مقابل المحتوى المميز.</small>
         </a>
 
-        <div class="card-bar" style="border-right-color: var(--red); background: #fff5f5; margin-top:20px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <i class="fa fa-shield-alt" style="color:var(--red); font-size: 20px;"></i>
-                <strong id="t-safe-t">نصيحة أمان</strong>
+        <h4 style="margin-top:25px;"><i class="fa fa-utensils"></i> مطاعم تقبل الدفع بـ Pi</h4>
+        <div class="card-bar" style="border-right-color: #ff5722;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong>Pi Pizza Hub</strong>
+                <span style="color: #ffc107; font-size: 13px;"><i class="fa fa-star"></i> 4.6</span>
             </div>
-            <p id="t-safe-d" style="font-size: 13px; color: #666; margin-top: 8px;">لا تشارك كلمة سر محفظتك مع أي شخص.</p>
+            <small id="t-pizza-d">خدمات توصيل ووجبات سريعة تدعم نظام المقايضة.</small>
+            <a href="https://pibartermall.com" style="display:block; margin-top:8px; color:var(--p); font-weight:bold; font-size:12px; text-decoration:none;">اطلب الآن <i class="fa fa-external-link-alt"></i></a>
         </div>
+
+        <h4 style="margin-top:25px; color:var(--red);"><i class="fa fa-shield-alt"></i> ركن الأمان والموثوقية</h4>
+        <div class="card-bar" style="border-right-color: var(--red); background: #fff5f5;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fa fa-exclamation-triangle" style="color:var(--red); font-size: 20px;"></i>
+                <strong id="t-safe-t">نصيحة للمحافظة على حسابك</strong>
+            </div>
+            <p id="t-safe-d" style="font-size: 13px; color: #666; margin-top: 8px;">
+                لا تقم أبداً بإدخال "كلمة سر المحفظة" في أي موقع خارج متصفح Pi الرسمي.
+            </p>
+        </div>
+    </div>
+
+    <div id="verify_list" class="section">
+        <h3 id="t-v-title" style="text-align:center;">دليل المشاريع الرسمية</h3>
+        <a href="https://www.pichainmall.com" class="card-bar"><strong>Pi Chain Mall</strong><br><small id="t-v1">أكبر سوق تجاري.</small></a>
+        <a href="https://pibridge.org" class="card-bar" style="border-right-color: #2196f3;"><strong>Pi Bridge</strong><br><small id="t-v-bridge">جسر نقل الأصول.</small></a>
+        <a href="https://workforcepool.com" class="card-bar" style="border-right-color: #9c27b0;"><strong>Workforce Pool</strong><br><small id="t-v2">منصة الخدمات المصغرة.</small></a>
     </div>
 
     <div id="stake" class="section">
@@ -81,6 +99,7 @@
             <ul style="margin: 8px 0; padding-right: 20px;">
                 <li id="t-s-l1">أرباح صافية تضاف لرصيدك الحالي.</li>
                 <li id="t-s-l2">مضاعفة سرعة تعدينك اليومي فوراً.</li>
+                <li id="t-s-l3">دعم قيمة العملة واستقرارها عالمياً.</li>
             </ul>
         </div>
         <div class="card-bar">
@@ -90,11 +109,12 @@
             <select id="p_years">
                 <option value="0.5">6 أشهر (أرباح +50%)</option>
                 <option value="2.0">سنة واحدة (أرباح +200%) 🔥</option>
+                <option value="5.0">3 سنوات (أرباح +500%) 🚀</option>
             </select>
             <button class="btn-main" onclick="calc()" id="t-s-btn">احسب أرباحي الآن</button>
             <div id="res_box" class="res-highlight" style="display:none; text-align:center;">
-                <span id="t-s-res-l" style="font-weight:bold; color:#555;">رصيدك الإجمالي المتوقع:</span><br>
-                <span id="total_v" style="font-size:28px; color:var(--p); font-weight:900;"></span> <b style="color:var(--p)">π</b>
+                <span id="t-s-res-l">رصيدك الإجمالي المتوقع:</span><br>
+                <span id="total_v" style="font-size:28px; color:var(--p); font-weight:900;"></span> <b>π</b>
             </div>
         </div>
     </div>
@@ -103,27 +123,27 @@
         <h3 id="t-a-title" style="text-align:center;">سجل كتاجر موثق</h3>
         <div class="card-bar" style="text-align:center;">
             <i class="fa fa-medal" style="font-size:45px; color:var(--gold); margin-bottom:10px;"></i>
-            <p id="t-a-desc">انضم لقائمة "ثقة" للمتاجر المعتمدة مقابل رسوم رمزية.</p>
+            <p id="t-a-desc">انضم لقائمة المتاجر المعتمدة مقابل رسوم رمزية.</p>
             
-            <button id="pay-button" class="btn-main" onclick="startPayment()">
+            <button id="pay-button" class="btn-main" onclick="onPayClick()">
                 انضم للمتاجر الموثوقة بـ 0.1
             </button>
-            
             <div id="payment-status">جاري فحص حالة المعاملات...</div>
+            
+            <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
+            <i class="fab fa-whatsapp" style="font-size:30px; color:var(--green);"></i>
+            <p style="font-size:12px;">بعد الدفع، ارسل البيانات هنا:</p>
+            <a href="whatsapp://send?phone=201220469415&text=أريد_تسجيل_متجري" class="btn-main" style="background:var(--green); font-size:14px;">
+                <span id="t-a-btn">مراسلة واتساب للدعم</span>
+            </a>
         </div>
-    </div>
-
-    <div id="verify_list" class="section">
-        <h3 id="t-v-title" style="text-align:center;">دليل المشاريع الرسمية</h3>
-        <a href="https://www.pichainmall.com" class="card-bar"><strong>Pi Chain Mall</strong></a>
-        <a href="https://pibridge.org" class="card-bar" style="border-right-color: #2196f3;"><strong>Pi Bridge</strong></a>
     </div>
 
     <div id="report" class="section">
         <h3 id="t-r-title" style="text-align:center; color:var(--red);">مركز الأمان</h3>
         <div class="card-bar" style="border-right-color: var(--red); text-align:center;">
             <i class="fa fa-user-shield" style="font-size:45px; color:var(--red); margin-bottom:10px;"></i>
-            <p id="t-r-desc">أبلغ عن أي محاولة احتيال.</p>
+            <p id="t-r-desc">أبلغ عن أي نصاب لحماية المجتمع.</p>
             <a href="whatsapp://send?phone=201220469415&text=بلاغ" class="btn-main" style="background:var(--red);">إرسال بلاغ واتساب</a>
         </div>
     </div>
@@ -136,71 +156,49 @@
     </div>
 
     <script>
-        // 1. منطق الـ SDK والدفع (الكود الثاني المدمج)
+        // --- منطق الـ SDK ---
         const statusBox = document.getElementById('payment-status');
         const payBtn = document.getElementById('pay-button');
 
-        // وظيفة التأكيد مع السيرفر الخفي
-        async function callBackendToComplete(paymentId, txid) {
-            statusBox.innerText = "جاري التأكيد مع سيرفرات Pi...";
+        async function authenticateUser() {
             try {
-                const response = await fetch('/complete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paymentId, txid })
+                await Pi.authenticate(['payments', 'username'], (payment) => {
+                    if (payment.transaction && payment.transaction.txid) {
+                        completeOnServer(payment.identifier, payment.transaction.txid);
+                    }
                 });
-                if (response.ok) {
-                    statusBox.innerText = "تمت العملية بنجاح! مبروك التوثيق.";
-                    statusBox.style.color = "green";
-                    alert("نجحت عملية الدفع وانضممت للمتاجر الموثوقة!");
-                } else {
-                    statusBox.innerText = "فشل التأكيد النهائي من السيرفر.";
-                }
-            } catch (err) {
-                statusBox.innerText = "خطأ في الاتصال بالسيرفر.";
-            }
+            } catch (err) { statusBox.style.display = "block"; statusBox.innerText = "يرجى فتح الموقع من Pi Browser."; }
         }
+        authenticateUser();
 
-        const onIncompletePaymentFound = (payment) => {
-            if (payment.transaction && payment.transaction.txid) {
-                callBackendToComplete(payment.identifier, payment.transaction.txid);
-            }
-        };
-
-        // المصادقة عند التشغيل
-        Pi.authenticate(['payments', 'username'], onIncompletePaymentFound).then(function(auth) {
-            statusBox.style.display = "block";
-            statusBox.innerText = "مرحباً " + auth.user.username + "، جاهز للتوثيق.";
-        }).catch(function(err) {
-            statusBox.style.display = "block";
-            statusBox.innerText = "يرجى فتح الموقع من داخل Pi Browser.";
-        });
-
-        // تنفيذ الدفع بـ 0.1
-        function startPayment() {
-            statusBox.style.display = "block";
-            statusBox.innerText = "جاري تحضير المعاملة (0.1 Test Pi)...";
-            payBtn.disabled = true;
-
+        function onPayClick() {
+            statusBox.style.display = "block"; statusBox.innerText = "جاري تحضير المعاملة..."; payBtn.disabled = true;
             Pi.createPayment({
                 amount: 0.1,
-                memo: "رسوم انضمام للمتاجر الموثوقة - ثقة ودليل الباي",
+                memo: "التسجيل في دليل المتاجر - ثقة ودليل الباي",
                 metadata: { orderId: "reg_" + Date.now() }
             }, {
-                onReadyForServerApproval: (paymentId) => { statusBox.innerText = "جاري الموافقة من السيرفر..."; },
-                onReadyForServerCompletion: (paymentId, txid) => { callBackendToComplete(paymentId, txid); },
-                onCancel: (paymentId) => { statusBox.innerText = "تم إلغاء العملية."; payBtn.disabled = false; },
-                onError: (error) => { statusBox.innerText = "خطأ: " + error.message; payBtn.disabled = false; }
+                onReadyForServerApproval: (id) => { statusBox.innerText = "جاري الموافقة..."; },
+                onReadyForServerCompletion: (id, tx) => { completeOnServer(id, tx); },
+                onCancel: (id) => { statusBox.innerText = "تم الإلغاء."; payBtn.disabled = false; },
+                onError: (e) => { statusBox.innerText = "خطأ: " + e.message; payBtn.disabled = false; }
             });
         }
 
-        // 2. منطق الواجهة والتبديل (الكود الأول)
+        async function completeOnServer(paymentId, txid) {
+            try {
+                await fetch('/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentId, txid }) });
+                statusBox.style.color = "green"; statusBox.innerText = "تم التوثيق بنجاح!"; alert("مبروك!");
+            } catch (e) { console.log(e); }
+        }
+
+        // --- منطق الواجهة واللغات ---
+        let isAr = true;
         function showPage(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.f-item').forEach(i => i.classList.remove('active'));
             if(el) el.classList.add('active');
-            window.scrollTo(0,0);
         }
 
         function calc() {
@@ -210,14 +208,14 @@
                 let total = parseFloat(amt) + (amt * bonus);
                 document.getElementById('total_v').innerText = total.toLocaleString();
                 document.getElementById('res_box').style.display = 'block';
-            } else { alert("من فضلك أدخل كمية باي"); }
+            } else { alert("أدخل الكمية أولاً"); }
         }
 
-        let isAr = true;
         function toggleLang() {
-            isAr = !isAr;
-            document.dir = isAr ? 'rtl' : 'ltr';
-            alert(isAr ? "اللغة العربية" : "English Language");
+            isAr = !isAr; document.dir = isAr ? 'rtl' : 'ltr';
+            const t = isAr ? { title: "ثقة ودليل الباي", desc: "استثمر بأمان" } : { title: "Trust & Pi Guide", desc: "Invest Safely" };
+            document.getElementById('t-title').innerText = t.title;
+            document.getElementById('t-desc').innerText = t.desc;
         }
     </script>
 </body>
