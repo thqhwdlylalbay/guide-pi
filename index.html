@@ -7,7 +7,6 @@
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-        // تفعيل وضع الاختبار (Sandbox) - يتم تغييره لـ false عند الإطلاق الرسمي
         Pi.init({ version: "2.0", sandbox: true });
     </script>
 
@@ -21,21 +20,20 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .card-bar { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-right: 5px solid var(--p); text-decoration: none; color: inherit; display: block; }
-        .profit-box { background: #e8f5e9; border: 1px solid #2e7d32; padding: 12px; border-radius: 12px; margin-bottom: 15px; color: #1b5e20; line-height: 1.6; }
+        .profit-box { background: #e8f5e9; border: 1px solid #2e7d32; padding: 12px; border-radius: 12px; margin-bottom: 15px; color: #1b5e20; }
         .footer { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000; }
         .f-item { flex: 1; text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
         .f-item.active { color: var(--p); font-weight: bold; }
         .f-item i { display: block; font-size: 22px; margin-bottom: 4px; }
         .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; display: block; box-sizing: border-box; font-size: 16px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; font-weight: bold; }
-        .res-highlight { background: #fff9c4; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); margin-top: 15px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
         #payment-status { margin: 15px 0; padding: 15px; border-radius: 10px; background: #fff; border: 1px solid var(--p); font-weight: bold; color: var(--p); display: none; text-align: center; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <button style="background:none; border:none; font-size:24px; color:var(--p); cursor:pointer;" onclick="toggleLang()"><i class="fa fa-globe"></i></button>
+        <button style="background:none; border:none; font-size:24px; color:var(--p);" onclick="toggleLang()"><i class="fa fa-globe"></i></button>
         <div style="display:flex; align-items:center; gap:8px;">
             <div style="text-align: right;"><b id="t-title">ثقة ودليل الباي</b><br><small id="t-desc">استثمر عملاتك بأمان</small></div>
             <div class="logo-box">π</div>
@@ -44,124 +42,97 @@
 
     <div id="home" class="section active">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-            <div onclick="showPage('add_form', this)" style="background: var(--p); color:white; padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
-                <i class="fa fa-store"></i> <br><span id="t-b-add">أضف متجرك</span>
-            </div>
-            <div onclick="showPage('stake', this)" style="background:#fff; border:1px solid var(--p); color:var(--p); padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
-                <i class="fa fa-chart-line"></i> <br><span id="t-b-calc">احسب أرباحك</span>
-            </div>
+            <div onclick="showPage('add_form', this)" style="background: var(--p); color:white; padding:18px; border-radius:15px; text-align:center;"><i class="fa fa-store"></i> <br><span id="t-b-add">أضف متجرك</span></div>
+            <div onclick="showPage('stake', this)" style="background:#fff; border:1px solid var(--p); color:var(--p); padding:18px; border-radius:15px; text-align:center;"><i class="fa fa-chart-line"></i> <br><span id="t-b-calc">احسب أرباحك</span></div>
         </div>
 
         <div style="margin-bottom: 25px;">
-            <button id="pay-btn" class="btn-main" onclick="handlePayment()" style="background: linear-gradient(45deg, var(--p), #9c27b0); padding: 18px; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.3);">
+            <button id="pay-btn" class="btn-main" onclick="handlePayment()" style="background: linear-gradient(45deg, var(--p), #9c27b0);">
                 <i class="fa fa-shield-check"></i> <span id="t-btn-pay">انضم للمتاجر الموثوقة بـ 0.1 π</span>
             </button>
             <div id="payment-status">جاري الاتصال...</div>
         </div>
 
         <h4 id="t-feat-h">تطبيقات المايننت الموثقة</h4>
-        <a href="https://fireside.pinet.com" class="card-bar" style="border-right-color: var(--ora);">
-            <strong>Fireside Forum</strong><br><small id="t-fire-d">اربح عملات Pi مقابل المحتوى المميز.</small>
-        </a>
-
-        <h4 style="margin-top:25px;"><i class="fa fa-utensils"></i> مطاعم تقبل الدفع بـ Pi</h4>
-        <div class="card-bar" style="border-right-color: #ff5722;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong>Pi Pizza Hub</strong>
-                <span style="color: #ffc107; font-size: 13px;"><i class="fa fa-star"></i> 4.6</span>
-            </div>
-            <small id="t-pizza-d">وجبات سريعة تدعم نظام المقايضة.</small>
-        </div>
-
-        <h4 style="margin-top:25px; color:var(--red);"><i class="fa fa-shield-alt"></i> ركن الأمان</h4>
-        <div class="card-bar" style="border-right-color: var(--red); background: #fff5f5;">
-            <strong id="t-safe-t">نصيحة الأمان</strong>
-            <p id="t-safe-d" style="font-size: 13px; color: #666; margin-top: 5px;">لا تدخل كلمة سر المحفظة خارج متصفح Pi الرسمي.</p>
-        </div>
+        <a href="https://fireside.pinet.com" class="card-bar" style="border-right-color: var(--ora);"><strong>Fireside Forum</strong><br><small>اربح عملات Pi مقابل المحتوى المميز.</small></a>
+        
+        <h4 style="margin-top:25px;"><i class="fa fa-utensils"></i> مطاعم تقبل بـ Pi</h4>
+        <div class="card-bar" style="border-right-color: #ff5722;"><strong>Pi Pizza Hub</strong><br><small>وجبات سريعة تدعم نظام المقايضة.</small></div>
     </div>
 
     <div id="verify_list" class="section">
-        <h3 id="t-v-title" style="text-align:center;">دليل المشاريع</h3>
+        <h3 style="text-align:center;">دليل المشاريع</h3>
         <a href="https://www.pichainmall.com" class="card-bar"><strong>Pi Chain Mall</strong></a>
         <a href="https://pibridge.org" class="card-bar" style="border-right-color: #2196f3;"><strong>Pi Bridge</strong></a>
     </div>
 
     <div id="stake" class="section">
-        <h3 id="t-s-title" style="text-align:center;">مركز الأرباح</h3>
-        <div class="profit-box"><i class="fa fa-gift"></i> <b id="t-s-promo">لماذا الاستيكنج؟</b></div>
+        <h3 style="text-align:center;">مركز الأرباح</h3>
         <div class="card-bar">
             <input type="number" id="p_amount" placeholder="الكمية">
-            <select id="p_years">
-                <option value="0.5">6 أشهر (+50%)</option>
-                <option value="2.0">سنة (+200%)</option>
-            </select>
-            <button class="btn-main" onclick="calc()" id="t-s-btn">احسب أرباحي</button>
-            <div id="res_box" class="res-highlight" style="display:none; text-align:center;">
-                <span id="t-s-res-l">الإجمالي المتوقع:</span> <span id="total_v" style="font-size:24px; color:var(--p);"></span> <b>π</b>
-            </div>
+            <button class="btn-main" onclick="calc()">احسب الآن</button>
+            <div id="res_box" style="display:none; text-align:center; margin-top:15px;">المتوقع: <span id="total_v" style="font-weight:bold; color:var(--p);"></span> π</div>
         </div>
     </div>
 
     <div id="add_form" class="section">
-        <h3 id="t-a-title" style="text-align:center;">سجل كتاجر</h3>
-        <a href="whatsapp://send?phone=201220469415" class="btn-main" style="background:var(--green);"><i class="fab fa-whatsapp"></i> مراسلة واتساب</a>
+        <h3 style="text-align:center;">سجل كتاجر</h3>
+        <a href="whatsapp://send?phone=201220469415" class="btn-main" style="background:var(--green);">مراسلة واتساب</a>
     </div>
 
     <div id="report" class="section">
-        <h3 id="t-r-title" style="text-align:center; color:var(--red);">بلاغ عن احتيال</h3>
-        <a href="whatsapp://send?phone=201220469415" class="btn-main" style="background:var(--red);"><i class="fa fa-user-shield"></i> إرسال بلاغ</a>
+        <h3 style="text-align:center; color:var(--red);">مركز الأمان</h3>
+        <a href="whatsapp://send?phone=201220469415" class="btn-main" style="background:var(--red);">إرسال بلاغ</a>
     </div>
 
     <div class="footer">
-        <div class="f-item" onclick="showPage('report', this)"><i class="fa fa-bullhorn"></i><span id="n-t-rep">إبلاغ</span></div>
-        <div class="f-item" onclick="showPage('verify_list', this)"><i class="fa fa-medal"></i><span id="n-t-ver">توثيق</span></div>
-        <div class="f-item" onclick="showPage('stake', this)"><i class="fa fa-chart-pie"></i><span id="n-t-sta">أرباح</span></div>
-        <div class="f-item active" onclick="showPage('home', this)"><i class="fa fa-house"></i><span id="n-t-hom">الرئيسية</span></div>
+        <div class="f-item" onclick="showPage('report', this)"><i class="fa fa-bullhorn"></i><span>إبلاغ</span></div>
+        <div class="f-item" onclick="showPage('verify_list', this)"><i class="fa fa-medal"></i><span>توثيق</span></div>
+        <div class="f-item" onclick="showPage('stake', this)"><i class="fa fa-chart-pie"></i><span>أرباح</span></div>
+        <div class="f-item active" onclick="showPage('home', this)"><i class="fa fa-house"></i><span>الرئيسية</span></div>
     </div>
 
     <script>
-        // --- 1. منطق الدفع الذكي (الربط مع complete.js) ---
+        // دالة الدفع النهائية والمحسنة
         async function handlePayment() {
             const statusBox = document.getElementById('payment-status');
             statusBox.style.display = "block";
             statusBox.innerText = "جاري تحضير المحفظة...";
-            
+
             try {
-                await Pi.createPayment({
+                const payment = await Pi.createPayment({
                     amount: 0.1,
                     memo: "Verification - Trust and Pi Guide",
                     metadata: { type: "verification" }
                 }, {
                     onReadyForServerApproval: async (paymentId) => {
-                        statusBox.innerText = "جاري الحصول على موافقة السيرفر...";
-                        // يرسل الإشارة لـ complete.js للموافقة الفورية
-                        await fetch('/functions/complete', {
+                        statusBox.innerText = "جاري إرسال الموافقة للسيرفر...";
+                        const response = await fetch('/functions/complete', {
                             method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId, action: 'approve' })
                         });
+                        if (response.ok) statusBox.innerText = "تمت الموافقة! بانتظار الشبكة...";
                     },
                     onReadyForServerCompletion: async (paymentId, txid) => {
-                        statusBox.innerText = "جاري إنهاء المعاملة...";
-                        // يرسل الإشارة لـ complete.js للإكمال النهائي
-                        const res = await fetch('/functions/complete', {
+                        statusBox.innerText = "جاري الإنهاء النهائي...";
+                        const response = await fetch('/functions/complete', {
                             method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId, txid, action: 'complete' })
                         });
-                        if(res.ok) {
+                        if (response.ok) {
                             statusBox.style.color = "green";
                             statusBox.innerText = "تم التوثيق بنجاح!";
-                            alert("مبروك! تم إتمام الدفع بنجاح.");
+                            alert("مبروك! تم إتمام المعاملة.");
                         }
                     },
                     onCancel: () => { statusBox.innerText = "تم إلغاء العملية."; },
                     onError: (err) => { statusBox.innerText = "خطأ: " + err.message; }
                 });
-            } catch (e) { statusBox.innerText = "فشل بدء الدفع."; }
+            } catch (e) { statusBox.innerText = "خطأ في بدء الدفع."; }
         }
 
-        // --- 2. وظائف الواجهة والحساب ---
         function showPage(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -171,23 +142,15 @@
 
         function calc() {
             let amt = document.getElementById('p_amount').value;
-            let bonus = document.getElementById('p_years').value;
             if(amt > 0) {
-                let total = parseFloat(amt) + (amt * bonus);
-                document.getElementById('total_v').innerText = total.toLocaleString();
+                document.getElementById('total_v').innerText = (amt * 2).toLocaleString();
                 document.getElementById('res_box').style.display = 'block';
             }
         }
+        
+        function toggleLang() { alert("اللغة قيد التحديث"); }
 
-        function toggleLang() {
-            // منطق الترجمة (يمكن إضافته هنا كما في كودك السابق)
-            alert("تغيير اللغة قيد التحديث");
-        }
-
-        // تسجيل الدخول التلقائي عند الفتح
-        Pi.authenticate(['payments', 'username'], (payment) => {
-            console.log("Welcome " + payment.user.username);
-        }).catch(err => { console.error(err); });
+        Pi.authenticate(['payments', 'username'], (p) => { console.log("User: " + p.user.username); });
     </script>
 </body>
-            </html>
+    </html>
