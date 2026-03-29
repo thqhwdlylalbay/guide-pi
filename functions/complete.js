@@ -1,35 +1,29 @@
-// هذا الملف يجب أن يكون في المسار: functions/complete.js
-export async function onRequestPost(context) {
-  try {
-    // 1. استقبال البيانات من صفحة الموقع (الـ Frontend)
-    const { paymentId, txid } = await context.request.json();
+export async function onRequest(context) {
+    const { request, env } = context;
     
-    // 2. سحب المفتاح السري من متغيرات البيئة في Cloudflare
-    const apiKey = context.env.PI_API_KEY;
+    // تأكد أن الطلب POST
+    if (request.method !== "POST") return new Response("Forbidden", { status: 403 });
 
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: "API Key is missing in Cloudflare settings" }), { status: 500 });
+    try {
+        const { paymentId, txid } = await request.json();
+        const API_KEY = env.PI_API_KEY; // المفتاح مخفي في إعدادات Cloudflare
+
+        // إرسال التأكيد النهائي لشركة باي
+        const piResponse = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Key ${API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ txid })
+        });
+
+        if (piResponse.ok) {
+            return new Response(JSON.stringify({ status: "success" }), { status: 200 });
+        } else {
+            return new Response("Pi API Error", { status: 400 });
+        }
+    } catch (err) {
+        return new Response(err.message, { status: 500 });
     }
-
-    // 3. مراسلة سيرفرات Pi لإتمام المعاملة رسمياً
-    const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Key ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ txid }),
-    });
-
-    const result = await response.json();
-
-    // 4. إرسال النتيجة النهائية للمتصفح
-    return new Response(JSON.stringify(result), { 
-      status: response.status,
-      headers: { "Content-Type": "application/json" }
-    });
-
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
-  }
 }
