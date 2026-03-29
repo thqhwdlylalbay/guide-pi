@@ -3,20 +3,26 @@
 export async function onRequestPost(context) {
     try {
         const { paymentId, txid, action } = await context.request.json();
-        const apiKey = "اسم_مفتاح_API_الخاص_بك_هنا"; // يوضع هنا API Key من بوابة مطوري Pi
+        
+        // جلب المفتاح السري من Environment Variables في Cloudflare
+        const apiKey = context.env.PI_API_KEY; 
 
-        // إذا كان الطلب للموافقة (Approve)
+        if (!apiKey) {
+            return new Response("API Key missing in environment", { status: 500 });
+        }
+
+        // 1. مرحلة الموافقة (Approve)
         if (action === 'approve') {
-            await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+            const approveRes = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
                 method: 'POST',
                 headers: { 'Authorization': `Key ${apiKey}` }
             });
-            return new Response(JSON.stringify({ message: "Approved" }), { status: 200 });
+            return new Response(JSON.stringify({ success: approveRes.ok }), { status: 200 });
         }
 
-        // إذا كان الطلب للإكمال (Complete)
+        // 2. مرحلة الإكمال (Complete)
         if (action === 'complete') {
-            await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+            const completeRes = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
                 method: 'POST',
                 headers: { 
                     'Authorization': `Key ${apiKey}`,
@@ -24,7 +30,7 @@ export async function onRequestPost(context) {
                 },
                 body: JSON.stringify({ txid })
             });
-            return new Response(JSON.stringify({ message: "Completed" }), { status: 200 });
+            return new Response(JSON.stringify({ success: completeRes.ok }), { status: 200 });
         }
 
         return new Response("Invalid Action", { status: 400 });
