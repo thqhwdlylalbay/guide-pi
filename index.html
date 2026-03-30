@@ -8,7 +8,7 @@
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-        // ضبط على وضع التجربة (sandbox: true) لكسر عقدة الـ 60 ثانية
+        // تفعيل وضع التجربة (sandbox: true) لضمان عدم تعليق العداد
         Pi.init({ version: "2.0", sandbox: true });
     </script>
 
@@ -17,88 +17,132 @@
         body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; }
         .header { background: #fff; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
         .logo-box { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); background: var(--p); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        
         .section { display: none; padding: 15px; animation: fadeIn 0.3s; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         .card-bar { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-right: 5px solid var(--p); text-decoration: none; color: inherit; display: block; }
+        .profit-box { background: #e8f5e9; border: 1px solid #2e7d32; padding: 12px; border-radius: 12px; margin-bottom: 15px; color: #1b5e20; line-height: 1.6; }
+        
         .footer { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000; }
         .f-item { flex: 1; text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
         .f-item.active { color: var(--p); font-weight: bold; }
         .f-item i { display: block; font-size: 22px; margin-bottom: 4px; }
+
         .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; display: block; box-sizing: border-box; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; font-weight: bold; }
+        .res-highlight { background: #fff9c4; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); margin-top: 15px; text-align: center; }
         .btn-pay-main { background: linear-gradient(45deg, #673ab7, #9c27b0); border: 2px solid var(--gold); margin-bottom: 20px; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.3); }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <button style="background:none; border:none; font-size:24px; color:var(--p);" onclick="toggleLang()"><i class="fa fa-globe"></i></button>
+        <button style="background:none; border:none; font-size:24px; color:var(--p); cursor:pointer;" onclick="toggleLang()">
+            <i class="fa fa-globe"></i>
+        </button>
         <div style="display:flex; align-items:center; gap:8px;">
-            <div style="text-align: right;"><b id="t-title">ثقة ودليل الباي</b><br><small id="t-desc">استثمر عملاتك بأمان</small></div>
+            <div style="text-align: right;">
+                <b id="t-title">ثقة ودليل الباي</b><br>
+                <small id="t-desc">استثمر عملاتك بأمان</small>
+            </div>
             <div class="logo-box">π</div>
         </div>
     </div>
 
     <div id="home" class="section active">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-            <div onclick="showPage('add_form', this)" style="background: var(--p); color:white; padding:18px; border-radius:15px; text-align:center;">
+            <div onclick="showPage('add_form', this)" style="background: var(--p); color:white; padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
                 <i class="fa fa-store"></i> <br><span id="t-b-add">أضف متجرك</span>
             </div>
-            <div onclick="showPage('stake', this)" style="background:#fff; border:1px solid var(--p); color:var(--p); padding:18px; border-radius:15px; text-align:center;">
+            <div onclick="showPage('stake', this)" style="background:#fff; border:1px solid var(--p); color:var(--p); padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
                 <i class="fa fa-chart-line"></i> <br><span id="t-b-calc">احسب أرباحك</span>
             </div>
         </div>
 
-        <button class="btn-main btn-pay-main" onclick="handlePayment()">
-            <i class="fa fa-medal"></i> انضم للمتاجر الموثوقة (0.1 π تجريبي)
+        <button class="btn-main btn-pay-main" onclick="handleMerchantPayment()">
+            <i class="fa fa-medal"></i> انضم إلى المتاجر الموثوقة (0.1 π تجريبي)
         </button>
 
         <h4 id="t-feat-h">تطبيقات المايننت الموثقة</h4>
         <a href="https://fireside.pinet.com" class="card-bar" style="border-right-color: var(--ora);">
-            <strong>Fireside Forum</strong><br><small>اربح عملات Pi مقابل المحتوى المميز.</small>
+            <strong>Fireside Forum</strong><br>
+            <small id="t-fire-d">اربح عملات Pi مقابل المحتوى المميز.</small>
         </a>
+
+        <h4 style="margin-top:25px;"><i class="fa fa-utensils"></i> مطاعم تقبل الدفع بـ Pi</h4>
+        <div class="card-bar" style="border-right-color: #ff5722;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong>Pi Pizza Hub</strong>
+                <span style="color: #ffc107; font-size: 13px;"><i class="fa fa-star"></i> 4.6</span>
+            </div>
+            <small id="t-pizza-d">خدمات توصيل ووجبات سريعة تدعم نظام المقايضة.</small>
+        </div>
     </div>
 
     <div id="stake" class="section">
-        <h3 id="t-s-title">مركز استثمار وأرباح Pi</h3>
+        <h3 id="t-s-title" style="text-align:center;">مركز استثمار وأرباح Pi</h3>
+        <div class="profit-box">
+            <i class="fa fa-gift"></i> <b id="t-s-promo">لماذا الاستيكنج (Stake)؟</b>
+            <ul style="margin: 8px 0; padding-right: 20px;">
+                <li id="t-s-l1">أرباح صافية تضاف لرصيدك الحالي.</li>
+                <li id="t-s-l2">مضاعفة سرعة تعدينك اليومي فوراً.</li>
+            </ul>
+        </div>
         <div class="card-bar">
-            <label id="t-l-amt">الكمية:</label>
-            <input type="number" id="p_amount" placeholder="100">
+            <label id="t-l-amt">الكمية المراد استثمارها:</label>
+            <input type="number" id="p_amount" placeholder="مثلاً: 100">
+            <label id="t-l-yrs">اختر خطة الأرباح:</label>
             <select id="p_years">
-                <option value="0.5">6 أشهر (+50%)</option>
-                <option value="2.0">سنة واحدة (+200%)</option>
+                <option value="0.5">6 أشهر (أرباح +50%)</option>
+                <option value="2.0">سنة واحدة (أرباح +200%) 🔥</option>
+                <option value="5.0">3 سنوات (أرباح +500%) 🚀</option>
             </select>
-            <button class="btn-main" onclick="calc()" id="t-s-btn">احسب أرباحي</button>
-            <div id="res_box" style="display:none; margin-top:15px; font-weight:bold;">
-                <span id="t-s-res-l">الإجمالي المتوقع:</span> <span id="total_v"></span> π
+            <button class="btn-main" onclick="calc()" id="t-s-btn">احسب أرباحي الآن</button>
+
+            <div id="res_box" class="res-highlight" style="display:none;">
+                <span id="t-s-res-l" style="font-weight:bold; color:#555;">رصيدك الإجمالي المتوقع:</span><br>
+                <span id="total_v" style="font-size:28px; color:var(--p); font-weight:900;"></span> <b style="color:var(--p)">π</b>
             </div>
         </div>
     </div>
 
     <div id="add_form" class="section">
-        <h3 id="t-a-title">سجل كتاجر موثق</h3>
-        <a href="whatsapp://send?phone=201220469415&text=تسجيل_متجر" class="btn-main" style="background:var(--green);">ارسل بياناتك واتساب</a>
+        <h3 id="t-a-title" style="text-align:center;">سجل كتاجر موثق</h3>
+        <div class="card-bar" style="text-align:center;">
+            <i class="fab fa-whatsapp" style="font-size:45px; color:var(--green); margin-bottom:10px;"></i>
+            <p id="t-a-desc">ارسل بيانات متجرك الآن ليظهر في الدليل العالمي.</p>
+            <a href="whatsapp://send?phone=201220469415&text=أريد_تسجيل_متجري" class="btn-main" style="background:var(--green);">
+                <span id="t-a-btn">اضغط للمراسلة فوراً</span>
+            </a>
+        </div>
     </div>
 
     <div id="report" class="section">
-        <h3 id="t-r-title" style="color:var(--red);">مركز الأمان</h3>
-        <a href="whatsapp://send?phone=201220469415&text=بلاغ_نصب" class="btn-main" style="background:var(--red);">إرسال بلاغ عن نصاب</a>
+        <h3 id="t-r-title" style="text-align:center; color:var(--red);">مركز الأمان</h3>
+        <div class="card-bar" style="border-right-color: var(--red); text-align:center;">
+            <i class="fa fa-user-shield" style="font-size:45px; color:var(--red); margin-bottom:10px;"></i>
+            <p id="t-r-desc">أبلغ عن أي نصاب لحماية المجتمع.</p>
+            <a href="whatsapp://send?phone=201220469415&text=بلاغ_عن_محاولة_احتيال" class="btn-main" style="background:var(--red);">
+                <span id="t-r-btn">إرسال بلاغ واتساب</span>
+            </a>
+        </div>
     </div>
 
     <div class="footer">
-        <div class="f-item" onclick="showPage('report', this)"><i class="fa fa-bullhorn"></i><span id="n-t-rep">إبلاغ</span></div>
-        <div class="f-item" onclick="showPage('home', this)"><i class="fa fa-house"></i><span id="n-t-hom">الرئيسية</span></div>
-        <div class="f-item" onclick="showPage('stake', this)"><i class="fa fa-chart-pie"></i><span id="n-t-sta">أرباح</span></div>
+        <div class="f-item" id="n-rep" onclick="showPage('report', this)"><i class="fa fa-bullhorn"></i><span id="n-t-rep">إبلاغ</span></div>
+        <div class="f-item" id="n-sta" onclick="showPage('stake', this)"><i class="fa fa-chart-pie"></i><span id="n-t-sta">أرباح</span></div>
+        <div class="f-item active" id="n-hom" onclick="showPage('home', this)"><i class="fa fa-house"></i><span id="n-t-hom">الرئيسية</span></div>
     </div>
 
     <script>
-        // --- نظام الدفع المحدث (Testnet) ---
-        async function handlePayment() {
+        // --- وظيفة الدفع (مدمجة باحترافية) ---
+        async function handleMerchantPayment() {
             try {
                 const payment = await Pi.createPayment({
                     amount: 0.1,
-                    memo: "تجربة توثيق - Testnet",
+                    memo: "توثيق متجر - تجربة",
                     metadata: { type: "test_verification" },
                 }, {
                     onReadyForServerApproval: (paymentId) => {
@@ -114,34 +158,52 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId: paymentId, txid: txid, action: 'complete' })
                         });
-                        alert("نجحت التجربة! العداد اختفى والدفع تم.");
+                        alert("نجحت التجربة! العداد اختفى.");
                     },
                     onCancel: (id) => console.log("Cancelled"),
-                    onError: (error) => alert("خطأ: " + error.message)
+                    onError: (err) => alert("خطأ: " + err.message)
                 });
             } catch (e) { alert("افتح من Pi Browser"); }
         }
 
         // --- وظائف الموقع الأصلية ---
+        let isAr = true;
         function showPage(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.f-item').forEach(i => i.classList.remove('active'));
+            if(el) el.classList.add('active');
             window.scrollTo(0,0);
         }
+
         function calc() {
             let amt = document.getElementById('p_amount').value;
             let bonus = document.getElementById('p_years').value;
             if(amt > 0) {
-                document.getElementById('total_v').innerText = (parseFloat(amt) + (amt * bonus)).toLocaleString();
+                let total = parseFloat(amt) + (amt * bonus);
+                document.getElementById('total_v').innerText = total.toLocaleString();
                 document.getElementById('res_box').style.display = 'block';
-            }
+            } else { alert("من فضلك أدخل كمية باي"); }
         }
+
         function toggleLang() {
-            // كود تبديل اللغة المختصر للمحافظة على المساحة
-            let isAr = document.dir === 'rtl';
-            document.dir = isAr ? 'ltr' : 'rtl';
-            document.getElementById('t-title').innerText = isAr ? "Trust & Pi Guide" : "ثقة ودليل الباي";
+            isAr = !isAr;
+            document.dir = isAr ? 'rtl' : 'ltr';
+            const t = isAr ? {
+                title: "ثقة ودليل الباي", desc: "استثمر عملاتك بأمان", badd: "أضف متجرك", bcalc: "احسب أرباحك",
+                nhom: "الرئيسية", nsta: "أرباح", nrep: "إبلاغ"
+            } : {
+                title: "Trust & Pi Guide", desc: "Invest Pi Safely", badd: "Add Store", bcalc: "Calculator",
+                nhom: "Home", nsta: "Earnings", nrep: "Report"
+            };
+            document.getElementById('t-title').innerText = t.title;
+            document.getElementById('t-desc').innerText = t.desc;
+            document.getElementById('t-b-add').innerText = t.badd;
+            document.getElementById('t-b-calc').innerText = t.bcalc;
+            document.getElementById('n-t-hom').innerText = t.nhom;
+            document.getElementById('n-t-sta').innerText = t.nsta;
+            document.getElementById('n-t-rep').innerText = t.nrep;
         }
     </script>
 </body>
-                </html>
+    </html>
