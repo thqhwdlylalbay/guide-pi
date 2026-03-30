@@ -3,71 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تجربة موتور الدفع</title>
-    
+    <title>اختبار الدفع</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-        // تفعيل وضع التجربة (sandbox: true)
-        // ده هو "مفتاح السر" اللي هيخلي العداد يختفي ويفتح المحفظة
+        // تهيئة الـ SDK مع التأكد من وضع الـ Sandbox
         Pi.init({ version: "2.0", sandbox: true });
     </script>
-
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f0f0f0; }
-        .test-btn { 
-            background: #673ab7; color: white; border: none; 
-            padding: 20px 40px; border-radius: 10px; font-size: 20px; 
-            font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
+        body { font-family: sans-serif; text-align: center; padding: 50px 20px; background: #fafafa; }
+        .btn { background: #673ab7; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 18px; cursor: pointer; }
+        #status { margin-top: 20px; color: #444; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h2>اختبار بوابة الدفع (Testnet)</h2>
-    <p>تأكدي من استخدام محفظة الـ 100 باي الوهمية</p>
-
-    <button class="test-btn" onclick="startTestPayment()">
-        دفع 0.1 π (تجربة)
-    </button>
-
-    <div id="log" style="margin-top:20px; color: #555;"></div>
+    <h2>فحص بوابة الدفع (Testnet)</h2>
+    <button class="btn" onclick="pay()">اضغطي هنا للدفع</button>
+    <div id="status">جاهز للاختبار...</div>
 
     <script>
-        async function startTestPayment() {
-            const log = document.getElementById('log');
-            log.innerText = "جاري فتح المحفظة...";
+        async function pay() {
+            const status = document.getElementById('status');
+            status.innerHTML = "جاري محاولة الاتصال بالمحفظة... <br><small>تأكدي من ظهور نافذة المنبثقة</small>";
 
             try {
                 const payment = await Pi.createPayment({
                     amount: 0.1,
-                    memo: "Testnet Trial",
-                    metadata: { orderId: "test_" + Date.now() },
+                    memo: "تجربة تقنية",
+                    metadata: { testId: "123" }
                 }, {
-                    onReadyForServerApproval: (paymentId) => {
-                        log.innerText = "تم إنشاء الطلب.. جاري إرسال الموافقة (Approve)";
+                    onReadyForServerApproval: function(paymentId) {
+                        status.innerText = "تمت الموافقة من السيرفر. ID: " + paymentId;
                         fetch('/functions/complete', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId: paymentId, action: 'approve' })
                         });
                     },
-                    onReadyForServerCompletion: (paymentId, txid) => {
-                        log.innerText = "تمت العملية بنجاح! رقم المعاملة: " + txid;
+                    onReadyForServerCompletion: function(paymentId, txid) {
+                        status.innerText = "نجح الدفع! رقم العملية: " + txid;
                         fetch('/functions/complete', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId: paymentId, txid: txid, action: 'complete' })
                         });
-                        alert("العداد اختفى والدفع نجح!");
                     },
-                    onCancel: (id) => { log.innerText = "تم إلغاء الدفع."; },
-                    onError: (err) => { log.innerText = "خطأ: " + err.message; }
+                    onCancel: function(id) { status.innerText = "تم إلغاء العملية من قبلك."; },
+                    onError: function(error) { status.innerText = "خطأ في المحفظة: " + error.message; }
                 });
             } catch (err) {
-                alert("افتحي الرابط من داخل Pi Browser");
+                status.innerText = "فشل التشغيل: " + err.message;
             }
         }
     </script>
-
 </body>
 </html>
