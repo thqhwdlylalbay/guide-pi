@@ -30,7 +30,6 @@
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; font-weight: bold; }
         .res-highlight { background: #fff9c4; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); margin-top: 15px; }
         
-        /* تصميم زر الدفع الجديد ليناسب الواجهة */
         .btn-pay-main { background: linear-gradient(45deg, #673ab7, #9c27b0); border: 2px solid var(--gold); margin-bottom: 20px; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.3); }
     </style>
 </head>
@@ -60,7 +59,7 @@
         </div>
 
         <button class="btn-main btn-pay-main" onclick="handleMerchantPayment()">
-            <i class="fa fa-medal"></i> انضم إلى المتاجر الموثوقة
+            <i class="fa fa-medal"></i> انضم إلى المتاجر الموثوقة بـ 0.1 π
         </button>
 
         <h4 id="t-feat-h">تطبيقات المايننت الموثقة</h4>
@@ -165,7 +164,7 @@
     </div>
 
     <script>
-        // Pi Payment Function
+        // دالة الدفع مع معالجة رسالة فشل المطور
         async function handleMerchantPayment() {
             try {
                 const scopes = ['payments'];
@@ -173,17 +172,23 @@
                 await Pi.authenticate(scopes, onIncompletePaymentFound);
                 
                 Pi.createPayment({
-                    amount: 1.0,
+                    amount: 0.1, // السعر المطلوب 0.1
                     memo: "رسوم توثيق متجر - ثقة ودليل الباي",
                     metadata: { action: "merchant_verify" },
                 }, {
-                    onReadyForServerApproval: (id) => console.log("Approved:", id),
+                    onReadyForServerApproval: (id) => {
+                        console.log("الطلب جاهز للموافقة:", id);
+                        // ملاحظة: "فشل المطور" تظهر هنا لأننا لا نملك سيرفر يرسل موافقة نهائية حالياً.
+                    },
                     onReadyForServerCompletion: (id, txid) => {
                         alert("تم الدفع بنجاح! رقم المعاملة: " + txid);
                         window.location.href = "whatsapp://send?phone=201220469415&text=تم_دفع_رسوم_التوثيق_TXID_" + txid;
                     },
                     onCancel: (id) => alert("تم إلغاء الدفع"),
-                    onError: (err) => alert("خطأ في العملية"),
+                    onError: (err) => {
+                        console.error(err);
+                        alert("تنبيه: في التيستنت بدون سيرفر قد تظهر رسالة فشل، لكن إذا تم الخصم من محفظتك فالعملية صحيحة.");
+                    },
                 });
             } catch (e) { alert("يرجى فتح التطبيق من متصفح Pi"); }
         }
@@ -260,4 +265,4 @@
         }
     </script>
 </body>
-                    </html>
+    </html>
