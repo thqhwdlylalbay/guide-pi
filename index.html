@@ -2,57 +2,55 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اختبار الدفع</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-        // تهيئة الـ SDK مع التأكد من وضع الـ Sandbox
         Pi.init({ version: "2.0", sandbox: true });
     </script>
-    <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px 20px; background: #fafafa; }
-        .btn { background: #673ab7; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 18px; cursor: pointer; }
-        #status { margin-top: 20px; color: #444; font-weight: bold; }
-    </style>
 </head>
 <body>
 
-    <h2>فحص بوابة الدفع (Testnet)</h2>
-    <button class="btn" onclick="pay()">اضغطي هنا للدفع</button>
-    <div id="status">جاهز للاختبار...</div>
+    <button onclick="payWithScope()" style="padding: 20px; background: #673ab7; color: white; border-radius: 10px;">
+        اضغطي هنا للدفع (تجربة)
+    </button>
+
+    <div id="status" style="margin-top: 20px;"></div>
 
     <script>
-        async function pay() {
+        async function payWithScope() {
             const status = document.getElementById('status');
-            status.innerHTML = "جاري محاولة الاتصال بالمحفظة... <br><small>تأكدي من ظهور نافذة المنبثقة</small>";
-
             try {
+                // الخطوة اللي كانت ناقصة: طلب إذن "payments"
+                const scopes = ['payments'];
+                
+                // تسجيل الدخول وطلب الصلاحية أولاً
+                const auth = await Pi.authenticate(scopes, (payment) => {
+                    // هنا يتم التعامل مع المدفوعات غير المكتملة إن وجدت
+                });
+
+                status.innerText = "تم الحصول على الصلاحية.. جاري فتح المحفظة";
+
+                // الآن نبدأ الدفع بعد الحصول على الـ Scope
                 const payment = await Pi.createPayment({
                     amount: 0.1,
-                    memo: "تجربة تقنية",
-                    metadata: { testId: "123" }
+                    memo: "تجربة دفع سكوب",
+                    metadata: { test: "123" }
                 }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        status.innerText = "تمت الموافقة من السيرفر. ID: " + paymentId;
+                    onReadyForServerApproval: (paymentId) => {
                         fetch('/functions/complete', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId: paymentId, action: 'approve' })
                         });
                     },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        status.innerText = "نجح الدفع! رقم العملية: " + txid;
-                        fetch('/functions/complete', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId: paymentId, txid: txid, action: 'complete' })
-                        });
+                    onReadyForServerCompletion: (paymentId, txid) => {
+                        alert("نجح الدفع! العداد اختفى.");
                     },
-                    onCancel: function(id) { status.innerText = "تم إلغاء العملية من قبلك."; },
-                    onError: function(error) { status.innerText = "خطأ في المحفظة: " + error.message; }
+                    onCancel: (id) => { status.innerText = "تم الإلغاء"; },
+                    onError: (err) => { status.innerText = "خطأ: " + err.message; }
                 });
+
             } catch (err) {
-                status.innerText = "فشل التشغيل: " + err.message;
+                status.innerText = "خطأ في الصلاحيات: " + err.message;
             }
         }
     </script>
