@@ -1,74 +1,123 @@
-<script>
-    Pi.init({ version: "2.0", sandbox: true });
-</script>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ثقة ودليل الباي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+        // تهيئة صافية تماماً
+        Pi.init({ version: "2.0", sandbox: true });
+    </script>
 
-<script>
-    async function handleMerchantPayment() {
-        try {
-            // كود مخصص لمسح أي معاملة قديمة معلقة ومنع الـ 60 ثانية
-            const onIncompletePaymentFound = async (payment) => {
-                console.log("Found incomplete payment, fixing...");
-                await fetch('/functions/complete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        paymentId: payment.identifier, 
-                        txid: payment.transaction ? payment.transaction.txid : null, 
-                        action: 'complete' 
-                    })
+    <style>
+        :root { --p: #673ab7; --bg: #f3e5f5; --gold: #ffd700; --red: #e91e63; --ora: #ff9800; --green: #25D366; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; }
+        .header { background: #fff; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .logo-box { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); background: var(--p); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .section { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .card-bar { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-right: 5px solid var(--p); text-decoration: none; color: inherit; display: block; }
+        .footer { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000; }
+        .f-item { flex: 1; text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
+        .f-item.active { color: var(--p); font-weight: bold; }
+        .f-item i { display: block; font-size: 22px; margin-bottom: 4px; }
+        .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; display: block; box-sizing: border-box; }
+        .btn-pay-main { background: linear-gradient(45deg, #673ab7, #9c27b0); border: 2px solid var(--gold); margin-bottom: 20px; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.3); }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button style="background:none; border:none; font-size:24px; color:var(--p);" onclick="toggleLang()"><i class="fa fa-globe"></i></button>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <div style="text-align: right;"><b id="t-title">ثقة ودليل الباي</b><br><small id="t-desc">استثمر عملاتك بأمان</small></div>
+            <div class="logo-box">π</div>
+        </div>
+    </div>
+
+    <div id="home" class="section active">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div onclick="showPage('add_form', this)" style="background: var(--p); color:white; padding:18px; border-radius:15px; text-align:center;">
+                <i class="fa fa-store"></i> <br><span id="t-b-add">أضف متجرك</span>
+            </div>
+            <div onclick="showPage('stake', this)" style="background:#fff; border:1px solid var(--p); color:var(--p); padding:18px; border-radius:15px; text-align:center;">
+                <i class="fa fa-chart-line"></i> <br><span id="t-b-calc">احسب أرباحك</span>
+            </div>
+        </div>
+
+        <button class="btn-main btn-pay-main" onclick="handleMerchantPayment()">
+            <i class="fa fa-medal"></i> انضم إلى المتاجر الموثوقة بـ 0.1 π
+        </button>
+
+        <h4 id="t-feat-h">تطبيقات المايننت الموثقة</h4>
+        <div class="card-bar"><strong>Fireside Forum</strong><br><small>اربح عملات Pi مقابل المحتوى المميز.</small></div>
+    </div>
+
+    <div id="stake" class="section">...</div>
+    <div id="add_form" class="section">...</div>
+    <div id="report" class="section">...</div>
+    <div id="verify_list" class="section">...</div>
+
+    <div class="footer">
+        <div class="f-item" onclick="showPage('report', this)"><i class="fa fa-bullhorn"></i><span>إبلاغ</span></div>
+        <div class="f-item" onclick="showPage('verify_list', this)"><i class="fa fa-medal"></i><span>توثيق</span></div>
+        <div class="f-item" onclick="showPage('stake', this)"><i class="fa fa-chart-pie"></i><span>أرباح</span></div>
+        <div class="f-item active" onclick="showPage('home', this)"><i class="fa fa-house"></i><span>الرئيسية</span></div>
+    </div>
+
+    <script>
+        async function handleMerchantPayment() {
+            try {
+                // دالة تنظيف المعاملات المعلقة فوراً
+                const onIncompletePaymentFound = (payment) => {
+                    fetch('/functions/complete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid, action: 'complete' })
+                    });
+                };
+
+                await Pi.authenticate(['payments'], onIncompletePaymentFound);
+
+                Pi.createPayment({
+                    amount: 0.1,
+                    memo: "رسوم توثيق متجر",
+                    metadata: { orderId: "ID_" + Date.now() }, // تغيير الـ ID مع كل ضغطة لكسر الـ 60 ثانية
+                }, {
+                    onReadyForServerApproval: (paymentId) => {
+                        fetch('/functions/complete', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId: paymentId, action: 'approve' })
+                        });
+                    },
+                    onReadyForServerCompletion: (paymentId, txid) => {
+                        fetch('/functions/complete', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId: paymentId, txid: txid, action: 'complete' })
+                        });
+                        alert("تم بنجاح!");
+                    },
+                    onCancel: (id) => console.log("Cancelled"),
+                    onError: (error) => alert("حدث خطأ، حاول مجدداً")
                 });
-            };
-
-            // الدخول بحساب البي وتسوية المعاملات القديمة
-            const scopes = ['payments'];
-            await Pi.authenticate(scopes, onIncompletePaymentFound);
-
-            // إنشاء طلب دفع بـ ID متغير "ديناميكي" لكسر الـ 60 ثانية
-            Pi.createPayment({
-                amount: 0.1,
-                memo: "رسوم توثيق متجر - ثقة ودليل الباي",
-                metadata: { 
-                    orderId: "order_" + Date.now(), // توليد رقم فريد بالوقت الحالي
-                    type: "merchant_verification" 
-                },
-            }, {
-                onReadyForServerApproval: async (paymentId) => {
-                    console.log("Payment Ready for Approval:", paymentId);
-                    // إرسال الموافقة للسيرفر فوراً
-                    const response = await fetch('/functions/complete', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId: paymentId, action: 'approve' })
-                    });
-                    
-                    if (!response.ok) {
-                        console.error("Server failed to approve the payment");
-                    }
-                },
-                onReadyForServerCompletion: async (paymentId, txid) => {
-                    console.log("Payment Ready for Completion:", txid);
-                    await fetch('/functions/complete', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId: paymentId, txid: txid, action: 'complete' })
-                    });
-                    alert("تم التوثيق بنجاح!");
-                    window.location.href = "whatsapp://send?phone=201220469415&text=تم_الدفع_بنجاح_رقم_" + txid;
-                },
-                onCancel: (id) => {
-                    console.log("User cancelled payment:", id);
-                },
-                onError: (error, payment) => {
-                    console.error("SDK Error:", error);
-                    // لو حصل خطأ "معاملة معلقة"، هننبه المستخدم يفتح التطبيق تاني
-                    if(error.actual_error_type === "payment_in_progress") {
-                        alert("هناك معاملة معلقة، يرجى إعادة تحميل الصفحة.");
-                    }
-                }
-            });
-        } catch (e) {
-            console.error(e);
-            alert("يرجى التأكد من فتح التطبيق عبر متصفح Pi Browser");
+            } catch (e) {
+                alert("افتح التطبيق من Pi Browser");
+            }
         }
-    }
-                                                 </script>
+
+        function showPage(id, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.f-item').forEach(i => i.classList.remove('active'));
+            if(el) el.classList.add('active');
+        }
+    </script>
+</body>
+    </html>
