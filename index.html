@@ -8,7 +8,7 @@
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-        // تهيئة الـ SDK - تأكدي أن sandbox: true للاختبار و false للمايننت
+        // تهيئة الـ SDK - sandbox: true للتجربة | sandbox: false للمايننت
         Pi.init({ version: "2.0", sandbox: true });
     </script>
 
@@ -165,7 +165,7 @@
     <script>
         async function handleMerchantPayment() {
             try {
-                // التعليمات: التأكد من الدفعات غير المكتملة أولاً
+                // 1. التحقق من أي دفعات غير مكتملة
                 const onIncompletePaymentFound = (payment) => {
                     fetch('/functions/complete', {
                         method: 'POST',
@@ -176,14 +176,14 @@
 
                 await Pi.authenticate(['payments'], onIncompletePaymentFound);
 
-                // إنشاء الدفع (U2A)
+                // 2. إنشاء طلب الدفع
                 Pi.createPayment({
                     amount: 0.1,
-                    memo: "انضمام للمتاجر الموثوقة - ثقة ودليل الباي",
-                    metadata: { type: "merchant_registration" },
+                    memo: "رسوم توثيق متجر - ثقة ودليل الباي",
+                    metadata: { type: "merchant_verification" },
                 }, {
                     onReadyForServerApproval: async (paymentId) => {
-                        // التعليمات: يجب الموافقة من السيرفر باستخدام Server API Key
+                        // إرسال أمر الموافقة للسيرفر فوراً لإيقاف العداد
                         await fetch('/functions/complete', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -191,24 +191,26 @@
                         });
                     },
                     onReadyForServerCompletion: async (paymentId, txid) => {
-                        // التعليمات: يجب إكمال الدفع من السيرفر لإغلاق الدائرة
+                        // إكمال الدفع بعد نجاح المعاملة على البلوكشين
                         await fetch('/functions/complete', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId: paymentId, txid: txid, action: 'complete' })
                         });
                         alert("تم التوثيق بنجاح!");
-                        window.location.href = "whatsapp://send?phone=201220469415&text=تم_التوثيق_بنجاح_رقم_" + txid;
+                        window.location.href = "whatsapp://send?phone=201220469415&text=تم_الدفع_بنجاح_رقم_" + txid;
                     },
-                    onCancel: (paymentId) => { console.log("Cancelled"); },
-                    onError: (error, payment) => { alert("خطأ في الدفع، تأكد من فتح التطبيق في Pi Browser"); }
+                    onCancel: (id) => console.log("Cancelled: " + id),
+                    onError: (error, payment) => {
+                        console.error("Error: ", error);
+                        alert("حدث خطأ في عملية الدفع، يرجى المحاولة لاحقاً.");
+                    }
                 });
             } catch (e) {
-                alert("يجب استخدام متصفح Pi");
+                alert("يرجى فتح التطبيق من متصفح Pi الرسمي");
             }
         }
 
-        // باقي وظائف المشروع
         let isAr = true;
         function showPage(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
