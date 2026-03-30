@@ -3,144 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>تجربة موتور الدفع</title>
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
+        // تفعيل وضع التجربة (sandbox: true)
+        // ده هو "مفتاح السر" اللي هيخلي العداد يختفي ويفتح المحفظة
         Pi.init({ version: "2.0", sandbox: true });
     </script>
 
     <style>
-        :root { --p: #673ab7; --bg: #f3e5f5; --gold: #ffd700; --red: #e91e63; --ora: #ff9800; --green: #25D366; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; overflow-x: hidden; }
-        .header { background: #fff; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
-        .logo-box { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); background: var(--p); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        
-        .section { display: none; padding: 15px; animation: fadeIn 0.3s; }
-        .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .card-bar { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-right: 5px solid var(--p); text-decoration: none; color: inherit; display: block; }
-        .profit-box { background: #e8f5e9; border: 1px solid #2e7d32; padding: 12px; border-radius: 12px; margin-bottom: 15px; color: #1b5e20; line-height: 1.6; }
-        
-        .footer { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000; }
-        .f-item { flex: 1; text-align: center; color: #aaa; cursor: pointer; font-size: 11px; transition: 0.3s; }
-        .f-item.active { color: var(--p); font-weight: bold; }
-        .f-item i { display: block; font-size: 22px; margin-bottom: 4px; }
-
-        .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; display: block; box-sizing: border-box; font-size: 16px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
-        .btn-pay-main { background: linear-gradient(45deg, #673ab7, #9c27b0); border: 2px solid var(--gold); margin-bottom: 20px; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.3); }
-        .res-highlight { background: #fff9c4; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); margin-top: 15px; text-align: center; }
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f0f0f0; }
+        .test-btn { 
+            background: #673ab7; color: white; border: none; 
+            padding: 20px 40px; border-radius: 10px; font-size: 20px; 
+            font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <button style="background:none; border:none; font-size:24px; color:var(--p); cursor:pointer;" onclick="toggleLang()"><i class="fa fa-globe"></i></button>
-        <div style="display:flex; align-items:center; gap:8px;">
-            <div style="text-align: right;"><b id="t-title">ثقة ودليل الباي</b><br><small id="t-desc">استثمر عملاتك بأمان</small></div>
-            <div class="logo-box">π</div>
-        </div>
-    </div>
+    <h2>اختبار بوابة الدفع (Testnet)</h2>
+    <p>تأكدي من استخدام محفظة الـ 100 باي الوهمية</p>
 
-    <div id="home" class="section active">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-            <div onclick="showPage('add_form', 'n-rep')" style="background: var(--p); color:white; padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
-                <i class="fa fa-store"></i> <br><span id="t-b-add">أضف متجرك</span>
-            </div>
-            <div onclick="showPage('stake', 'n-sta')" style="background:#fff; border:1px solid var(--p); color:var(--p); padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
-                <i class="fa fa-chart-line"></i> <br><span id="t-b-calc">احسب أرباحك</span>
-            </div>
-        </div>
+    <button class="test-btn" onclick="startTestPayment()">
+        دفع 0.1 π (تجربة)
+    </button>
 
-        <button class="btn-main btn-pay-main" onclick="handlePayment()">
-            <i class="fa fa-medal"></i> انضم للمتاجر الموثوقة (0.1 π تجريبي)
-        </button>
-
-        <h4 id="t-feat-h">تطبيقات المايننت الموثقة</h4>
-        <a href="https://fireside.pinet.com" class="card-bar" style="border-right-color: var(--ora);">
-            <strong>Fireside Forum</strong><br><small>اربح عملات Pi مقابل المحتوى المميز.</small>
-        </a>
-
-        <h4 style="margin-top:20px;"><i class="fa fa-utensils"></i> مطاعم تقبل Pi</h4>
-        <div class="card-bar" style="border-right-color: #ff5722;">
-            <div style="display: flex; justify-content: space-between;">
-                <strong>Pi Pizza Hub</strong>
-                <span style="color: #ffc107;"><i class="fa fa-star"></i> 4.6</span>
-            </div>
-            <small>خدمات توصيل ووجبات سريعة تدعم نظام المقايضة.</small>
-        </div>
-    </div>
-
-    <div id="stake" class="section">
-        <h3 style="text-align:center;">مركز استثمار وأرباح Pi</h3>
-        <div class="profit-box">
-            <i class="fa fa-gift"></i> <b>لماذا الاستيكنج؟</b>
-            <ul style="margin:5px 0; padding-right:20px;">
-                <li>أرباح تضاف لرصيدك.</li>
-                <li>مضاعفة سرعة التعدين.</li>
-            </ul>
-        </div>
-        <div class="card-bar">
-            <label>الكمية:</label>
-            <input type="number" id="p_amount" placeholder="مثلاً 100">
-            <label>المدة:</label>
-            <select id="p_years">
-                <option value="0.5">6 أشهر (+50%)</option>
-                <option value="2.0">سنة (+200%)</option>
-                <option value="5.0">3 سنوات (+500%)</option>
-            </select>
-            <button class="btn-main" onclick="calc()">احسب أرباحي</button>
-            <div id="res_box" class="res-highlight" style="display:none;">
-                <span>الإجمالي المتوقع:</span><br>
-                <span id="total_v" style="font-size:24px; font-weight:900; color:var(--p);"></span> <b>π</b>
-            </div>
-        </div>
-    </div>
-
-    <div id="add_form" class="section">
-        <h3 style="text-align:center;">سجل كتاجر موثق</h3>
-        <div class="card-bar" style="text-align:center;">
-            <i class="fab fa-whatsapp" style="font-size:40px; color:var(--green);"></i>
-            <p>ارسل بيانات متجرك الآن ليظهر في الدليل.</p>
-            <a href="whatsapp://send?phone=201220469415&text=تسجيل_متجر" class="btn-main" style="background:var(--green);">ارسل واتساب</a>
-        </div>
-    </div>
-
-    <div id="report" class="section">
-        <h3 style="text-align:center; color:var(--red);">مركز الأمان</h3>
-        <div class="card-bar" style="text-align:center; border-right-color:var(--red);">
-            <i class="fa fa-user-shield" style="font-size:40px; color:var(--red);"></i>
-            <p>أبلغ عن أي نصاب لحماية المجتمع.</p>
-            <a href="whatsapp://send?phone=201220469415&text=بلاغ_نصاب" class="btn-main" style="background:var(--red);">إرسال بلاغ</a>
-        </div>
-    </div>
-
-    <div class="footer">
-        <div class="f-item" id="n-rep" onclick="showPage('report', 'n-rep')"><i class="fa fa-bullhorn"></i><span>إبلاغ</span></div>
-        <div class="f-item" id="n-sta" onclick="showPage('stake', 'n-sta')"><i class="fa fa-chart-pie"></i><span>أرباح</span></div>
-        <div class="f-item active" id="n-hom" onclick="showPage('home', 'n-hom')"><i class="fa fa-house"></i><span>الرئيسية</span></div>
-    </div>
+    <div id="log" style="margin-top:20px; color: #555;"></div>
 
     <script>
-        function showPage(id, navId) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.f-item').forEach(i => i.classList.remove('active'));
-            if(navId) document.getElementById(navId).classList.add('active');
-            window.scrollTo(0,0);
-        }
+        async function startTestPayment() {
+            const log = document.getElementById('log');
+            log.innerText = "جاري فتح المحفظة...";
 
-        async function handlePayment() {
             try {
                 const payment = await Pi.createPayment({
                     amount: 0.1,
-                    memo: "توثيق تجريبي",
-                    metadata: { type: "test" },
+                    memo: "Testnet Trial",
+                    metadata: { orderId: "test_" + Date.now() },
                 }, {
                     onReadyForServerApproval: (paymentId) => {
+                        log.innerText = "تم إنشاء الطلب.. جاري إرسال الموافقة (Approve)";
                         fetch('/functions/complete', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -148,37 +52,22 @@
                         });
                     },
                     onReadyForServerCompletion: (paymentId, txid) => {
+                        log.innerText = "تمت العملية بنجاح! رقم المعاملة: " + txid;
                         fetch('/functions/complete', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId: paymentId, txid: txid, action: 'complete' })
                         });
-                        alert("نجحت التجربة!");
+                        alert("العداد اختفى والدفع نجح!");
                     },
-                    onCancel: (id) => {},
-                    onError: (err) => alert("خطأ: " + err.message)
+                    onCancel: (id) => { log.innerText = "تم إلغاء الدفع."; },
+                    onError: (err) => { log.innerText = "خطأ: " + err.message; }
                 });
-            } catch (e) {
-                // شلنا التنبيه المزعج عشان الزرار يشتغل علطول
-                console.log("الرجاء الفتح من Pi Browser");
+            } catch (err) {
+                alert("افتحي الرابط من داخل Pi Browser");
             }
-        }
-
-        function calc() {
-            let amt = document.getElementById('p_amount').value;
-            let bonus = document.getElementById('p_years').value;
-            if(amt > 0) {
-                document.getElementById('total_v').innerText = (parseFloat(amt) + (amt * bonus)).toLocaleString();
-                document.getElementById('res_box').style.display = 'block';
-            }
-        }
-
-        let isAr = true;
-        function toggleLang() {
-            isAr = !isAr;
-            document.dir = isAr ? 'rtl' : 'ltr';
-            document.getElementById('t-title').innerText = isAr ? "ثقة ودليل الباي" : "Trust & Pi Guide";
         }
     </script>
+
 </body>
-    </html>
+</html>
