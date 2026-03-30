@@ -1,39 +1,33 @@
-// functions/complete.js
-
 export async function onRequestPost(context) {
+    const { request, env } = context;
+    const body = await request.json();
+    const { paymentId, txid, action } = body;
+    
+    const apiKey = env.PI_API_KEY; // المفتاح الذي أضفتيه في Cloudflare
+    const baseUrl = "https://api.minepi.com/v2/payments/";
+
     try {
-        const { paymentId, txid, action } = await context.request.json();
-        
-        // جلب المفتاح السري من Environment Variables في Cloudflare
-        const apiKey = context.env.PI_API_KEY; 
-
-        if (!apiKey) {
-            return new Response("API Key missing in environment", { status: 500 });
-        }
-
-        // 1. مرحلة الموافقة (Approve)
         if (action === 'approve') {
-            const approveRes = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+            // إرسال الموافقة للسيرفر
+            await fetch(`${baseUrl}${paymentId}/approve`, {
                 method: 'POST',
                 headers: { 'Authorization': `Key ${apiKey}` }
             });
-            return new Response(JSON.stringify({ success: approveRes.ok }), { status: 200 });
-        }
-
-        // 2. مرحلة الإكمال (Complete)
-        if (action === 'complete') {
-            const completeRes = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+        } else if (action === 'complete') {
+            // إرسال إشارة الإكمال بعد توفر الـ txid
+            await fetch(`${baseUrl}${paymentId}/complete`, {
                 method: 'POST',
                 headers: { 
                     'Authorization': `Key ${apiKey}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json' 
                 },
-                body: JSON.stringify({ txid })
+                body: JSON.stringify({ txid: txid })
             });
-            return new Response(JSON.stringify({ success: completeRes.ok }), { status: 200 });
         }
-
-        return new Response("Invalid Action", { status: 400 });
+        
+        return new Response(JSON.stringify({ success: true }), {
+            headers: { 'Content-Type': 'application/json' }
+        });
     } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), { status: 500 });
     }
