@@ -8,7 +8,7 @@
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-        // تهيئة الـ SDK
+        // تهيئة الـ SDK - تأكدي من تغيير sandbox إلى false عند الانتقال للـ Mainnet
         Pi.init({ version: "2.0", sandbox: true });
     </script>
 
@@ -163,43 +163,52 @@
     </div>
 
     <script>
+        // دالة الدفع المحدثة والمطابقة لتعليمات الكورتيم
         async function handleMerchantPayment() {
             try {
                 const scopes = ['payments'];
-                function onIncompletePaymentFound(payment) { 
-                   // إذا وجد دفع معلق، نرسله للسيرفر لإكماله
-                   fetch('/functions/complete', {
-                        method: 'POST',
-                        body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid })
-                   });
-                }
-                await Pi.authenticate(scopes, onIncompletePaymentFound);
                 
+                // معالجة أي دفع معلق لمنع رسالة الفشل
+                function onIncompletePaymentFound(payment) {
+                    console.log("Incomplete payment found:", payment.identifier);
+                    fetch('/functions/complete', {
+                        method: 'POST',
+                        body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid, action: 'complete' })
+                    });
+                }
+
+                await Pi.authenticate(scopes, onIncompletePaymentFound);
+
                 Pi.createPayment({
                     amount: 0.1,
                     memo: "رسوم توثيق متجر - ثقة ودليل الباي",
-                    metadata: { action: "merchant_verify" },
+                    metadata: { action: "merchant_verify", timestamp: Date.now() },
                 }, {
                     onReadyForServerApproval: async (paymentId) => {
-                        // الخطوة 1: إبلاغ السيرفر بالموافقة (Approve)
+                        console.log("Approving payment on server...");
                         await fetch('/functions/complete', {
                             method: 'POST',
                             body: JSON.stringify({ paymentId: paymentId, action: 'approve' })
                         });
                     },
                     onReadyForServerCompletion: async (paymentId, txid) => {
-                        // الخطوة 2: إبلاغ السيرفر بالإكمال (Complete)
+                        console.log("Completing payment on server...");
                         await fetch('/functions/complete', {
                             method: 'POST',
                             body: JSON.stringify({ paymentId: paymentId, txid: txid, action: 'complete' })
                         });
-                        alert("تم التوثيق بنجاح!");
-                        window.location.href = "whatsapp://send?phone=201220469415&text=تم_الدفع_بنجاح_TXID_" + txid;
+                        alert("تم الدفع والتوثيق بنجاح!");
+                        window.location.href = "whatsapp://send?phone=201220469415&text=تم_دفع_رسوم_التوثيق_TXID_" + txid;
                     },
-                    onCancel: (id) => alert("تم إلغاء الدفع"),
-                    onError: (err) => alert("حدث خطأ، تأكد من اتصالك بالسيرفر"),
+                    onCancel: (paymentId) => { console.log("User cancelled payment."); },
+                    onError: (error, payment) => { 
+                        console.error("Payment Error:", error);
+                        alert("فشل الدفع، يرجى المحاولة لاحقاً.");
+                    },
                 });
-            } catch (e) { alert("يرجى فتح التطبيق من متصفح Pi"); }
+            } catch (e) {
+                alert("يجب فتح التطبيق من متصفح Pi Browser");
+            }
         }
 
         let isAr = true;
