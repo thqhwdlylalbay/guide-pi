@@ -8,7 +8,7 @@
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-        // تهيئة الـ SDK - تأكدي من تغيير sandbox إلى false عند الانتقال للـ Mainnet
+        // تهيئة الـ SDK - تأكدي أن sandbox: true للاختبار و false للمايننت
         Pi.init({ version: "2.0", sandbox: true });
     </script>
 
@@ -163,54 +163,52 @@
     </div>
 
     <script>
-        // دالة الدفع المحدثة والمطابقة لتعليمات الكورتيم
         async function handleMerchantPayment() {
             try {
-                const scopes = ['payments'];
-                
-                // معالجة أي دفع معلق لمنع رسالة الفشل
-                function onIncompletePaymentFound(payment) {
-                    console.log("Incomplete payment found:", payment.identifier);
+                // التعليمات: التأكد من الدفعات غير المكتملة أولاً
+                const onIncompletePaymentFound = (payment) => {
                     fetch('/functions/complete', {
                         method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid, action: 'complete' })
                     });
-                }
+                };
 
-                await Pi.authenticate(scopes, onIncompletePaymentFound);
+                await Pi.authenticate(['payments'], onIncompletePaymentFound);
 
+                // إنشاء الدفع (U2A)
                 Pi.createPayment({
                     amount: 0.1,
-                    memo: "رسوم توثيق متجر - ثقة ودليل الباي",
-                    metadata: { action: "merchant_verify", timestamp: Date.now() },
+                    memo: "انضمام للمتاجر الموثوقة - ثقة ودليل الباي",
+                    metadata: { type: "merchant_registration" },
                 }, {
                     onReadyForServerApproval: async (paymentId) => {
-                        console.log("Approving payment on server...");
+                        // التعليمات: يجب الموافقة من السيرفر باستخدام Server API Key
                         await fetch('/functions/complete', {
                             method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId: paymentId, action: 'approve' })
                         });
                     },
                     onReadyForServerCompletion: async (paymentId, txid) => {
-                        console.log("Completing payment on server...");
+                        // التعليمات: يجب إكمال الدفع من السيرفر لإغلاق الدائرة
                         await fetch('/functions/complete', {
                             method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId: paymentId, txid: txid, action: 'complete' })
                         });
-                        alert("تم الدفع والتوثيق بنجاح!");
-                        window.location.href = "whatsapp://send?phone=201220469415&text=تم_دفع_رسوم_التوثيق_TXID_" + txid;
+                        alert("تم التوثيق بنجاح!");
+                        window.location.href = "whatsapp://send?phone=201220469415&text=تم_التوثيق_بنجاح_رقم_" + txid;
                     },
-                    onCancel: (paymentId) => { console.log("User cancelled payment."); },
-                    onError: (error, payment) => { 
-                        console.error("Payment Error:", error);
-                        alert("فشل الدفع، يرجى المحاولة لاحقاً.");
-                    },
+                    onCancel: (paymentId) => { console.log("Cancelled"); },
+                    onError: (error, payment) => { alert("خطأ في الدفع، تأكد من فتح التطبيق في Pi Browser"); }
                 });
             } catch (e) {
-                alert("يجب فتح التطبيق من متصفح Pi Browser");
+                alert("يجب استخدام متصفح Pi");
             }
         }
 
+        // باقي وظائف المشروع
         let isAr = true;
         function showPage(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -283,4 +281,4 @@
         }
     </script>
 </body>
-            </html>
+    </html>
