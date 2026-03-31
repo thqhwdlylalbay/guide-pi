@@ -8,7 +8,7 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: "API Key missing" }), { status: 500 });
     }
 
-    // تحديد المسار الصحيح (إما approve أو complete) بناءً على ما يطلبه الكود الأمامي
+    // endpoint سيكون إما 'approve' أو 'complete'
     const targetUrl = `https://api.minepi.com/v2/payments/${paymentId}/${endpoint}`;
 
     const response = await fetch(targetUrl, {
@@ -17,7 +17,6 @@ export async function onRequestPost(context) {
         "Authorization": `Key ${apiKey}`,
         "Content-Type": "application/json",
       },
-      // في حالة الـ complete نرسل الـ txid، في حالة الـ approve لا نحتاجه
       body: endpoint === 'complete' ? JSON.stringify({ txid }) : null,
     });
 
