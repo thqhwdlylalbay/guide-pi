@@ -15,19 +15,15 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .card-bar { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-right: 5px solid var(--p); text-decoration: none; color: inherit; display: block; }
-        .profit-box { background: #e8f5e9; border: 1px solid #2e7d32; padding: 12px; border-radius: 12px; margin-bottom: 15px; color: #1b5e20; line-height: 1.6; }
         .footer { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000; }
         .f-item { flex: 1; text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
         .f-item.active { color: var(--p); font-weight: bold; }
         .f-item i { display: block; font-size: 22px; margin-bottom: 4px; }
-        .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; display: block; box-sizing: border-box; }
+        .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; display: block; text-decoration: none; box-sizing: border-box; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; font-weight: bold; }
         .res-highlight { background: #fff9c4; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); margin-top: 15px; }
-        
-        /* استايل زرار التوثيق */
-        .btn-trust { background: linear-gradient(45deg, var(--p), #8e44ad); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; }
-        .btn-trust:disabled { background: #aaa; cursor: not-allowed; }
-        #status-bar { background: #fff9c4; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; display: none; }
+        .btn-trust { background: linear-gradient(45deg, var(--p), #8e44ad); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; box-shadow: 0 4px 15px rgba(103, 58, 183, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; }
+        #status-bar { background: #fff9c4; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; display: none; color: #5a32a3; }
     </style>
 </head>
 <body>
@@ -46,7 +42,7 @@
     </div>
 
     <div id="home" class="section active">
-        <div id="status-bar">جاري فحص حالة الشبكة...</div>
+        <div id="status-bar">جاري التحقق من الحالة...</div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
             <div onclick="showPage('add_form', this)" style="background: var(--p); color:white; padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
@@ -64,66 +60,65 @@
         <h4 id="t-feat-h">تطبيقات المايننت الموثقة</h4>
         <a href="https://fireside.pinet.com" class="card-bar" style="border-right-color: var(--ora);">
             <strong>Fireside Forum</strong><br>
-            <small id="t-fire-d">اربح عملات Pi مقابل المحتوى المميز.</small>
+            <small>اربح عملات Pi مقابل المحتوى المميز.</small>
         </a>
 
-        <h4 style="margin-top:25px; color:var(--red);"><i class="fa fa-shield-alt"></i> ركن الأمان والموثوقية</h4>
-        <div class="card-bar" style="border-right-color: var(--red); background: #fff5f5;">
+        <div class="card-bar" style="border-right-color: var(--red); background: #fff5f5; margin-top:20px;">
             <strong id="t-safe-t">نصيحة للمحافظة على حسابك</strong>
-            <p id="t-safe-d" style="font-size: 13px; color: #666; margin-top: 8px;">لا تقم أبداً بإدخال كلمة سر المحفظة خارج متصفح Pi.</p>
+            <p id="t-safe-d" style="font-size: 13px; color: #666; margin-top: 8px;">لا تقم أبداً بإدخال كلمة سر المحفظة خارج متصفح Pi الرسمي.</p>
         </div>
     </div>
 
     <div id="verify_list" class="section">
-        <h3 id="t-v-title" style="text-align:center;">دليل المشاريع الرسمية</h3>
-        <a href="https://www.pichainmall.com" class="card-bar"><strong>Pi Chain Mall</strong><br><small>سوق تجاري عالمي لشراء المنتجات.</small></a>
-        <a href="https://pibridge.org" class="card-bar" style="border-right-color: #2196f3;"><strong>Pi Bridge</strong><br><small>جسر نقل الأصول والتبادل.</small></a>
+        <h3 style="text-align:center;">دليل المشاريع</h3>
+        <a href="https://www.pichainmall.com" class="card-bar"><strong>Pi Chain Mall</strong><br><small>سوق تجاري عالمي.</small></a>
+        <a href="https://pibridge.org" class="card-bar" style="border-right-color: #2196f3;"><strong>Pi Bridge</strong><br><small>جسر نقل الأصول.</small></a>
     </div>
 
     <div id="stake" class="section">
-        <h3 id="t-s-title" style="text-align:center;">مركز استثمار وأرباح Pi</h3>
+        <h3 style="text-align:center;">مركز الأرباح</h3>
         <div class="card-bar">
-            <label id="t-l-amt">الكمية:</label>
+            <label>الكمية:</label>
             <input type="number" id="p_amount" placeholder="100">
-            <label id="t-l-yrs">الخطة:</label>
+            <label>المدة:</label>
             <select id="p_years">
                 <option value="0.5">6 أشهر (+50%)</option>
                 <option value="2.0">سنة واحدة (+200%)</option>
             </select>
-            <button class="btn-main" onclick="calc()" id="t-s-btn">احسب أرباحي</button>
+            <button class="btn-main" onclick="calc()">احسب الآن</button>
             <div id="res_box" class="res-highlight" style="display:none; text-align:center;">
-                <span id="t-s-res-l">الإجمالي المتوقع:</span><br>
+                <span>الرصيد المتوقع:</span><br>
                 <span id="total_v" style="font-size:28px; color:var(--p); font-weight:bold;"></span> <b>π</b>
             </div>
         </div>
     </div>
 
     <div id="add_form" class="section">
-        <h3 id="t-a-title" style="text-align:center;">سجل كتاجر موثق</h3>
+        <h3 style="text-align:center;">سجل متجرك</h3>
         <div class="card-bar" style="text-align:center;">
             <i class="fab fa-whatsapp" style="font-size:45px; color:var(--green);"></i>
-            <p id="t-a-desc">ارسل بياناتك لتظهر في الدليل.</p>
-            <a href="whatsapp://send?phone=201220469415" class="btn-main" style="background:var(--green);"><span id="t-a-btn">مراسلة واتساب</span></a>
+            <p>ارسل بيانات متجرك الآن.</p>
+            <a href="whatsapp://send?phone=201220469415" class="btn-main" style="background:var(--green);">مراسلة واتساب</a>
         </div>
     </div>
 
     <div id="report" class="section">
-        <h3 id="t-r-title" style="text-align:center; color:var(--red);">مركز الأمان</h3>
+        <h3 style="text-align:center; color:var(--red);">مركز الأمان</h3>
         <div class="card-bar" style="text-align:center;">
-            <p id="t-r-desc">أبلغ عن أي نصاب لحماية المجتمع.</p>
-            <a href="whatsapp://send?phone=201220469415" class="btn-main" style="background:var(--red);"><span id="t-r-btn">إرسال بلاغ</span></a>
+            <p>أبلغ عن أي عملية احتيال.</p>
+            <a href="whatsapp://send?phone=201220469415" class="btn-main" style="background:var(--red);">إرسال بلاغ</a>
         </div>
     </div>
 
     <div class="footer">
-        <div class="f-item" onclick="showPage('report', this)"><i class="fa fa-bullhorn"></i><span id="n-t-rep">إبلاغ</span></div>
-        <div class="f-item" onclick="showPage('verify_list', this)"><i class="fa fa-medal"></i><span id="n-t-ver">توثيق</span></div>
-        <div class="f-item" onclick="showPage('stake', this)"><i class="fa fa-chart-pie"></i><span id="n-t-sta">أرباح</span></div>
-        <div class="f-item active" onclick="showPage('home', this)"><i class="fa fa-house"></i><span id="n-t-hom">الرئيسية</span></div>
+        <div class="f-item" onclick="showPage('report', this)"><i class="fa fa-bullhorn"></i><span>إبلاغ</span></div>
+        <div class="f-item" onclick="showPage('verify_list', this)"><i class="fa fa-medal"></i><span>توثيق</span></div>
+        <div class="f-item" onclick="showPage('stake', this)"><i class="fa fa-chart-pie"></i><span>أرباح</span></div>
+        <div class="f-item active" onclick="showPage('home', this)"><i class="fa fa-house"></i><span>الرئيسية</span></div>
     </div>
 
     <script>
-        // --- المحرك التقني (كامل وبدون نقص) ---
+        // --- محرك الدفع المتوافق مع دليل المطورين الجديد ---
         Pi.init({ version: "2.0", sandbox: true });
 
         const statusBar = document.getElementById('status-bar');
@@ -137,9 +132,10 @@
                     body: JSON.stringify({ paymentId, txid, endpoint })
                 });
                 return await res.json();
-            } catch (e) { return { error: "خطأ اتصال" }; }
+            } catch (e) { return { error: "خطأ في الاتصال بالسيرفر" }; }
         }
 
+        // معالجة المعاملات المعلقة تلقائياً
         const onIncomplete = (payment) => {
             if (payment.transaction && payment.transaction.txid) {
                 apiCall(payment.identifier, payment.transaction.txid, 'complete');
@@ -148,26 +144,35 @@
 
         Pi.authenticate(['payments', 'username'], onIncomplete).then(auth => {
             statusBar.style.display = "block";
-            statusBar.innerText = "مرحباً " + auth.user.username;
-        }).catch(() => { statusBar.style.display = "block"; statusBar.innerText = "يرجى الفتح من متصفح Pi"; });
+            statusBar.innerText = "مرحباً " + auth.user.username + " | جاهز للتوثيق";
+        }).catch(() => {
+            statusBar.style.display = "block";
+            statusBar.innerText = "يرجى فتح التطبيق من متصفح Pi";
+        });
 
         payBtn.onclick = function() {
             payBtn.disabled = true;
-            statusBar.innerText = "جاري الاتصال بالمحفظة...";
+            statusBar.innerText = "جاري إنشاء المعاملة...";
+
             Pi.createPayment({
                 amount: 0.1,
                 memo: "Trust & Pi Guide Membership",
                 metadata: { type: "verification" }
             }, {
-                onReadyForServerApproval: (id) => apiCall(id, null, 'approve'),
-                onReadyForServerCompletion: (id, txid) => {
-                    apiCall(id, txid, 'complete').then(() => {
-                        alert("✅ تم التوثيق!");
-                        location.reload();
-                    });
+                // خطوة الموافقة (Approve) - إلزامية حسب دليل المطورين
+                onReadyForServerApproval: async (id) => {
+                    statusBar.innerText = "جاري الحصول على موافقة السيرفر...";
+                    await apiCall(id, null, 'approve');
                 },
-                onCancel: () => { payBtn.disabled = false; statusBar.innerText = "تم الإلغاء"; },
-                onError: (err) => { alert(err.message); payBtn.disabled = false; }
+                // خطوة الإتمام (Complete) - بعد دفع المستخدم
+                onReadyForServerCompletion: async (id, txid) => {
+                    statusBar.innerText = "جاري تأكيد الدفع...";
+                    await apiCall(id, txid, 'complete');
+                    alert("✅ تم التوثيق بنجاح!");
+                    location.reload();
+                },
+                onCancel: () => { payBtn.disabled = false; statusBar.innerText = "تم إلغاء الدفع"; },
+                onError: (err) => { alert("خطأ: " + err.message); payBtn.disabled = false; }
             });
         };
 
@@ -176,6 +181,7 @@
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.f-item').forEach(i => i.classList.remove('active'));
             if(el) el.classList.add('active');
+            window.scrollTo(0,0);
         }
 
         function calc() {
@@ -188,10 +194,12 @@
             }
         }
 
+        let isAr = true;
         function toggleLang() {
-            // كود تبديل اللغة كما كان عندك سابقاً
-            alert("تم تغيير اللغة بنجاح!"); 
+            isAr = !isAr;
+            document.dir = isAr ? 'rtl' : 'ltr';
+            alert(isAr ? "اللغة العربية" : "English Language");
         }
     </script>
 </body>
-            </html>
+    </html>
