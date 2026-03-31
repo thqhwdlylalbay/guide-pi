@@ -5,77 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ثقة ودليل الباي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --main-color: #6d3082; --bg-color: #f8f9fa; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg-color); margin: 0; padding-bottom: 50px; }
-        header { background: var(--main-color); color: white; padding: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .merchant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; }
-        .card { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; border: 1px solid #eee; }
-        .card img { width: 60px; margin-bottom: 10px; }
+        :root { --main-color: #6d3082; --bg-color: #f4f4f9; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg-color); margin: 0; padding: 0; text-align: center; }
+        header { background: var(--main-color); color: white; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .container { padding: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+        .card { background: white; border-radius: 15px; width: 280px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #ddd; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .card img { width: 80px; height: 80px; margin-bottom: 15px; }
         .card h3 { margin: 10px 0; color: #333; }
-        .card .category { color: #888; font-size: 14px; margin-bottom: 10px; }
-        .card .price { font-size: 20px; font-weight: bold; color: var(--main-color); margin-bottom: 15px; }
-        .pay-btn { background: var(--main-color); color: white; border: none; width: 100%; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .pay-btn:disabled { background: #ccc; }
-        #loader { text-align: center; padding: 20px; color: var(--main-color); }
+        .card p { color: #666; font-size: 14px; }
+        .price { font-size: 22px; font-weight: bold; color: var(--main-color); margin: 15px 0; }
+        .pay-btn { background: var(--main-color); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; }
+        .pay-btn:active { background: #562568; }
+        #status-msg { margin-top: 20px; color: #d9534f; font-weight: bold; }
+        .loading { padding: 50px; font-size: 18px; color: #666; }
     </style>
 </head>
 <body>
 
 <header>
     <h1>ثقة ودليل الباي 🛡️</h1>
-    <p>دليلك المعتمد للتجار الموثوقين</p>
+    <p>دليلك المعتمد للتجار الموثوقين في شبكة Pi</p>
 </header>
 
-<div id="loader">جاري تحميل قائمة التجار الموثوقين...</div>
-<div class="merchant-grid" id="merchantList"></div>
+<div id="status-msg"></div>
+
+<div class="container" id="merchantList">
+    <div class="loading">جاري تحميل قائمة التجار...</div>
+</div>
 
 <script>
+    // تهيئة Pi SDK
     Pi.init({ version: "2.0", sandbox: true });
 
-    // وظيفة لجلب التجار من قاعدة البيانات (D1)
     async function loadMerchants() {
         try {
-            // ملاحظة: لازم تكوني مجهزة ملف function اسمه get_merchants.js
-            const response = await fetch('/functions/get_merchants');
+            // تنبيه: المسار هنا هو /get_merchants مباشرة
+            const response = await fetch('/get_merchants');
+            if (!response.ok) throw new Error("فشل الاتصال بالسيرفر");
+            
             const merchants = await response.json();
-            
-            const list = document.getElementById('merchantList');
-            document.getElementById('loader').style.display = 'none';
-            
+            const listContainer = document.getElementById('merchantList');
+            listContainer.innerHTML = ''; // مسح كلمة جاري التحميل
+
+            if (merchants.length === 0) {
+                listContainer.innerHTML = '<p>لا يوجد تجار مسجلين حالياً.</p>';
+                return;
+            }
+
             merchants.forEach(m => {
-                list.innerHTML += `
+                listContainer.innerHTML += `
                     <div class="card">
-                        <img src="${m.image_url}" alt="shop">
+                        <img src="${m.image_url || 'https://cdn-icons-png.flaticon.com/512/1162/1162456.png'}" alt="shop">
                         <h3>${m.name}</h3>
-                        <div class="category">${m.category}</div>
+                        <p>${m.category}</p>
                         <div class="price">${m.price_pi} Pi</div>
-                        <button class="pay-btn" onclick="handlePayment('${m.name}', ${m.price_pi})">ادفع الآن</button>
+                        <button class="pay-btn" onclick="onPay('${m.name}', ${m.price_pi})">ادفع الآن</button>
                     </div>
                 `;
             });
-        } catch (e) {
-            document.getElementById('loader').innerText = "حدث خطأ في الاتصال بقاعدة البيانات.";
+        } catch (err) {
+            document.getElementById('status-msg').innerText = "حدث خطأ في الاتصال بقاعدة البيانات.";
+            console.error(err);
         }
     }
 
-    async function handlePayment(name, amount) {
+    async function onPay(merchantName, amount) {
         try {
-            await Pi.createPayment({
+            const payment = await Pi.createPayment({
                 amount: amount,
-                memo: `شراء من ${name}`,
-                metadata: { merchant: name }
+                memo: "توثيق اشتراك في دليل الثقة - " + merchantName,
+                metadata: { merchant: merchantName }
             }, {
-                onReadyForServerApproval: (id) => fetch('/functions/approve', { method: 'POST', body: JSON.stringify({paymentId: id}) }),
-                onReadyForServerCompletion: (id, txid) => fetch('/functions/complete', { method: 'POST', body: JSON.stringify({paymentId: id, txid}) }),
-                onCancel: (id) => alert("تم الإلغاء"),
-                onError: (err) => alert("خطأ: " + err.message)
+                onReadyForServerApproval: (id) => fetch('/approve', { method: 'POST', body: JSON.stringify({paymentId: id}) }),
+                onReadyForServerCompletion: (id, txid) => fetch('/complete', { method: 'POST', body: JSON.stringify({paymentId: id, txid}) }),
+                onCancel: (id) => console.log("Payment cancelled"),
+                onError: (err) => alert("Error: " + err.message)
             });
         } catch (err) {
-            alert("افتح التطبيق من Pi Browser");
+            alert("يرجى فتح التطبيق من داخل Pi Browser");
         }
     }
 
+    // تشغيل جلب البيانات عند فتح الصفحة
     loadMerchants();
 </script>
 </body>
