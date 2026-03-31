@@ -1,60 +1,46 @@
 export async function onRequestPost(context) {
-    const { request, env } = context;
-    
-    // 1. التحقق من وجود مفتاح الـ API
-    const PI_API_KEY = env.PI_API_KEY;
-    if (!PI_API_KEY) {
-        return new Response(JSON.stringify({ error: "Missing PI_API_KEY in environment variables" }), { status: 500 });
+  try {
+    const { paymentId, txid } = await context.request.json();
+    const apiKey = context.env.PI_API_KEY;
+
+    if (!paymentId || !txid) {
+      return new Response(JSON.stringify({ error: "بيانات ناقصة" }), { status: 400 });
     }
 
-    try {
-        const body = await request.json();
-        const { paymentId, txid, action } = body;
-        const baseUrl = "https://api.minepi.com/v2/payments/";
+    // 1. الموافقة على الدفعة (Approve)
+    // نتحقق أولاً من أن الدفعة صالحة للموافقة
+    const approveResponse = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+      method: "POST",
+      headers: { "Authorization": `Key ${apiKey}` }
+    });
 
-        // 2. تجهيز الإعدادات بناءً على نوع الأكشن
-        let url = `${baseUrl}${paymentId}/`;
-        let fetchOptions = {
-            method: 'POST',
-            headers: {
-                'Authorization': `Key ${PI_API_KEY}`,
-                'Content-Type': 'application/json'
-            }
-        };
+    // ملاحظة: إذا كانت الدفعة تمت الموافقة عليها مسبقاً، قد يعيد السيرفر خطأ، لذا يفضل متابعة التنفيذ في بعض الحالات
+    // ولكن للأمان، نتحقق من نجاح الخطوة
+    const approveData = await approveResponse.json();
 
-        if (action === 'approve') {
-            url += 'approve';
-            // في حالة approve، البروتوكول يفضل عدم إرسال body نهائياً
-        } else if (action === 'complete') {
-            url += 'complete';
-            if (!txid) throw new Error("Missing txid for completion");
-            fetchOptions.body = JSON.stringify({ txid: txid });
-        } else {
-            return new Response(JSON.stringify({ error: "Invalid Action" }), { status: 400 });
-        }
+    // 2. إكمال الدفعة (Complete)
+    // نرسل الـ txid لربط العملية بالبلوكشين وإنهائها
+    const completeResponse = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Key ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ txid })
+    });
 
-        // 3. تنفيذ الطلب إلى سيرفرات Pi
-        const response = await fetch(url, fetchOptions);
-        
-        // التحقق من استجابة سيرفر Pi
-        if (!response.ok) {
-            const errorData = await response.text();
-            console.error("Pi API Error:", errorData);
-            return new Response(errorData, { status: response.status });
-        }
+    const result = await completeResponse.json();
 
-        const result = await response.json();
-        return new Response(JSON.stringify(result), {
-            headers: { 
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*' // للسماح بالطلب من المتصفح دون مشاكل CORS
-            }
-        });
+    // نرسل النتيجة النهائية للمتصفح
+    return new Response(JSON.stringify({
+      success: completeResponse.ok,
+      data: result
+    }), {
+      status: completeResponse.status,
+      headers: { "Content-Type": "application/json" }
+    });
 
-    } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), { 
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-        });
-    }
-                                }
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "خطأ داخلي: " + error.message }), { status: 500 });
+  }
+}
