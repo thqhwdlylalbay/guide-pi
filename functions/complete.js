@@ -1,31 +1,27 @@
-// هذا الملف يجب أن يكون في المسار: functions/complete.js
+// المسار: functions/complete.js
 export async function onRequestPost(context) {
   try {
-    const { paymentId, txid } = await context.request.json();
+    const { paymentId, txid, endpoint } = await context.request.json();
     const apiKey = context.env.PI_API_KEY;
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "مفتاح الـ API مفقود في إعدادات Cloudflare" }), { status: 500 });
+      return new Response(JSON.stringify({ error: "API Key missing" }), { status: 500 });
     }
 
-    // 1. خطوة الموافقة (Approve) - إلزامية قبل الإكمال
-    const approveRes = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
-      method: "POST",
-      headers: { "Authorization": `Key ${apiKey}` }
-    });
+    // تحديد المسار الصحيح (إما approve أو complete) بناءً على ما يطلبه الكود الأمامي
+    const targetUrl = `https://api.minepi.com/v2/payments/${paymentId}/${endpoint}`;
 
-    // 2. خطوة الإكمال (Complete)
-    const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+    const response = await fetch(targetUrl, {
       method: "POST",
       headers: {
         "Authorization": `Key ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ txid }),
+      // في حالة الـ complete نرسل الـ txid، في حالة الـ approve لا نحتاجه
+      body: endpoint === 'complete' ? JSON.stringify({ txid }) : null,
     });
 
     const result = await response.json();
-
     return new Response(JSON.stringify(result), { 
       status: response.status,
       headers: { "Content-Type": "application/json" }
@@ -34,4 +30,4 @@ export async function onRequestPost(context) {
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
-    }
+}
