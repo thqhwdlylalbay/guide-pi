@@ -1,19 +1,26 @@
 export async function onRequest(context) {
   const { env } = context;
-  
+
+  // فحص هل قاعدة البيانات مربوطة بالاسم الصحيح DB؟
+  if (!env.DB) {
+    return new Response(JSON.stringify({ error: "لم يتم العثور على ربط قاعدة البيانات (DB Binding)" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
   try {
-    // محاولة جلب البيانات من جدول merchants
-    const data = await env.DB.prepare("SELECT * FROM merchants").all();
+    // جلب البيانات من جدول merchants
+    const { results } = await env.DB.prepare("SELECT * FROM merchants").all();
     
-    return new Response(JSON.stringify(data.results), {
-      headers: { 
+    return new Response(JSON.stringify(results), {
+      headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*" 
+        "Access-Control-Allow-Origin": "*"
       }
     });
-  } catch (e) {
-    // لو فيه مشكلة، الكود ده هيقولنا إيه هي بالظبط
-    return new Response(JSON.stringify({ error: "Database Error: " + e.message }), { 
+  } catch (err) {
+    return new Response(JSON.stringify({ error: "خطأ في الاستعلام: " + err.message }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
     });
