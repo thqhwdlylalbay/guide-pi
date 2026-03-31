@@ -1,13 +1,8 @@
 export async function onRequest(context) {
   const { env } = context;
   
-  // فحص هل الربط موجود أصلاً؟
-  if (!env.DB) {
-    return new Response(JSON.stringify({ error: "Binding DB not found" }), { status: 500 });
-  }
-
   try {
-    // محاولة جلب البيانات
+    // محاولة جلب البيانات من جدول merchants
     const data = await env.DB.prepare("SELECT * FROM merchants").all();
     
     return new Response(JSON.stringify(data.results), {
@@ -17,6 +12,10 @@ export async function onRequest(context) {
       }
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+    // لو فيه مشكلة، الكود ده هيقولنا إيه هي بالظبط
+    return new Response(JSON.stringify({ error: "Database Error: " + e.message }), { 
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
   }
 }
