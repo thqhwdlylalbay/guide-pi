@@ -1,32 +1,19 @@
-// المسار: functions/complete.js
 export async function onRequestPost(context) {
-  try {
-    const { paymentId, txid, endpoint } = await context.request.json();
-    const apiKey = context.env.PI_API_KEY;
+    const { paymentId, txid, pi_uid } = await context.request.json();
+    const db = context.env.DB;
 
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: "API Key missing" }), { status: 500 });
-    }
+    // تسجيل العملية في جدول المدفوعات
+    await db.prepare(
+        "INSERT INTO payments (paymentId, txid, pi_uid) VALUES (?, ?, ?)"
+    ).bind(paymentId, txid, pi_uid).run();
 
-    // endpoint سيكون إما 'approve' أو 'complete'
-    const targetUrl = `https://api.minepi.com/v2/payments/${paymentId}/${endpoint}`;
-
-    const response = await fetch(targetUrl, {
-      method: "POST",
-      headers: {
-        "Authorization": `Key ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: endpoint === 'complete' ? JSON.stringify({ txid }) : null,
+    // إرسال إشارة الإكمال لـ Pi Network
+    await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Key ${context.env.PI_API_KEY}`
+        }
     });
 
-    const result = await response.json();
-    return new Response(JSON.stringify(result), { 
-      status: response.status,
-      headers: { "Content-Type": "application/json" }
-    });
-
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
-  }
+    return new Response(JSON.stringify({ status: "Payment Completed & Saved" }));
 }
