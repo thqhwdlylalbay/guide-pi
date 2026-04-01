@@ -1,14 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust and Pi Guide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --pi-purple: #6d3082; --pi-gold: #ffa500; }
+        body { font-family: 'Cairo', sans-serif; background: #f8f9fa; margin: 0; padding-bottom: 70px; }
+        
+        /* شريط اللغات */
+        .top-bar { background: white; padding: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .lang-btn { cursor: pointer; font-size: 20px; color: var(--pi-purple); }
+
+        /* شريط التنقل السفلي */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000; }
+        .nav-item { text-align: center; color: #666; cursor: pointer; flex: 1; font-size: 12px; }
+        .nav-item i { font-size: 22px; display: block; margin-bottom: 2px; }
+        .nav-item.active { color: var(--pi-purple); font-weight: bold; }
+
+        /* الأقسام المخفية */
+        .page-section { display: none; padding: 20px; }
+        .page-section.active { display: block; }
+
+        /* الحاسبة الذكية */
+        .calculator-card { background: white; padding: 20px; border-radius: 15px; border: 2px solid var(--pi-purple); margin-top: 10px; }
+        input, select { width: 90%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; }
+        .result-box { background: #e8f5e9; padding: 15px; border-radius: 10px; font-weight: bold; color: #2e7d32; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="lang-btn"><i class="fas fa-globe"></i></div>
+    <div style="font-weight: bold; color: var(--pi-purple);">Trust & Pi Guide</div>
+    <div class="lang-btn"><i class="fas fa-user-circle"></i></div>
+</div>
+
+<div id="home-page" class="page-section active">
+    <h3><i class="fas fa-store"></i> قائمة التجار الموثوقين</h3>
+    <div id="merchantList"></div>
+</div>
+
+<div id="staking-page" class="page-section">
+    <h3><i class="fas fa-chart-line"></i> مركز الاستيكنج الذكي</h3>
+    <div class="calculator-card">
+        <label>كمية Pi المراد قفلها:</label>
+        <input type="number" id="piAmount" placeholder="مثلاً: 100" oninput="calculateStaking()">
+        
+        <label>مدة القفل:</label>
+        <select id="lockDuration" onchange="calculateStaking()">
+            <option value="0.1">أسبوعين (10%)</option>
+            <option value="0.25">6 شهور (25%)</option>
+            <option value="1">سنة واحدة (100%)</option>
+            <option value="2">3 سنوات (200%)</option>
+        </select>
+        
+        <div class="result-box" id="stakingResult">زيادة معدل التعدين المتوقعة: 0%</div>
+    </div>
+    <div style="margin-top: 20px; text-align: right; background: white; padding: 15px; border-radius: 15px;">
+        <h4>💡 نصيحة الاستيكنج:</h4>
+        <p>القفل لمدة أطول يعزز من قوة الشبكة ويرفع معدل تعدينك الفردي بشكل كبير. ابدأ بنسبة 50% لمدة سنة لتوازن بين الأرباح والسيولة.</p>
+    </div>
+</div>
+
+<div id="report-page" class="page-section">
+    <h3><i class="fas fa-exclamation-triangle"></i> مركز البلاغات</h3>
+    <p>أمانك يهمنا. أبلغ عن أي تاجر غير ملتزم:</p>
+    <input type="text" placeholder="اسم التاجر">
+    <textarea rows="4" style="width: 90%; border-radius: 10px; padding: 10px;" placeholder="اشرح ما حدث بالتفصيل..."></textarea>
+    <button style="background: red; color: white; border: none; padding: 15px 30px; border-radius: 25px; margin-top: 10px; width: 100%;">إرسال بلاغ رسمي</button>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="showPage('home-page')"><i class="fas fa-home"></i>الرئيسية</div>
+    <div class="nav-item" onclick="showPage('verified-page')"><i class="fas fa-check-circle"></i>موثق</div>
+    <div class="nav-item" onclick="showPage('staking-page')"><i class="fas fa-calculator"></i>الاستيكنج</div>
+    <div class="nav-item" onclick="showPage('report-page')"><i class="fas fa-flag"></i>بلاغ</div>
+</div>
+
 <script>
-    async function loadMerchants() {
-        try {
-            const response = await fetch('/get_merchants');
-            const merchants = await response.json();
-            const list = document.getElementById('merchantList');
-            list.innerHTML = ''; 
-            merchants.forEach(m => {
-                list.innerHTML += `<div class="card">...</div>`; // عرض الكروت أوتوماتيكياً
-            });
-        } catch (err) { console.error("خطأ في جلب البيانات"); }
+    function showPage(pageId) {
+        // إخفاء كل الأقسام
+        document.querySelectorAll('.page-section').forEach(section => section.classList.remove('active'));
+        // إظهار القسم المطلوب
+        document.getElementById(pageId).classList.add('active');
+        // تحديث شكل الأزرار
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        event.currentTarget.classList.add('active');
     }
-    window.onload = loadMerchants;
+
+    function calculateStaking() {
+        const amount = document.getElementById('piAmount').value || 0;
+        const duration = document.getElementById('lockDuration').value;
+        // معادلة تقريبية تحاكي نظام الكورتيم
+        const bonus = (amount * duration * 0.4).toFixed(2);
+        document.getElementById('stakingResult').innerText = `زيادة معدل التعدين المتوقعة: ${bonus}% تقريباً`;
+    }
 </script>
+
+</body>
+        </html>
