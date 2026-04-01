@@ -11,16 +11,11 @@
         body { font-family: 'Cairo', sans-serif; background: var(--bg-color); margin: 0; padding: 0; text-align: center; }
         header { background: var(--main-color); color: white; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .container { padding: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
-        .card { background: white; border-radius: 15px; width: 280px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #ddd; transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); }
+        .card { background: white; border-radius: 15px; width: 280px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #ddd; }
         .card img { width: 80px; height: 80px; margin-bottom: 15px; }
-        .card h3 { margin: 10px 0; color: #333; }
-        .card p { color: #666; font-size: 14px; }
         .price { font-size: 22px; font-weight: bold; color: var(--main-color); margin: 15px 0; }
-        .pay-btn { background: var(--main-color); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; }
-        .pay-btn:active { background: #562568; }
-        #status-msg { margin-top: 20px; color: #d9534f; font-weight: bold; }
-        .loading { padding: 50px; font-size: 18px; color: #666; }
+        .pay-btn { background: var(--main-color); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; width: 100%; }
+        .pi-browser-msg { color: #d9534f; font-size: 14px; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
@@ -30,67 +25,54 @@
     <p>دليلك المعتمد للتجار الموثوقين في شبكة Pi</p>
 </header>
 
-<div id="status-msg"></div>
-
 <div class="container" id="merchantList">
-    <div class="loading">جاري تحميل قائمة التجار...</div>
-</div>
+    </div>
 
 <script>
-    // تهيئة Pi SDK
+    // تهيئة الـ SDK (Sandbox للاختبار)
     Pi.init({ version: "2.0", sandbox: true });
 
-    async function loadMerchants() {
-        try {
-            // تنبيه: المسار هنا هو /get_merchants مباشرة
-            const response = await fetch('/get_merchants');
-            if (!response.ok) throw new Error("فشل الاتصال بالسيرفر");
-            
-            const merchants = await response.json();
-            const listContainer = document.getElementById('merchantList');
-            listContainer.innerHTML = ''; // مسح كلمة جاري التحميل
+    // قائمة التجار (تقدري تعدليها من هنا بسهولة)
+    const merchants = [
+        { name: "سوبر ماركت الأمانة", category: "مواد غذائية", price: 0.1, img: "https://cdn-icons-png.flaticon.com/512/3081/3081840.png" },
+        { name: "محل إلكترونيات الثقة", category: "تكنولوجيا", price: 0.5, img: "https://cdn-icons-png.flaticon.com/512/3659/3659899.png" },
+        { name: "معرض الأثاث الحديث", category: "أثاث منزلي", price: 10.0, img: "https://cdn-icons-png.flaticon.com/512/2603/2603737.png" }
+    ];
 
-            if (merchants.length === 0) {
-                listContainer.innerHTML = '<p>لا يوجد تجار مسجلين حالياً.</p>';
-                return;
-            }
-
-            merchants.forEach(m => {
-                listContainer.innerHTML += `
-                    <div class="card">
-                        <img src="${m.image_url || 'https://cdn-icons-png.flaticon.com/512/1162/1162456.png'}" alt="shop">
-                        <h3>${m.name}</h3>
-                        <p>${m.category}</p>
-                        <div class="price">${m.price_pi} Pi</div>
-                        <button class="pay-btn" onclick="onPay('${m.name}', ${m.price_pi})">ادفع الآن</button>
-                    </div>
-                `;
-            });
-        } catch (err) {
-            document.getElementById('status-msg').innerText = "حدث خطأ في الاتصال بقاعدة البيانات.";
-            console.error(err);
-        }
+    function displayMerchants() {
+        const list = document.getElementById('merchantList');
+        merchants.forEach(m => {
+            list.innerHTML += `
+                <div class="card">
+                    <img src="${m.img}" alt="shop">
+                    <h3>${m.name}</h3>
+                    <p>${m.category}</p>
+                    <div class="price">${m.price} Pi</div>
+                    <button class="pay-btn" onclick="onPay('${m.name}', ${m.price})">ادفع الآن</button>
+                    <p class="pi-browser-msg" id="msg-${m.name}">يرجى الفتح من Pi Browser</p>
+                </div>
+            `;
+        });
     }
 
-    async function onPay(merchantName, amount) {
+    async function onPay(name, amount) {
         try {
             const payment = await Pi.createPayment({
                 amount: amount,
-                memo: "توثيق اشتراك في دليل الثقة - " + merchantName,
-                metadata: { merchant: merchantName }
+                memo: "دفع لتاجر: " + name,
+                metadata: { merchant: name }
             }, {
-                onReadyForServerApproval: (id) => fetch('/approve', { method: 'POST', body: JSON.stringify({paymentId: id}) }),
-                onReadyForServerCompletion: (id, txid) => fetch('/complete', { method: 'POST', body: JSON.stringify({paymentId: id, txid}) }),
-                onCancel: (id) => console.log("Payment cancelled"),
-                onError: (err) => alert("Error: " + err.message)
+                onReadyForServerApproval: (id) => console.log("Approved:", id),
+                onReadyForServerCompletion: (id, txid) => console.log("Completed:", txid),
+                onCancel: (id) => console.log("Cancelled"),
+                onError: (err) => alert("خطأ: " + err.message)
             });
         } catch (err) {
-            alert("يرجى فتح التطبيق من داخل Pi Browser");
+            alert("تنبيه: يجب فتح الرابط من داخل تطبيق Pi Browser لإتمام الدفع.");
         }
     }
 
-    // تشغيل جلب البيانات عند فتح الصفحة
-    loadMerchants();
+    displayMerchants();
 </script>
 </body>
 </html>
