@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي | Trust & Pi Guide</title>
+    <title>Trust & Pi Guide | ثقة ودليل الباي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pi-p: #6d3082; --pi-g: #ffa500; --bg: #f4f7f6; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; transition: 0.3s; text-align: right; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; transition: 0.3s; }
         header { background: var(--pi-p); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .lang-btn { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-family: 'Cairo'; font-size: 0.8rem; }
+        .lang-btn { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
         
         .section { display: none; padding: 15px; animation: fadeIn 0.4s ease; }
         .section.active { display: block; }
@@ -20,145 +20,130 @@
         .card { background: white; border-radius: 15px; padding: 18px; margin-bottom: 15px; border-right: 5px solid var(--pi-p); box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-decoration: none; display: block; color: inherit; }
         .tag { background: #f3e5f5; color: var(--pi-p); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; margin-bottom: 8px; display: inline-block; }
         
-        .btn-main { background: var(--pi-p); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
-        .btn-main:active { transform: scale(0.98); }
+        .btn-main { background: var(--pi-p); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 10px; }
         
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; height: 75px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 1000; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; cursor: pointer; font-size: 0.7rem; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; cursor: pointer; font-size: 0.75rem; }
         .nav-item.active { color: var(--pi-p); font-weight: bold; border-top: 3px solid var(--pi-p); }
-        .nav-item i { font-size: 1.4rem; margin-bottom: 3px; }
+        .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
 
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-family: 'Cairo'; }
-        h3 { color: var(--pi-p); border-bottom: 2px solid var(--pi-g); display: inline-block; padding-bottom: 5px; margin-bottom: 15px; width: 100%; font-size: 1.1rem; }
-        .verified-badge { color: #2e7d32; font-weight: bold; font-size: 0.8rem; display: flex; align-items: center; gap: 4px; margin-top: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; font-family: 'Cairo'; }
+        h3 { color: var(--pi-p); border-bottom: 2px solid var(--pi-g); display: inline-block; padding-bottom: 5px; margin-bottom: 15px; width: 100%; }
     </style>
 </head>
 <body>
 
 <header>
-    <button class="lang-btn" onclick="toggleLanguage()" id="btn-lang">English</button>
-    <div style="font-weight: bold;" id="ui-app-name">ثقة ودليل الباي 🛡️</div>
+    <button class="lang-btn" onclick="toggleLanguage()" id="ui-lang-btn">English</button>
+    <div style="font-weight: bold; font-size: 1.1rem;" id="ui-app-title">ثقة ودليل الباي 🛡️</div>
 </header>
 
 <div id="home" class="section active">
-    <h3 id="h-guide">دليل المايننت المعتمد</h3>
+    <h3 id="ui-h-guide">دليل المايننت المعتمد</h3>
     <a href="https://globalpimarket.pinet.com" class="card">
-        <span class="tag" id="tag-shop">تسوق</span>
+        <span class="tag" id="ui-tag-shop">تسوق</span>
         <h4 style="margin:0">Global Pi Market</h4>
-        <p style="font-size:0.8rem; color:#666;" id="d-global">أكبر سوق عالمي لتبادل السلع مقابل عملة Pi.</p>
+        <p style="font-size:0.8rem; color:#666;" id="ui-desc-global">أكبر سوق عالمي لتبادل السلع مقابل عملة Pi.</p>
     </a>
     <a href="https://thepitogo.pinet.com" class="card">
-        <span class="tag" id="tag-travel">سفر</span>
+        <span class="tag" id="ui-tag-travel">سفر</span>
         <h4 style="margin:0">Pi To Go</h4>
-        <p style="font-size:0.8rem; color:#666;" id="d-togo">خدمات السفر والحجز الموثوقة داخل الشبكة.</p>
-    </a>
-    <a href="https://gamepi.pinet.com" class="card">
-        <span class="tag" id="tag-game">ألعاب</span>
-        <h4 style="margin:0">GamePi</h4>
-        <p style="font-size:0.8rem; color:#666;" id="d-game">منصة ترفيهية متكاملة تدعم اقتصاد Pi.</p>
+        <p style="font-size:0.8rem; color:#666;" id="ui-desc-togo">خدمات السفر والحجز الموثوقة داخل الشبكة.</p>
     </a>
 </div>
 
 <div id="staking" class="section">
-    <h3 id="h-calc">حاسبة الاستيكنج الذكية</h3>
+    <h3 id="ui-h-calc">حاسبة الاستيكنج الذكية</h3>
     <div class="card">
-        <label id="lbl-amt">كمية الـ Pi:</label>
+        <label id="ui-lbl-amt">كمية الـ Pi:</label>
         <input type="number" id="stk-amt" oninput="runCalc()" placeholder="0.00">
-        <label id="lbl-dur">المدة:</label>
+        <label id="ui-lbl-dur">المدة:</label>
         <select id="stk-dur" onchange="runCalc()">
-            <option value="0.1" id="opt-1">أسبوعين</option>
-            <option value="0.25" id="opt-2">6 شهور</option>
-            <option value="1" id="opt-3">سنة واحدة</option>
-            <option value="2" id="opt-4">3 سنوات</option>
+            <option value="0.1" id="ui-opt-1">أسبوعين</option>
+            <option value="0.25" id="ui-opt-2">6 شهور</option>
+            <option value="1" id="ui-opt-3">سنة واحدة</option>
+            <option value="2" id="ui-opt-4">3 سنوات</option>
         </select>
-        <div id="calc-res" style="text-align:center; color:green; font-weight:bold; margin-top:15px;">المكافأة: 0%</div>
+        <div id="calc-res" style="text-align:center; color:green; font-weight:bold; margin-top:15px;">Bonus: 0%</div>
     </div>
 </div>
 
 <div id="add-merchant" class="section">
-    <h3 id="h-add">توثيق وإضافة تاجر (Testnet)</h3>
+    <h3 id="ui-h-add">توثيق وإضافة تاجر (Testnet)</h3>
     <div class="card">
-        <p id="add-info" style="font-size:0.85rem; color:#666;">رسوم التوثيق هي 1 Test-Pi (عملة وهمية للتجربة).</p>
-        <input type="text" id="m-name" placeholder="اسم المحل">
-        <input type="text" id="m-cat" placeholder="نوع النشاط">
+        <p id="ui-add-info" style="font-size:0.85rem; color:#666;">رسوم التوثيق هي 1 Test-Pi (عملة وهمية للتجربة).</p>
+        <input type="text" id="m-name" placeholder="Shop Name">
+        <input type="text" id="m-cat" placeholder="Category">
         <button class="btn-main" onclick="payTestnet()">
-            <i class="fab fa-product-hunt"></i> <span id="btn-pay-text">دفع 1 Test-Pi وتوثيق</span>
+            <i class="fab fa-product-hunt"></i> <span id="ui-btn-pay">دفع 1 Test-Pi وتوثيق</span>
         </button>
     </div>
 </div>
 
-<div id="report" class="section">
-    <h3 id="h-rep" style="color:red">مركز البلاغات</h3>
-    <div class="card" style="border-right-color:red">
-        <input type="text" placeholder="اسم التاجر المشتكى عليه" id="r-name">
-        <textarea placeholder="اشرح المشكلة..." id="r-msg"></textarea>
-        <button class="btn-main" style="background:red" id="btn-rep">إرسال بلاغ</button>
-    </div>
-</div>
-
 <nav class="nav-bar">
-    <div class="nav-item active" onclick="nav('home')"><i class="fas fa-store"></i><span id="n-1">الدليل</span></div>
-    <div class="nav-item" onclick="nav('staking')"><i class="fas fa-calculator"></i><span id="n-2">الحاسبة</span></div>
-    <div class="nav-item" onclick="nav('add-merchant')"><i class="fas fa-plus-circle"></i><span id="n-3">توثيق</span></div>
-    <div class="nav-item" onclick="nav('report')"><i class="fas fa-flag"></i><span id="n-4">بلاغ</span></div>
+    <div class="nav-item active" onclick="nav('home')"><i class="fas fa-store"></i><span id="ui-n1">الدليل</span></div>
+    <div class="nav-item" onclick="nav('staking')"><i class="fas fa-calculator"></i><span id="ui-n2">الحاسبة</span></div>
+    <div class="nav-item" onclick="nav('add-merchant')"><i class="fas fa-plus-circle"></i><span id="ui-n3">توثيق</span></div>
 </nav>
 
 <script>
-    // تهيئة الـ Pi SDK للـ Testnet
     const Pi = window.Pi;
     try { Pi.init({ version: "2.0", sandbox: true }); } catch(e) {}
 
-    let lang = 'ar';
+    let currentLang = 'ar';
 
     function toggleLanguage() {
-        lang = lang === 'ar' ? 'en' : 'ar';
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
         const t = {
             ar: {
-                btn: "English", app: "ثقة ودليل الباي 🛡️", h1: "دليل المايننت المعتمد", h2: "حاسبة الاستيكنج الذكية",
-                h3: "توثيق وإضافة تاجر (Testnet)", h4: "مركز البلاغات", t1: "تسوق", t2: "سفر", t3: "ألعاب",
-                d1: "أكبر سوق عالمي لتبادل السلع مقابل عملة Pi.", d2: "خدمات السفر والحجز الموثوقة داخل الشبكة.",
-                d3: "منصة ترفيهية متكاملة تدعم اقتصاد Pi.", l1: "كمية الـ Pi:", l2: "المدة:",
+                btn: "English", title: "ثقة ودليل الباي 🛡️", hG: "دليل المايننت المعتمد", hC: "حاسبة الاستيكنج الذكية",
+                hA: "توثيق وإضافة تاجر (Testnet)", tS: "تسوق", tT: "سفر", dG: "أكبر سوق عالمي لتبادل السلع مقابل عملة Pi.",
+                dT: "خدمات السفر والحجز الموثوقة داخل الشبكة.", lA: "كمية الـ Pi:", lD: "المدة:",
                 o1: "أسبوعين", o2: "6 شهور", o3: "سنة واحدة", o4: "3 سنوات", 
-                info: "رسوم التوثيق هي 1 Test-Pi (عملة وهمية للتجربة).", bPay: "دفع 1 Test-Pi وتوثيق",
-                bRep: "إرسال بلاغ", n1: "الدليل", n2: "الحاسبة", n3: "توثيق", n4: "بلاغ"
+                info: "رسوم التوثيق هي 1 Test-Pi (عملة وهمية للتجربة).", bP: "دفع 1 Test-Pi وتوثيق",
+                n1: "الدليل", n2: "الحاسبة", n3: "توثيق", dir: "rtl"
             },
             en: {
-                btn: "العربية", app: "Trust & Pi Guide 🛡️", h1: "Verified Mainnet Directory", h2: "Smart Staking Calculator",
-                h3: "Add Merchant (Testnet)", h4: "Report Center", t1: "Shop", t2: "Travel", t3: "Games",
-                d1: "The largest global marketplace for Pi exchange.", d2: "Reliable travel and booking services.",
-                d3: "Entertainment platform supporting Pi economy.", l1: "Pi Amount:", l2: "Duration:",
+                btn: "العربية", title: "Trust & Pi Guide 🛡️", hG: "Verified Mainnet Guide", hC: "Smart Staking Calc",
+                hA: "Merchant Verification (Testnet)", tS: "Shop", tT: "Travel", dG: "The largest global marketplace for Pi.",
+                dT: "Reliable travel and booking services.", lA: "Pi Amount:", lD: "Duration:",
                 o1: "2 Weeks", o2: "6 Months", o3: "1 Year", o4: "3 Years",
-                info: "Verification fee is 1 Test-Pi (Fake coins for testing).", bPay: "Pay 1 Test-Pi & Verify",
-                bRep: "Submit Report", n1: "Guide", n2: "Calculator", n3: "Verify", n4: "Report"
+                info: "Verification fee: 1 Test-Pi (Testing coins).", bP: "Pay 1 Test-Pi & Verify",
+                n1: "Guide", n2: "Calc", n3: "Verify", dir: "ltr"
             }
         };
-        const a = t[lang];
-        document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
-        document.getElementById('btn-lang').innerText = a.btn;
-        document.getElementById('ui-app-name').innerText = a.app;
-        document.getElementById('h-guide').innerText = a.h1;
-        document.getElementById('h-calc').innerText = a.h2;
-        document.getElementById('h-add').innerText = a.h3;
-        document.getElementById('h-rep').innerText = a.h4;
-        document.getElementById('tag-shop').innerText = a.t1;
-        document.getElementById('tag-travel').innerText = a.t2;
-        document.getElementById('tag-game').innerText = a.t3;
-        document.getElementById('d-global').innerText = a.d1;
-        document.getElementById('d-togo').innerText = a.d2;
-        document.getElementById('d-game').innerText = a.d3;
-        document.getElementById('lbl-amt').innerText = a.l1;
-        document.getElementById('lbl-dur').innerText = a.l2;
-        document.getElementById('opt-1').innerText = a.o1;
-        document.getElementById('opt-2').innerText = a.o2;
-        document.getElementById('opt-3').innerText = a.o3;
-        document.getElementById('opt-4').innerText = a.o4;
-        document.getElementById('add-info').innerText = a.info;
-        document.getElementById('btn-pay-text').innerText = a.bPay;
-        document.getElementById('btn-rep').innerText = a.bRep;
-        document.getElementById('n-1').innerText = a.n1;
-        document.getElementById('n-2').innerText = a.n2;
-        document.getElementById('n-3').innerText = a.n3;
-        document.getElementById('n-4').innerText = a.n4;
+        const a = t[currentLang];
+        document.body.dir = a.dir;
+        document.getElementById('ui-lang-btn').innerText = a.btn;
+        document.getElementById('ui-app-title').innerText = a.title;
+        document.getElementById('ui-h-guide').innerText = a.hG;
+        document.getElementById('ui-h-calc').innerText = a.hC;
+        document.getElementById('ui-h-add').innerText = a.hA;
+        document.getElementById('ui-tag-shop').innerText = a.tS;
+        document.getElementById('ui-tag-travel').innerText = a.tT;
+        document.getElementById('ui-desc-global').innerText = a.dG;
+        document.getElementById('ui-desc-togo').innerText = a.dT;
+        document.getElementById('ui-lbl-amt').innerText = a.lA;
+        document.getElementById('ui-lbl-dur').innerText = a.lD;
+        document.getElementById('ui-opt-1').innerText = a.o1;
+        document.getElementById('ui-opt-2').innerText = a.o2;
+        document.getElementById('ui-opt-3').innerText = a.o3;
+        document.getElementById('ui-opt-4').innerText = a.o4;
+        document.getElementById('ui-add-info').innerText = a.info;
+        document.getElementById('ui-btn-pay').innerText = a.bP;
+        document.getElementById('ui-n1').innerText = a.n1;
+        document.getElementById('ui-n2').innerText = a.n2;
+        document.getElementById('ui-n3').innerText = a.n3;
+    }
+
+    async function payTestnet() {
+        try {
+            await Pi.createPayment({ amount: 1, memo: "Testnet Verification", metadata: {test: true} }, {
+                onReadyForServerApproval: (id) => console.log(id),
+                onReadyForServerCompletion: (id, tx) => alert("🎉 Payment Success!"),
+                onCancel: (id) => {}, onError: (e) => {}
+            });
+        } catch(e) { alert("Open in Pi Browser to test payment."); }
     }
 
     function nav(id) {
@@ -168,22 +153,6 @@
         event.currentTarget.classList.add('active');
     }
 
-    async function payTestnet() {
-        if(!document.getElementById('m-name').value) return alert("Please enter shop name");
-        try {
-            await Pi.createPayment({
-                amount: 1.0,
-                memo: "Merchant Verification Test",
-                metadata: { type: "test" }
-            }, {
-                onReadyForServerApproval: (id) => console.log("Payment ID:", id),
-                onReadyForServerCompletion: (id, tx) => alert("🎉 Success! Test-Pi Received."),
-                onCancel: (id) => console.log("Cancelled"),
-                onError: (err) => alert("Error: Please use Pi Browser.")
-            });
-        } catch(e) { alert("Open in Pi Browser to test payment."); }
-    }
-
     function runCalc() {
         const a = document.getElementById('stk-amt').value || 0;
         const d = document.getElementById('stk-dur').value;
@@ -191,4 +160,4 @@
     }
 </script>
 </body>
-            </html>
+</html>
