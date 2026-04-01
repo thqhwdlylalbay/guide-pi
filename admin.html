@@ -1,0 +1,20 @@
+<h2>إضافة تاجر جديد للدليل</h2>
+<input type="text" id="name" placeholder="اسم المحل">
+<input type="text" id="cat" placeholder="التصنيف">
+<input type="number" id="price" placeholder="السعر بالـ Pi">
+<button onclick="saveToDB()">اعتماد وإضافة أوتوماتيكية</button>
+
+<script>
+async function saveToDB() {
+    const newItem = {
+        name: document.getElementById('name').value,
+        category: document.getElementById('cat').value,
+        price: document.getElementById('price').value
+    };
+    await fetch('/add_merchant', { 
+        method: 'POST', 
+        body: JSON.stringify(newItem) 
+    });
+    alert("تم تحديث الدليل بنجاح!");
+}
+</script>
