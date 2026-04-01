@@ -3,125 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trust & Pi Guide | ثقة ودليل الباي</title>
+    <title id="ui-title-tag">ثقة ودليل الباي | Trust & Pi Guide</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         :root { --pi-p: #6d3082; --pi-g: #ffa500; --bg: #f4f7f6; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; transition: 0.3s; }
-        header { background: var(--pi-p); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
-        .lang-btn { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 6px 16px; border-radius: 20px; cursor: pointer; }
+        header { background: var(--pi-p); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .lang-btn { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        
         .section { display: none; padding: 15px; animation: fadeIn 0.4s ease; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         .card { background: white; border-radius: 15px; padding: 18px; margin-bottom: 15px; border-right: 5px solid var(--pi-p); box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-decoration: none; display: block; color: inherit; }
         .btn-main { background: var(--pi-p); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; height: 75px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 1000; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; cursor: pointer; font-size: 0.75rem; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; cursor: pointer; font-size: 0.8rem; }
         .nav-item.active { color: var(--pi-p); font-weight: bold; border-top: 3px solid var(--pi-p); }
         .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; font-family: 'Cairo'; }
+
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-family: 'Cairo'; }
         h3 { color: var(--pi-p); border-bottom: 2px solid var(--pi-g); display: inline-block; padding-bottom: 5px; margin-bottom: 15px; width: 100%; }
+        .status-msg { margin-top: 10px; font-size: 0.9rem; text-align: center; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <header>
     <button class="lang-btn" onclick="toggleLanguage()" id="ui-lang-btn">English</button>
-    <div style="font-weight: bold;" id="ui-app-title">ثقة ودليل الباي 🛡️</div>
+    <div style="font-weight: bold; font-size: 1.1rem;" id="ui-app-title">ثقة ودليل الباي 🛡️</div>
 </header>
 
 <div id="home" class="section active">
     <h3 id="ui-h-guide">دليل المتاجر المعتمد</h3>
-    <a href="https://globalpimarket.pinet.com" class="card"><h4>Global Pi Market</h4><p id="ui-d1">سوق عالمي شامل.</p></a>
-    <a href="https://thepitogo.pinet.com" class="card"><h4>Pi To Go</h4><p id="ui-d2">حجوزات وسفر.</p></a>
+    <a href="https://globalpimarket.pinet.com" class="card">
+        <h4 style="margin:0">Global Pi Market</h4>
+        <p style="font-size:0.8rem; color:#666;" id="ui-d1">أكبر سوق عالمي لتبادل السلع مقابل Pi.</p>
+    </a>
+    <a href="https://thepitogo.pinet.com" class="card">
+        <h4 style="margin:0">Pi To Go</h4>
+        <p style="font-size:0.8rem; color:#666;" id="ui-d2">خدمات السفر والحجز الموثوقة.</p>
+    </a>
 </div>
 
 <div id="staking" class="section">
-    <h3 id="ui-h-calc">حاسبة الاستيكنج</h3>
+    <h3 id="ui-h-calc">حاسبة الاستيكنج الذكية</h3>
     <div class="card">
-        <label id="ui-lbl-amt">الكمية:</label><input type="number" id="stk-amt" oninput="runCalc()" placeholder="0.00">
+        <label id="ui-lbl-amt">الكمية:</label>
+        <input type="number" id="stk-amt" oninput="runCalc()" placeholder="0.00">
         <label id="ui-lbl-dur">المدة:</label>
         <select id="stk-dur" onchange="runCalc()">
             <option value="0.1" id="ui-opt-1">أسبوعين</option>
-            <option value="1" id="ui-opt-2">سنة</option>
-            <option value="2" id="ui-opt-3">3 سنوات</option>
+            <option value="0.25" id="ui-opt-2">6 شهور</option>
+            <option value="1" id="ui-opt-3">سنة واحدة</option>
+            <option value="2" id="ui-opt-4">3 سنوات</option>
         </select>
-        <div id="calc-res" style="text-align:center; color:green; font-weight:bold; margin-top:15px; font-size:1.2rem;">0%</div>
+        <div id="calc-res" style="text-align:center; color:green; font-weight:bold; margin-top:15px; font-size: 1.3rem;">Bonus: 0%</div>
     </div>
 </div>
 
 <div id="payment" class="section">
-    <h3 id="ui-h-pay">توثيق الحساب (Testnet)</h3>
+    <h3 id="ui-h-pay">توثيق المتجر (Testnet)</h3>
     <div class="card">
-        <p id="ui-pay-info">رسوم التوثيق 1 Test-Pi لمرة واحدة.</p>
-        <button class="btn-main" onclick="startPiPayment()">
-            <i class="fab fa-product-hunt"></i> <span id="ui-btn-pay">دفع وتوثيق</span>
+        <p id="ui-pay-info" style="font-size:0.9rem; color:#666;">رسوم التوثيق هي 1 Test-Pi لإضافة متجرك للدليل.</p>
+        <button class="btn-main" onclick="handlePayment()">
+            <i class="fab fa-product-hunt"></i> <span id="ui-btn-pay">دفع 1 Test-Pi وتوثيق</span>
         </button>
+        <div id="payment-status" class="status-msg"></div>
     </div>
 </div>
 
 <nav class="nav-bar">
-    <div class="nav-item active" onclick="nav('home')"><i class="fas fa-store"></i><span id="ui-n1">الدليل</span></div>
-    <div class="nav-item" onclick="nav('staking')"><i class="fas fa-calculator"></i><span id="ui-n2">الحاسبة</span></div>
-    <div class="nav-item" onclick="nav('payment')"><i class="fas fa-check-circle"></i><span id="ui-n3">توثيق</span></div>
+    <div class="nav-item active" onclick="nav('home', this)"><i class="fas fa-store"></i><span id="ui-n1">الدليل</span></div>
+    <div class="nav-item" onclick="nav('staking', this)"><i class="fas fa-calculator"></i><span id="ui-n2">الحاسبة</span></div>
+    <div class="nav-item" onclick="nav('payment', this)"><i class="fas fa-check-circle"></i><span id="ui-n3">توثيق</span></div>
 </nav>
 
 <script>
+    // تهيئة Pi SDK
     const Pi = window.Pi;
-    try { Pi.init({ version: "2.0", sandbox: true }); } catch(e) {}
+    try { 
+        Pi.init({ version: "2.0", sandbox: true }); 
+    } catch(e) { console.error("Pi SDK init error"); }
 
-    let lang = 'ar';
+    let currentLang = 'ar';
+
+    // نظام الترجمة الشامل
     function toggleLanguage() {
-        lang = lang === 'ar' ? 'en' : 'ar';
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
         const t = {
-            ar: { btn: "English", title: "ثقة ودليل الباي 🛡️", h1: "دليل المتاجر المعتمد", h2: "حاسبة الاستيكنج", h3: "توثيق الحساب (Testnet)", d1: "سوق عالمي شامل.", d2: "حجوزات وسفر.", l1: "الكمية:", l2: "المدة:", o1: "أسبوعين", o2: "سنة", o3: "3 سنوات", info: "رسوم التوثيق 1 Test-Pi لمرة واحدة.", bP: "دفع وتوثيق", n1: "الدليل", n2: "الحاسبة", n3: "توثيق", dir: "rtl" },
-            en: { btn: "العربية", title: "Trust & Pi Guide 🛡️", h1: "Verified Stores", h2: "Staking Calc", h3: "Account Verification", d1: "Global Marketplace.", d2: "Travel & Booking.", l1: "Amount:", l2: "Duration:", o1: "2 Weeks", o2: "1 Year", o3: "3 Years", info: "Verification fee: 1 Test-Pi.", bP: "Pay & Verify", n1: "Guide", n2: "Calc", n3: "Verify", dir: "ltr" }
+            ar: {
+                btn: "English", title: "ثقة ودليل الباي 🛡️", hG: "دليل المتاجر المعتمد", hC: "حاسبة الاستيكنج الذكية",
+                hP: "توثيق المتجر (Testnet)", d1: "أكبر سوق عالمي لتبادل السلع مقابل Pi.", d2: "خدمات السفر والحجز الموثوقة.",
+                lA: "الكمية:", lD: "المدة:", o1: "أسبوعين", o2: "6 شهور", o3: "سنة واحدة", o4: "3 سنوات",
+                pI: "رسوم التوثيق هي 1 Test-Pi لإضافة متجرك للدليل.", bP: "دفع 1 Test-Pi وتوثيق",
+                n1: "الدليل", n2: "الحاسبة", n3: "توثيق", dir: "rtl"
+            },
+            en: {
+                btn: "العربية", title: "Trust & Pi Guide 🛡️", hG: "Verified Merchant Guide", hC: "Smart Staking Calculator",
+                hP: "Store Verification (Testnet)", d1: "The largest global marketplace for Pi.", d2: "Reliable travel and booking services.",
+                lA: "Amount:", lD: "Duration:", o1: "2 Weeks", o2: "6 Months", o3: "1 Year", o4: "3 Years",
+                pI: "Verification fee: 1 Test-Pi to add your store.", bP: "Pay 1 Test-Pi & Verify",
+                n1: "Guide", n2: "Calc", n3: "Verify", dir: "ltr"
+            }
         };
-        const a = t[lang];
+        const a = t[currentLang];
         document.body.dir = a.dir;
         document.getElementById('ui-lang-btn').innerText = a.btn;
         document.getElementById('ui-app-title').innerText = a.title;
-        document.getElementById('ui-h-guide').innerText = a.h1;
-        document.getElementById('ui-h-calc').innerText = a.h2;
-        document.getElementById('ui-h-pay').innerText = a.h3;
+        document.getElementById('ui-h-guide').innerText = a.hG;
+        document.getElementById('ui-h-calc').innerText = a.hC;
+        document.getElementById('ui-h-pay').innerText = a.hP;
         document.getElementById('ui-d1').innerText = a.d1;
         document.getElementById('ui-d2').innerText = a.d2;
-        document.getElementById('ui-lbl-amt').innerText = a.l1;
-        document.getElementById('ui-lbl-dur').innerText = a.l2;
+        document.getElementById('ui-lbl-amt').innerText = a.lA;
+        document.getElementById('ui-lbl-dur').innerText = a.lD;
         document.getElementById('ui-opt-1').innerText = a.o1;
         document.getElementById('ui-opt-2').innerText = a.o2;
         document.getElementById('ui-opt-3').innerText = a.o3;
-        document.getElementById('ui-pay-info').innerText = a.info;
+        document.getElementById('ui-opt-4').innerText = a.o4;
+        document.getElementById('ui-pay-info').innerText = a.pI;
         document.getElementById('ui-btn-pay').innerText = a.bP;
         document.getElementById('ui-n1').innerText = a.n1;
         document.getElementById('ui-n2').innerText = a.n2;
         document.getElementById('ui-n3').innerText = a.n3;
     }
 
-    async function startPiPayment() {
+    // إدارة الدفع والربط مع ملفات الخلفية (approve.js & complete.js)
+    async function handlePayment() {
+        const statusDiv = document.getElementById('payment-status');
+        statusDiv.style.color = "blue";
+        statusDiv.innerText = currentLang === 'ar' ? "جاري الاتصال بالمحفظة..." : "Connecting to wallet...";
+
         try {
-            await Pi.createPayment({ amount: 1.0, memo: "Verification Fee", metadata: { type: "verify" } }, {
-                onReadyForServerApproval: (id) => fetch('/approve.js', { method: 'POST', body: JSON.stringify({paymentId: id}) }),
-                onReadyForServerCompletion: (id, tx) => fetch('/complete.js', { method: 'POST', body: JSON.stringify({paymentId: id, txid: tx}) }).then(() => alert("Verified!")),
-                onCancel: (id) => {}, onError: (e) => alert("Use Pi Browser")
+            const payment = await Pi.createPayment({
+                amount: 1.0,
+                memo: "Merchant Verification Fee",
+                metadata: { orderId: "verify_" + Date.now() }
+            }, {
+                onReadyForServerApproval: async (paymentId) => {
+                    console.log("Approving payment:", paymentId);
+                    // مناداة ملف approve.js في الخلفية
+                    return await fetch('/approve.js', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId })
+                    }).then(res => res.json());
+                },
+                onReadyForServerCompletion: async (paymentId, txid) => {
+                    console.log("Completing payment:", txid);
+                    // مناداة ملف complete.js في الخلفية
+                    await fetch('/complete.js', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId, txid })
+                    });
+                    statusDiv.style.color = "green";
+                    statusDiv.innerText = currentLang === 'ar' ? "✅ تمت عملية التوثيق بنجاح!" : "✅ Verification Successful!";
+                },
+                onCancel: (paymentId) => {
+                    statusDiv.style.color = "orange";
+                    statusDiv.innerText = currentLang === 'ar' ? "تم إلغاء العملية." : "Payment cancelled.";
+                },
+                onError: (error, payment) => {
+                    statusDiv.style.color = "red";
+                    statusDiv.innerText = currentLang === 'ar' ? "خطأ: تأكد من استخدام Pi Browser." : "Error: Use Pi Browser.";
+                }
             });
-        } catch(e) { alert("Open in Pi Browser"); }
+        } catch (err) {
+            statusDiv.style.color = "red";
+            statusDiv.innerText = "Error initiating payment.";
+        }
     }
 
-    function nav(id) {
+    // التنقل بين الأقسام
+    function nav(id, el) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+        el.classList.add('active');
     }
 
+    // حاسبة الأرباح
     function runCalc() {
-        const a = document.getElementById('stk-amt').value || 0;
-        const d = document.getElementById('stk-dur').value;
-        document.getElementById('calc-res').innerText = `Bonus: ${(a * d * 40).toFixed(2)}%`;
+        const amt = document.getElementById('stk-amt').value || 0;
+        const dur = document.getElementById('stk-dur').value;
+        const bonus = (amt * dur * 40).toFixed(2);
+        document.getElementById('calc-res').innerText = `Bonus: ${bonus}%`;
     }
 </script>
 </body>
-    </html>
+        </html>
