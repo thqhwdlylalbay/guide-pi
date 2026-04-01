@@ -3,101 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trust and Pi Guide</title>
+    <title>Trust & Pi Guide | ثقة ودليل الباي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --pi-purple: #6d3082; --pi-gold: #ffa500; }
-        body { font-family: 'Cairo', sans-serif; background: #f8f9fa; margin: 0; padding-bottom: 70px; }
+        :root { --pi-p: #6d3082; --pi-g: #ffa500; --bg: #f0f2f5; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; }
+        header { background: var(--pi-p); color: white; padding: 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .lang-icon { float: left; cursor: pointer; font-size: 1.2rem; }
         
-        /* شريط اللغات */
-        .top-bar { background: white; padding: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .lang-btn { cursor: pointer; font-size: 20px; color: var(--pi-purple); }
+        .section { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* شريط التنقل السفلي */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000; }
-        .nav-item { text-align: center; color: #666; cursor: pointer; flex: 1; font-size: 12px; }
-        .nav-item i { font-size: 22px; display: block; margin-bottom: 2px; }
-        .nav-item.active { color: var(--pi-purple); font-weight: bold; }
-
-        /* الأقسام المخفية */
-        .page-section { display: none; padding: 20px; }
-        .page-section.active { display: block; }
-
-        /* الحاسبة الذكية */
-        .calculator-card { background: white; padding: 20px; border-radius: 15px; border: 2px solid var(--pi-purple); margin-top: 10px; }
-        input, select { width: 90%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; }
-        .result-box { background: #e8f5e9; padding: 15px; border-radius: 10px; font-weight: bold; color: #2e7d32; margin-top: 15px; }
+        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-right: 5px solid var(--pi-p); }
+        .btn { background: var(--pi-p); color: white; border: none; padding: 10px 20px; border-radius: 25px; width: 100%; cursor: pointer; font-weight: bold; }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
+        
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); }
+        .nav-item { flex: 1; text-align: center; padding: 12px 0; color: #888; cursor: pointer; font-size: 0.8rem; }
+        .nav-item.active { color: var(--pi-p); border-top: 3px solid var(--pi-p); }
+        .nav-item i { font-size: 1.4rem; display: block; }
     </style>
 </head>
 <body>
 
-<div class="top-bar">
-    <div class="lang-btn"><i class="fas fa-globe"></i></div>
-    <div style="font-weight: bold; color: var(--pi-purple);">Trust & Pi Guide</div>
-    <div class="lang-btn"><i class="fas fa-user-circle"></i></div>
+<header>
+    <div class="lang-icon"><i class="fas fa-globe"></i></div>
+    <div style="font-size: 1.2rem; font-weight: bold;">ثقة ودليل الباي 🛡️</div>
+</header>
+
+<div id="home" class="section active">
+    <h3><i class="fas fa-store"></i> التجار المعتمدون</h3>
+    <div id="merchantsContainer">
+        </div>
 </div>
 
-<div id="home-page" class="page-section active">
-    <h3><i class="fas fa-store"></i> قائمة التجار الموثوقين</h3>
-    <div id="merchantList"></div>
-</div>
-
-<div id="staking-page" class="page-section">
-    <h3><i class="fas fa-chart-line"></i> مركز الاستيكنج الذكي</h3>
-    <div class="calculator-card">
-        <label>كمية Pi المراد قفلها:</label>
-        <input type="number" id="piAmount" placeholder="مثلاً: 100" oninput="calculateStaking()">
-        
-        <label>مدة القفل:</label>
-        <select id="lockDuration" onchange="calculateStaking()">
-            <option value="0.1">أسبوعين (10%)</option>
-            <option value="0.25">6 شهور (25%)</option>
-            <option value="1">سنة واحدة (100%)</option>
-            <option value="2">3 سنوات (200%)</option>
+<div id="staking" class="section">
+    <h3><i class="fas fa-calculator"></i> حاسبة الاستيكنج الرسمية</h3>
+    <div class="card">
+        <label>كمية Pi المحجوزة:</label>
+        <input type="number" id="piVal" placeholder="0.00" oninput="runCalc()">
+        <label>مدة الحجز:</label>
+        <select id="piTime" onchange="runCalc()">
+            <option value="0.1">أسبوعين (×0.1)</option>
+            <option value="0.25">6 شهور (×0.25)</option>
+            <option value="1">سنة واحدة (×1.0)</option>
+            <option value="2">3 سنوات (×2.0)</option>
         </select>
-        
-        <div class="result-box" id="stakingResult">زيادة معدل التعدين المتوقعة: 0%</div>
+        <div id="res" style="color: green; font-weight: bold; margin-top: 10px; text-align: center;">المكافأة: 0%</div>
     </div>
-    <div style="margin-top: 20px; text-align: right; background: white; padding: 15px; border-radius: 15px;">
-        <h4>💡 نصيحة الاستيكنج:</h4>
-        <p>القفل لمدة أطول يعزز من قوة الشبكة ويرفع معدل تعدينك الفردي بشكل كبير. ابدأ بنسبة 50% لمدة سنة لتوازن بين الأرباح والسيولة.</p>
+    <div class="card" style="border-right-color: var(--pi-g);">
+        <h4>💡 نصيحة الخبراء:</h4>
+        <p>الاستيكنج بيزود سرعة تعدينك بنسبة بتوصل لـ 200% لو قفلت لمدة 3 سنين.</p>
     </div>
 </div>
 
-<div id="report-page" class="page-section">
-    <h3><i class="fas fa-exclamation-triangle"></i> مركز البلاغات</h3>
-    <p>أمانك يهمنا. أبلغ عن أي تاجر غير ملتزم:</p>
-    <input type="text" placeholder="اسم التاجر">
-    <textarea rows="4" style="width: 90%; border-radius: 10px; padding: 10px;" placeholder="اشرح ما حدث بالتفصيل..."></textarea>
-    <button style="background: red; color: white; border: none; padding: 15px 30px; border-radius: 25px; margin-top: 10px; width: 100%;">إرسال بلاغ رسمي</button>
+<div id="admin" class="section">
+    <h3><i class="fas fa-user-shield"></i> لوحة التحكم (أوتوماتيك)</h3>
+    <div class="card">
+        <input type="text" id="mName" placeholder="اسم التاجر أو المحل">
+        <input type="text" id="mCat" placeholder="التصنيف (مثلاً: مطعم)">
+        <input type="number" id="mPrice" placeholder="السعر بالـ Pi">
+        <button class="btn" onclick="addNew()">إضافة فورية للدليل</button>
+    </div>
 </div>
 
-<div class="bottom-nav">
-    <div class="nav-item active" onclick="showPage('home-page')"><i class="fas fa-home"></i>الرئيسية</div>
-    <div class="nav-item" onclick="showPage('verified-page')"><i class="fas fa-check-circle"></i>موثق</div>
-    <div class="nav-item" onclick="showPage('staking-page')"><i class="fas fa-calculator"></i>الاستيكنج</div>
-    <div class="nav-item" onclick="showPage('report-page')"><i class="fas fa-flag"></i>بلاغ</div>
+<div id="report" class="section">
+    <h3><i class="fas fa-bullhorn"></i> مركز البلاغات الآمن</h3>
+    <div class="card">
+        <p>هل تعرضت لمشكلة؟ أبلغنا فوراً لنحمي المجتمع.</p>
+        <input type="text" placeholder="اسم التاجر">
+        <textarea placeholder="وصف المشكلة (جودة سيئة، نصب، تأخير)..."></textarea>
+        <button class="btn" style="background: #dc3545;">إرسال البلاغ</button>
+    </div>
 </div>
+
+<nav class="nav-bar">
+    <div class="nav-item active" onclick="go('home')"><i class="fas fa-home"></i>الرئيسية</div>
+    <div class="nav-item" onclick="go('staking')"><i class="fas fa-chart-pie"></i>الاستيكنج</div>
+    <div class="nav-item" onclick="go('admin')"><i class="fas fa-plus-circle"></i>إضافة</div>
+    <div class="nav-item" onclick="go('report')"><i class="fas fa-flag"></i>بلاغ</div>
+</nav>
 
 <script>
-    function showPage(pageId) {
-        // إخفاء كل الأقسام
-        document.querySelectorAll('.page-section').forEach(section => section.classList.remove('active'));
-        // إظهار القسم المطلوب
-        document.getElementById(pageId).classList.add('active');
-        // تحديث شكل الأزرار
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    // نظام التنقل الذكي
+    function go(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         event.currentTarget.classList.add('active');
     }
 
-    function calculateStaking() {
-        const amount = document.getElementById('piAmount').value || 0;
-        const duration = document.getElementById('lockDuration').value;
-        // معادلة تقريبية تحاكي نظام الكورتيم
-        const bonus = (amount * duration * 0.4).toFixed(2);
-        document.getElementById('stakingResult').innerText = `زيادة معدل التعدين المتوقعة: ${bonus}% تقريباً`;
+    // حاسبة الاستيكنج الذكية
+    function runCalc() {
+        let v = document.getElementById('piVal').value || 0;
+        let t = document.getElementById('piTime').value;
+        let bonus = (v * t * 40).toFixed(2); 
+        document.getElementById('res').innerText = `زيادة معدل التعدين: ${bonus}%`;
     }
+
+    // نظام الإضافة الأوتوماتيكي (لوحة التحكم)
+    let db = JSON.parse(localStorage.getItem('merchants')) || [
+        {name: "سوبر ماركت الأمانة", cat: "مواد غذائية", price: 0.1}
+    ];
+
+    function render() {
+        const container = document.getElementById('merchantsContainer');
+        container.innerHTML = db.map(m => `
+            <div class="card">
+                <div style="float: left; color: gold;"><i class="fas fa-star"></i></div>
+                <h4 style="margin:0">${m.name}</h4>
+                <small>${m.cat}</small>
+                <div style="color:var(--pi-p); font-weight:bold; margin-top:10px;">السعر: ${m.price} Pi</div>
+                <button class="btn" style="margin-top:10px" onclick="alert('افتح Pi Browser للدفع')">ادفع الآن</button>
+            </div>
+        `).join('');
+    }
+
+    function addNew() {
+        let n = document.getElementById('mName').value;
+        let c = document.getElementById('mCat').value;
+        let p = document.getElementById('mPrice').value;
+        if(n && p) {
+            db.push({name: n, cat: c, price: p});
+            localStorage.setItem('merchants', JSON.stringify(db));
+            render();
+            alert('تم التحديث أوتوماتيكياً!');
+            go('home');
+        }
+    }
+
+    render();
 </script>
 
 </body>
-        </html>
+            </html>
