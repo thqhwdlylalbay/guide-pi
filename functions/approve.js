@@ -1,16 +1,11 @@
-
-export async function onRequestPost(context) {
-    const { paymentId } = await context.request.json();
-    
-    // هنا يتم استدعاء API الخاص بـ Pi لتأكيد العملية
-    // ملاحظة: ستحتاجين لوضع API KEY الخاص بكِ في إعدادات Cloudflare
-    const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Key ${context.env.PI_API_KEY}`
-        }
+export default {
+  async fetch(request, env) {
+    if (request.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
+    const { paymentId } = await request.json();
+    const res = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+      method: "POST",
+      headers: { "Authorization": `Key ${env.PI_API_KEY}`, "Content-Type": "application/json" }
     });
-
-    const result = await response.json();
-    return new Response(JSON.stringify(result));
+    return new Response(JSON.stringify(await res.json()), { headers: { "Content-Type": "application/json" } });
+  }
 }
