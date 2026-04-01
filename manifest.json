@@ -1,15 +1,18 @@
 {
   "short_name": "TrustPi",
   "name": "Trust and Pi Guide",
+  "description": "دليل المتاجر الموثوقة وحاسبة الاستيكنج لرواد شبكة باي",
   "icons": [
     {
       "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
+      "sizes": "64x64 32x32",
       "type": "image/x-icon"
     }
   ],
-  "start_url": ".",
+  "start_url": "https://thqhwdlylalbay-github-io.pages.dev/",
+  "scope": "https://thqhwdlylalbay-github-io.pages.dev/",
   "display": "standalone",
-  "theme_color": "#673ab7",
-  "background_color": "#ffffff"
+  "theme_color": "#6d3082",
+  "background_color": "#ffffff",
+  "lang": "ar"
 }
