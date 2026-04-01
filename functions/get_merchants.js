@@ -1,28 +1,11 @@
-export async function onRequest(context) {
-  const { env } = context;
-
-  // فحص هل قاعدة البيانات مربوطة بالاسم الصحيح DB؟
-  if (!env.DB) {
-    return new Response(JSON.stringify({ error: "لم يتم العثور على ربط قاعدة البيانات (DB Binding)" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-
-  try {
-    // جلب البيانات من جدول merchants
-    const { results } = await env.DB.prepare("SELECT * FROM merchants").all();
+export async function onRequestPost(context) {
+    const { env, request } = context;
+    const data = await request.json();
     
-    return new Response(JSON.stringify(results), {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
-      }
-    });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: "خطأ في الاستعلام: " + err.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
+    // أمر الإدخال في قاعدة البيانات أوتوماتيكياً
+    await env.DB.prepare(
+        "INSERT INTO merchants (name, category, price_pi) VALUES (?, ?, ?)"
+    ).bind(data.name, data.category, data.price).run();
+
+    return new Response("Success", { status: 200 });
 }
