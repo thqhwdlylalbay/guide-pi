@@ -3,91 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trust & Pi Guide | ثقة ودليل الباي</title>
+    <title>Trust & Pi Guide</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --pi-p: #6d3082; --pi-g: #ffa500; --bg: #f0f2f5; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; }
-        header { background: var(--pi-p); color: white; padding: 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .lang-icon { float: left; cursor: pointer; font-size: 1.2rem; }
+        :root { --pi-p: #6d3082; --pi-g: #ffa500; --bg: #f8f9fa; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; text-align: right; }
+        header { background: var(--pi-p); color: white; padding: 15px; position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; }
         
         .section { display: none; padding: 15px; animation: fadeIn 0.3s; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-right: 5px solid var(--pi-p); }
-        .btn { background: var(--pi-p); color: white; border: none; padding: 10px 20px; border-radius: 25px; width: 100%; cursor: pointer; font-weight: bold; }
+        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; border-right: 5px solid var(--pi-p); }
+        .price { color: var(--pi-p); font-weight: bold; font-size: 1.2rem; }
+        .btn { background: var(--pi-p); color: white; border: none; padding: 12px; border-radius: 25px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; }
         
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
-        
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); }
+        /* قائمة اللغات */
+        #langMenu { display: none; position: absolute; top: 50px; left: 10px; background: white; border: 1px solid #ddd; border-radius: 8px; z-index: 2000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        #langMenu div { padding: 10px 20px; cursor: pointer; color: #333; }
+        #langMenu div:hover { background: #eee; }
+
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000; }
         .nav-item { flex: 1; text-align: center; padding: 12px 0; color: #888; cursor: pointer; font-size: 0.8rem; }
         .nav-item.active { color: var(--pi-p); border-top: 3px solid var(--pi-p); }
         .nav-item i { font-size: 1.4rem; display: block; }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="lang-icon"><i class="fas fa-globe"></i></div>
-    <div style="font-size: 1.2rem; font-weight: bold;">ثقة ودليل الباي 🛡️</div>
+    <div onclick="toggleLang()" style="cursor:pointer"><i class="fas fa-globe"></i> <span id="currentLang">العربية</span></div>
+    <div style="font-weight: bold;">ثقة ودليل الباي 🛡️</div>
+    <div id="langMenu">
+        <div onclick="changeLang('ar')">العربية</div>
+        <div onclick="changeLang('en')">English</div>
+        <div onclick="changeLang('zh')">中文</div>
+        <div onclick="changeLang('vi')">Tiếng Việt</div>
+    </div>
 </header>
 
 <div id="home" class="section active">
-    <h3><i class="fas fa-store"></i> التجار المعتمدون</h3>
-    <div id="merchantsContainer">
-        </div>
+    <h3 id="txt-merchants">التجار المعتمدون</h3>
+    <div id="merchantsContainer"></div>
 </div>
 
 <div id="staking" class="section">
-    <h3><i class="fas fa-calculator"></i> حاسبة الاستيكنج الرسمية</h3>
+    <h3 id="txt-calc-title">حاسبة الاستيكنج الذكية</h3>
     <div class="card">
-        <label>كمية Pi المحجوزة:</label>
-        <input type="number" id="piVal" placeholder="0.00" oninput="runCalc()">
-        <label>مدة الحجز:</label>
+        <label id="txt-amount">الكمية:</label>
+        <input type="number" id="piVal" oninput="runCalc()" placeholder="0.00">
+        <label id="txt-duration">المدة:</label>
         <select id="piTime" onchange="runCalc()">
-            <option value="0.1">أسبوعين (×0.1)</option>
-            <option value="0.25">6 شهور (×0.25)</option>
-            <option value="1">سنة واحدة (×1.0)</option>
-            <option value="2">3 سنوات (×2.0)</option>
+            <option value="0.1">أسبوعين</option>
+            <option value="0.25">6 شهور</option>
+            <option value="1">سنة واحدة</option>
+            <option value="2">3 سنوات</option>
         </select>
-        <div id="res" style="color: green; font-weight: bold; margin-top: 10px; text-align: center;">المكافأة: 0%</div>
-    </div>
-    <div class="card" style="border-right-color: var(--pi-g);">
-        <h4>💡 نصيحة الخبراء:</h4>
-        <p>الاستيكنج بيزود سرعة تعدينك بنسبة بتوصل لـ 200% لو قفلت لمدة 3 سنين.</p>
+        <div id="res" style="text-align:center; margin-top:15px; font-weight:bold; color:green;">المكافأة المتوقعة: 0%</div>
     </div>
 </div>
 
 <div id="admin" class="section">
-    <h3><i class="fas fa-user-shield"></i> لوحة التحكم (أوتوماتيك)</h3>
+    <h3 id="txt-admin-title">إضافة تاجر (لوحة التحكم)</h3>
     <div class="card">
-        <input type="text" id="mName" placeholder="اسم التاجر أو المحل">
-        <input type="text" id="mCat" placeholder="التصنيف (مثلاً: مطعم)">
+        <input type="text" id="mName" placeholder="اسم التاجر">
+        <input type="text" id="mCat" placeholder="التصنيف">
         <input type="number" id="mPrice" placeholder="السعر بالـ Pi">
-        <button class="btn" onclick="addNew()">إضافة فورية للدليل</button>
+        <button class="btn" onclick="addNew()">إضافة فورية</button>
     </div>
 </div>
 
 <div id="report" class="section">
-    <h3><i class="fas fa-bullhorn"></i> مركز البلاغات الآمن</h3>
+    <h3>مركز البلاغات</h3>
     <div class="card">
-        <p>هل تعرضت لمشكلة؟ أبلغنا فوراً لنحمي المجتمع.</p>
-        <input type="text" placeholder="اسم التاجر">
-        <textarea placeholder="وصف المشكلة (جودة سيئة، نصب، تأخير)..."></textarea>
-        <button class="btn" style="background: #dc3545;">إرسال البلاغ</button>
+        <input type="text" placeholder="اسم التاجر المشتكى عليه">
+        <textarea placeholder="سبب البلاغ..."></textarea>
+        <button class="btn" style="background:#dc3545">إرسال بلاغ</button>
     </div>
 </div>
 
 <nav class="nav-bar">
     <div class="nav-item active" onclick="go('home')"><i class="fas fa-home"></i>الرئيسية</div>
-    <div class="nav-item" onclick="go('staking')"><i class="fas fa-chart-pie"></i>الاستيكنج</div>
+    <div class="nav-item" onclick="go('staking')"><i class="fas fa-calculator"></i>الاستيكنج</div>
     <div class="nav-item" onclick="go('admin')"><i class="fas fa-plus-circle"></i>إضافة</div>
     <div class="nav-item" onclick="go('report')"><i class="fas fa-flag"></i>بلاغ</div>
 </nav>
 
 <script>
-    // نظام التنقل الذكي
+    // تهيئة Pi SDK
+    try { Pi.init({ version: "2.0", sandbox: true }); } catch(e) { console.log("Pi SDK Error"); }
+
     function go(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -95,30 +104,55 @@
         event.currentTarget.classList.add('active');
     }
 
-    // حاسبة الاستيكنج الذكية
-    function runCalc() {
-        let v = document.getElementById('piVal').value || 0;
-        let t = document.getElementById('piTime').value;
-        let bonus = (v * t * 40).toFixed(2); 
-        document.getElementById('res').innerText = `زيادة معدل التعدين: ${bonus}%`;
+    function toggleLang() {
+        const menu = document.getElementById('langMenu');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
     }
 
-    // نظام الإضافة الأوتوماتيكي (لوحة التحكم)
-    let db = JSON.parse(localStorage.getItem('merchants')) || [
-        {name: "سوبر ماركت الأمانة", cat: "مواد غذائية", price: 0.1}
+    // نظام اللغات
+    function changeLang(l) {
+        const texts = {
+            ar: { merchants: "التجار المعتمدون", amount: "الكمية:", duration: "المدة:", calc: "حاسبة الاستيكنج الذكية" },
+            en: { merchants: "Verified Merchants", amount: "Amount:", duration: "Duration:", calc: "Smart Staking Calc" }
+        };
+        document.getElementById('txt-merchants').innerText = texts[l]?.merchants || texts['en'].merchants;
+        document.getElementById('currentLang').innerText = l === 'ar' ? 'العربية' : 'English';
+        toggleLang();
+    }
+
+    // قاعدة بيانات محلية ذكية
+    let db = JSON.parse(localStorage.getItem('myMerchants')) || [
+        {name: "سوبر ماركت الأمانة", cat: "مواد غذائية", price: 0.1},
+        {name: "إلكترونيات الثقة", cat: "أجهزة", price: 1.5}
     ];
 
     function render() {
         const container = document.getElementById('merchantsContainer');
         container.innerHTML = db.map(m => `
             <div class="card">
-                <div style="float: left; color: gold;"><i class="fas fa-star"></i></div>
                 <h4 style="margin:0">${m.name}</h4>
                 <small>${m.cat}</small>
-                <div style="color:var(--pi-p); font-weight:bold; margin-top:10px;">السعر: ${m.price} Pi</div>
-                <button class="btn" style="margin-top:10px" onclick="alert('افتح Pi Browser للدفع')">ادفع الآن</button>
+                <div class="price">${m.price} Pi</div>
+                <button class="btn" onclick="pay('${m.name}', ${m.price})">ادفع الآن</button>
             </div>
         `).join('');
+    }
+
+    async function pay(name, amount) {
+        try {
+            const payment = await Pi.createPayment({
+                amount: amount,
+                memo: "شراء من " + name,
+                metadata: { merchant: name }
+            }, {
+                onReadyForServerApproval: (id) => console.log(id),
+                onReadyForServerCompletion: (id, tx) => alert("تم الدفع بنجاح!"),
+                onCancel: (id) => console.log("Cancelled"),
+                onError: (error) => alert("خطأ: " + error.message)
+            });
+        } catch(err) {
+            alert("تأكد من فتح التطبيق من Pi Browser الرسمي");
+        }
     }
 
     function addNew() {
@@ -127,15 +161,20 @@
         let p = document.getElementById('mPrice').value;
         if(n && p) {
             db.push({name: n, cat: c, price: p});
-            localStorage.setItem('merchants', JSON.stringify(db));
+            localStorage.setItem('myMerchants', JSON.stringify(db));
             render();
-            alert('تم التحديث أوتوماتيكياً!');
+            alert("تمت الإضافة أوتوماتيكياً!");
             go('home');
         }
     }
 
+    function runCalc() {
+        let v = document.getElementById('piVal').value || 0;
+        let t = document.getElementById('piTime').value;
+        document.getElementById('res').innerText = `زيادة معدل التعدين: ${(v * t * 45).toFixed(2)}%`;
+    }
+
     render();
 </script>
-
 </body>
             </html>
