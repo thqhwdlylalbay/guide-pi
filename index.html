@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trust & Pi Guide | ثقة ودليل الباي</title>
+    <title id="ui-page-title">ثقة ودليل الباي | Trust & Pi Guide</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --pi-p: #6d3082; --pi-g: #ffa500; --bg: #f4f7f6; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; transition: 0.3s; }
-        header { background: var(--pi-p); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .lang-btn { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; transition: 0.3s; text-align: right; }
+        header { background: var(--pi-p); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        .lang-btn { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-family: 'Cairo'; }
         .section { display: none; padding: 15px; animation: fadeIn 0.4s ease; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .card { background: white; border-radius: 15px; padding: 18px; margin-bottom: 15px; border-right: 5px solid var(--pi-p); box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-decoration: none; display: block; color: inherit; }
-        .btn-main { background: var(--pi-p); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .btn-main { background: var(--pi-p); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; height: 75px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; cursor: pointer; font-size: 0.75rem; }
         .nav-item.active { color: var(--pi-p); font-weight: bold; border-top: 3px solid var(--pi-p); }
@@ -29,38 +29,37 @@
 
 <header>
     <button class="lang-btn" onclick="toggleLanguage()" id="ui-lang-btn">English</button>
-    <div style="font-weight: bold; font-size: 1.1rem;" id="ui-app-title">ثقة ودليل الباي 🛡️</div>
+    <div style="font-weight: bold;" id="ui-app-title">ثقة ودليل الباي 🛡️</div>
 </header>
 
 <div id="home" class="section active">
     <h3 id="ui-h-guide">دليل المتاجر المعتمد</h3>
     <div id="links-container">
-        <a href="https://globalpimarket.pinet.com" class="card"><h4 style="margin:0">Global Pi Market</h4><p id="ui-d1">سوق عالمي شامل.</p></a>
-        <a href="https://thepitogo.pinet.com" class="card"><h4 style="margin:0">Pi To Go</h4><p id="ui-d2">حجوزات وسفر.</p></a>
-        <a href="https://gamepi.pinet.com" class="card"><h4 style="margin:0">GamePi</h4><p id="ui-d3">ألعاب ترفيهية.</p></a>
+        <a href="https://globalpimarket.pinet.com" class="card"><h4 style="margin:0">Global Pi Market</h4><p id="ui-d1">سوق عالمي شامل لتبادل السلع.</p></a>
+        <a href="https://thepitogo.pinet.com" class="card"><h4 style="margin:0">Pi To Go</h4><p id="ui-d2">حجوزات وسفر ومسابقات موثوقة.</p></a>
     </div>
 </div>
 
 <div id="staking" class="section">
-    <h3 id="ui-h-calc">حاسبة الاستيكنج</h3>
+    <h3 id="ui-h-calc">حاسبة الاستيكنج الذكية</h3>
     <div class="card">
-        <label id="ui-lbl-amt">الكمية:</label><input type="number" id="stk-amt" oninput="runCalc()" placeholder="0.00">
+        <label id="ui-lbl-amt">كمية الـ Pi:</label><input type="number" id="stk-amt" oninput="runCalc()" placeholder="0.00">
         <label id="ui-lbl-dur">المدة:</label>
         <select id="stk-dur" onchange="runCalc()">
             <option value="0.1" id="ui-opt-1">أسبوعين</option>
-            <option value="1" id="ui-opt-2">سنة</option>
+            <option value="1" id="ui-opt-2">سنة واحدة</option>
             <option value="2" id="ui-opt-3">3 سنوات</option>
         </select>
-        <div id="calc-res" style="text-align:center; color:green; font-weight:bold; margin-top:15px;">0%</div>
+        <div id="calc-res" style="text-align:center; color:green; font-weight:bold; margin-top:15px; font-size: 1.2rem;">0%</div>
     </div>
 </div>
 
-<div id="test-pay" class="section">
-    <h3 id="ui-h-test">اختبار الدفع التجريبي</h3>
+<div id="payment" class="section">
+    <h3 id="ui-h-pay">اختبار الدفع والتوثيق</h3>
     <div class="card">
-        <p id="ui-test-info">جرب عملية الدفع للتأكد من ربط المحفظة.</p>
-        <button class="btn-main" onclick="initiatePayment()">
-            <i class="fab fa-product-hunt"></i> <span id="ui-btn-pay">دفع 1 Test-Pi</span>
+        <p id="ui-pay-info">اضغط للتجربة؛ سيتم الربط مع approve.js و complete.js</p>
+        <button class="btn-main" onclick="onReadyForServerApproval()">
+            <i class="fab fa-product-hunt"></i> <span id="ui-btn-text">دفع 1 Test-Pi</span>
         </button>
     </div>
 </div>
@@ -68,65 +67,63 @@
 <nav class="nav-bar">
     <div class="nav-item active" onclick="nav('home')"><i class="fas fa-store"></i><span id="ui-n1">الدليل</span></div>
     <div class="nav-item" onclick="nav('staking')"><i class="fas fa-calculator"></i><span id="ui-n2">الحاسبة</span></div>
-    <div class="nav-item" onclick="nav('test-pay')"><i class="fas fa-vial"></i><span id="ui-n3">تجربة دفع</span></div>
+    <div class="nav-item" onclick="nav('payment')"><i class="fas fa-vial"></i><span id="ui-n3">دفع تجريبي</span></div>
 </nav>
 
 <script>
-    // 1. تهيئة الـ SDK مع وضع الـ Sandbox
     const Pi = window.Pi;
     try { Pi.init({ version: "2.0", sandbox: true }); } catch(e) {}
 
     let currentLang = 'ar';
 
-    // 2. نظام الترجمة الشامل
     function toggleLanguage() {
         currentLang = currentLang === 'ar' ? 'en' : 'ar';
         const t = {
-            ar: { btn: "English", title: "ثقة ودليل الباي 🛡️", hG: "دليل المتاجر المعتمد", hC: "حاسبة الاستيكنج", hT: "اختبار الدفع التجريبي", d1: "سوق عالمي شامل.", d2: "حجوزات وسفر.", d3: "ألعاب ترفيهية.", lA: "الكمية:", lD: "المدة:", o1: "أسبوعين", o2: "سنة", o3: "3 سنوات", info: "جرب عملية الدفع للتأكد من ربط المحفظة.", bP: "دفع 1 Test-Pi", n1: "الدليل", n2: "الحاسبة", n3: "تجربة دفع", dir: "rtl" },
-            en: { btn: "العربية", title: "Trust & Pi Guide 🛡️", hG: "Verified Store Guide", hC: "Staking Calculator", hT: "Test Payment Mode", d1: "Global Marketplace.", d2: "Travel & Booking.", d3: "Fun Games.", lA: "Amount:", lD: "Duration:", o1: "2 Weeks", o2: "1 Year", o3: "3 Years", info: "Test the payment to verify wallet link.", bP: "Pay 1 Test-Pi", n1: "Guide", n2: "Calc", n3: "Test Pay", dir: "ltr" }
+            ar: { btn: "English", title: "ثقة ودليل الباي 🛡️", h1: "دليل المتاجر المعتمد", h2: "حاسبة الاستيكنج الذكية", h3: "اختبار الدفع والتوثيق", d1: "سوق عالمي شامل لتبادل السلع.", d2: "حجوزات وسفر ومسابقات موثوقة.", l1: "كمية الـ Pi:", l2: "المدة:", o1: "أسبوعين", o2: "سنة واحدة", o3: "3 سنوات", info: "اضغط للتجربة؛ سيتم الربط مع approve.js و complete.js", bText: "دفع 1 Test-Pi", n1: "الدليل", n2: "الحاسبة", n3: "دفع تجريبي", dir: "rtl" },
+            en: { btn: "العربية", title: "Trust & Pi Guide 🛡️", h1: "Verified Merchant Guide", h2: "Smart Staking Calculator", h3: "Payment & Verification Test", d1: "Global marketplace for goods exchange.", d2: "Reliable travel and contest bookings.", l1: "Pi Amount:", l2: "Duration:", o1: "2 Weeks", o2: "1 Year", o3: "3 Years", info: "Click to test; linking with approve.js and complete.js", bText: "Pay 1 Test-Pi", n1: "Guide", n2: "Calculator", n3: "Test Pay", dir: "ltr" }
         };
         const a = t[currentLang];
         document.body.dir = a.dir;
         document.getElementById('ui-lang-btn').innerText = a.btn;
         document.getElementById('ui-app-title').innerText = a.title;
-        document.getElementById('ui-h-guide').innerText = a.hG;
-        document.getElementById('ui-h-calc').innerText = a.hC;
-        document.getElementById('ui-h-test').innerText = a.hT;
+        document.getElementById('ui-h-guide').innerText = a.h1;
+        document.getElementById('ui-h-calc').innerText = a.h2;
+        document.getElementById('ui-h-pay').innerText = a.h3;
         document.getElementById('ui-d1').innerText = a.d1;
         document.getElementById('ui-d2').innerText = a.d2;
-        document.getElementById('ui-d3').innerText = a.d3;
-        document.getElementById('ui-lbl-amt').innerText = a.lA;
-        document.getElementById('ui-lbl-dur').innerText = a.lD;
+        document.getElementById('ui-lbl-amt').innerText = a.l1;
+        document.getElementById('ui-lbl-dur').innerText = a.l2;
         document.getElementById('ui-opt-1').innerText = a.o1;
         document.getElementById('ui-opt-2').innerText = a.o2;
         document.getElementById('ui-opt-3').innerText = a.o3;
-        document.getElementById('ui-test-info').innerText = a.info;
-        document.getElementById('ui-btn-pay').innerText = a.bP;
+        document.getElementById('ui-pay-info').innerText = a.info;
+        document.getElementById('ui-btn-text').innerText = a.bText;
         document.getElementById('ui-n1').innerText = a.n1;
         document.getElementById('ui-n2').innerText = a.n2;
         document.getElementById('ui-n3').innerText = a.n3;
     }
 
-    // 3. وظيفة الدفع الاحترافية
-    async function initiatePayment() {
+    // الربط مع ملفات السيرفر الخاصة بك ( approve.js / complete.js )
+    async function onReadyForServerApproval() {
         try {
-            const payment = await Pi.createPayment({
-                amount: 1.0,
-                memo: "Testing Trust Guide Integration",
-                metadata: { orderId: "test-123" }
+            await Pi.createPayment({
+                amount: 1, memo: "Test Payment for Trust Guide", metadata: { internalId: 123 }
             }, {
-                // الخطوات التي تطلبها كولودفلير والسيرفر
-                onReadyForServerApproval: (paymentId) => {
-                    console.log("Payment Ready for Approval:", paymentId);
-                    // هنا يجب إرسال الـ ID للسيرفر الخاص بك لاحقاً
+                onReadyForServerApproval: async (id) => {
+                    // هنا يتم النداء على ملف approve.js الخاص بك
+                    console.log("Calling approve.js for payment ID:", id);
+                    await fetch('/approve.js', { method: 'POST', body: JSON.stringify({paymentId: id}) });
                 },
-                onReadyForServerCompletion: (paymentId, txid) => {
-                    alert("🎉 Success! Wallet Linked Correctly.");
+                onReadyForServerCompletion: async (id, tx) => {
+                    // هنا يتم النداء على ملف complete.js الخاص بك
+                    console.log("Calling complete.js for transaction:", tx);
+                    await fetch('/complete.js', { method: 'POST', body: JSON.stringify({paymentId: id, txid: tx}) });
+                    alert("🎉 Success! Wallet Linked.");
                 },
-                onCancel: (paymentId) => console.log("User Cancelled"),
-                onError: (error, payment) => alert("Error: Make sure to use Pi Browser")
+                onCancel: (id) => console.log("Cancelled"),
+                onError: (e) => alert("Error: Use Pi Browser")
             });
-        } catch(e) { alert("Open in Pi Browser to test."); }
+        } catch(e) { alert("Please open in Pi Browser."); }
     }
 
     function nav(id) {
@@ -143,4 +140,4 @@
     }
 </script>
 </body>
-    </html>
+                                                       </html>
