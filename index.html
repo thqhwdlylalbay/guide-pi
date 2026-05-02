@@ -1,4 +1,4 @@
-here<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -7,9 +7,9 @@ here<!DOCTYPE html>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; }
-        .btn-pay { padding: 15px 30px; font-size: 18px; background-color: #673ab7; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-pay:hover { background-color: #512da8; }
-        #status { margin-top: 20px; font-weight: bold; color: #333; }
+        .btn-pay { padding: 15px 30px; font-size: 18px; background-color: #673ab7; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s; }
+        .btn-pay:hover { background-color: #512da8; transform: scale(1.05); }
+        #status { margin-top: 20px; font-weight: bold; color: #333; min-height: 24px; }
     </style>
 </head>
 <body>
@@ -24,32 +24,31 @@ here<!DOCTYPE html>
     <script>
         // 1. تهيئة الـ SDK
         const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: true }); // sandbox: true لبيئة التست
+        Pi.init({ version: "2.0", sandbox: true }); 
 
         const statusLabel = document.getElementById('status');
         
-        // رابط الـ Worker الجديد (الرابط رقم 3) - استبدلي هذا الرابط برابط الـ Worker الخاص بكِ
-        const workerURL = "https://pi-api.thqhwdlylalbay.workers.dev"; 
+        // رابط الـ Worker الخاص بكِ (الرابط رقم 3) الذي سيعالج عداد الـ 60 ثانية
+        const workerURL = "https://pi.trust-app.workers.dev"; 
 
-        // 2. معالجة المدفوعات غير المكتملة (مهم جداً لعدم تعليق الحساب)
+        // 2. معالجة المدفوعات غير المكتملة
         const onIncompletePaymentFound = (payment) => {
-            statusLabel.innerText = "تم العثور على معاملة سابقة معلقة. جاري محاولة إغلاقها...";
+            statusLabel.innerText = "تم العثور على معاملة سابقة معلقة. يرجى مراجعة محفظتك.";
             console.log("Incomplete payment found:", payment);
-            // يمكنك إرسال الـ paymentId للـ Worker هنا أيضاً لعمل Complete
         };
 
-        // 3. وظيفة إنشاء الدفع
+        // 3. وظيفة إنشاء الدفع عند الضغط على الزر
         document.getElementById('pay-button').onclick = () => {
             statusLabel.innerText = "جاري فتح المحفظة...";
             
             Pi.createPayment({
                 amount: 1,
                 memo: "دعم مشروع ثقة ودليل الباي - نسخة تجريبية",
-                metadata: { orderId: "TRUST_PI_001" }
+                metadata: { orderId: "TRUST_PI_VER_1" }
             }, {
-                // المرحلة الحرجة: الموافقة (هنا يتدخل الـ Worker لإلغاء الـ 60 ثانية)
+                // المرحلة الأولى: الموافقة (إرسال الإشارة للـ Worker)
                 onReadyForServerApproval: function(paymentId) {
-                    statusLabel.innerText = "جاري التواصل مع السيرفر لتأكيد العملية...";
+                    statusLabel.innerText = "جاري تأكيد العملية عبر السيرفر الآمن...";
                     
                     fetch(workerURL, {
                         method: "POST",
@@ -58,15 +57,16 @@ here<!DOCTYPE html>
                     })
                     .then(response => response.json())
                     .then(data => {
-                        statusLabel.innerText = "تم تأكيد السيرفر! بانتظار توقيعك في المحفظة...";
+                        statusLabel.innerText = "تم التأكيد! يرجى إكمال التوقيع في محفظتك الآن.";
                         console.log("Server Approved:", data);
                     })
                     .catch(err => {
-                        statusLabel.innerText = "فشل السيرفر في الرد. تأكدي من إعدادات الـ Worker.";
+                        statusLabel.innerText = "خطأ في السيرفر: تأكدي من تفعيل الـ Worker ووضع الـ API Key.";
                         console.error("Error:", err);
                     });
                 },
 
+                // المرحلة الثانية: نجاح العملية
                 onReadyForServerCompletion: function(paymentId, txid) {
                     statusLabel.style.color = "green";
                     statusLabel.innerText = "✅ نجحت العملية! رقم المعاملة: " + txid;
@@ -75,7 +75,7 @@ here<!DOCTYPE html>
 
                 onCancel: function(paymentId) {
                     statusLabel.style.color = "orange";
-                    statusLabel.innerText = "تم إلغاء عملية الدفع.";
+                    statusLabel.innerText = "تم إلغاء عملية الدفع من قبلك.";
                 },
 
                 onError: function(error, payment) {
