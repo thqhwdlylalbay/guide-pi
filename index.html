@@ -3,162 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - Trust & Pi Guide</title>
+    <title>ثقة ودليل الباي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .header {
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .logo-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .pi-icon {
-            background: #673ab7;
-            color: white;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-        }
-        .main-card {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            width: 100%;
-            max-width: 360px;
-            border-radius: 25px;
-            padding: 30px 20px;
-            color: white;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-        }
-        .btn-pay {
-            background: #ffc107;
-            color: #333;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            width: 80%;
-        }
-        .grid-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            width: 100%;
-            max-width: 360px;
-        }
-        .small-card {
-            background: white;
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
-        }
-        #status-msg {
-            margin-top: 15px;
-            font-size: 13px;
-            font-weight: bold;
-        }
+        body { font-family: sans-serif; background-color: #f8f4ff; margin: 0; padding: 15px; text-align: center; }
+        .card { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 20px; padding: 25px; color: white; margin-bottom: 20px; }
+        .btn-pay { background: #ffc107; color: #333; border: none; padding: 15px 35px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; width: 90%; }
+        #status { margin-top: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <div class="logo-box">
-            <div class="pi-icon">π</div>
-            <div style="text-align: right;">
-                <div style="font-weight: bold; font-size: 16px;">ثقة ودليل الباي</div>
-                <div style="font-size: 11px; color: #777;">استثمر عملاتك بأمان</div>
-            </div>
-        </div>
-        <div style="color: #673ab7; font-size: 20px;">🌐</div>
-    </div>
-
-    <div class="main-card">
-        <div style="font-size: 50px;">💳</div>
-        <h2 style="margin: 10px 0;">بوابة دفع Pi الرسمية</h2>
-        <p style="font-size: 13px; opacity: 0.9;">اختبر اتصال السيرفر الآمن للخطوة 10</p>
-        
-        <button class="btn-pay" onclick="payNow()">
-            ادفع Pi 1 (تجريبي) 💰
-        </button>
-
-        <div id="status-msg"></div>
-    </div>
-
-    <div class="grid-container">
-        <div class="small-card">
-            <div style="font-size: 25px;">🏪</div>
-            <div style="font-weight: bold; margin-top: 5px;">أضف متجرك</div>
-        </div>
-        <div class="small-card">
-            <div style="font-size: 25px;">📈</div>
-            <div style="font-weight: bold; margin-top: 5px;">احسب أرباحك</div>
-        </div>
+    <div class="card">
+        <h2>بوابة دفع Pi الرسمية</h2>
+        <button class="btn-pay" onclick="pay()">ادفع Pi 1 (تجريبي) 💰</button>
+        <div id="status"></div>
     </div>
 
     <script>
-        // تعريف نظام الباي
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: true });
 
-        async function payNow() {
-            const msg = document.getElementById('status-msg');
-            msg.innerHTML = "جاري فتح المحفظة... 🚀";
-            msg.style.color = "#fff";
-
+        async function pay() {
+            const s = document.getElementById('status');
+            s.innerHTML = "جاري فتح المحفظة... ⏳";
             try {
-                const payment = await Pi.createPayment({
+                await Pi.createPayment({
                     amount: 1,
-                    memo: "تجربة دفع في مشروع ثقة ودليل الباي",
-                    metadata: { orderId: "Order_" + Date.now() },
+                    memo: "تجربة دفع - ثقة ودليل الباي",
+                    metadata: { orderId: "ID_" + Date.now() },
                 }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        return fetch('https://pi.trust-app.workers.dev', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ action: 'approve', paymentId: paymentId })
-                        }).then(res => res.json());
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        return fetch('https://pi.trust-app.workers.dev', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ action: 'complete', paymentId: paymentId, txid: txid })
-                        }).then(res => res.json());
-                    },
-                    onCancel: function(paymentId) { msg.innerHTML = "⚠️ تم إلغاء العملية."; },
-                    onError: function(error) { msg.innerHTML = "❌ خطأ: " + error.message; }
+                    // هنا بنادي السيرفر بتاعك المباشر
+                    onReadyForServerApproval: (id) => fetch('https://pi.trust-app.workers.dev', { 
+                        method: 'POST', 
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({action:'approve', paymentId:id}) 
+                    }).then(r => r.json()),
+                    
+                    onReadyForServerCompletion: (id, tx) => fetch('https://pi.trust-app.workers.dev', { 
+                        method: 'POST', 
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({action:'complete', paymentId:id, txid:tx}) 
+                    }).then(r => r.json()),
+                    
+                    onCancel: () => { s.innerHTML = "❌ تم الإلغاء"; },
+                    onError: (e) => { s.innerHTML = "❌ خطأ في السيرفر"; }
                 });
-
-                msg.innerHTML = "✅ تمت العملية بنجاح!";
-                alert("شكراً لك! تم استلام العملات التجريبية.");
-            } catch (err) {
-                msg.innerHTML = "❌ فشل: يجب فتح الرابط من Pi Browser";
+                s.innerHTML = "✅ نجح الدفع!";
+            } catch (e) { 
+                s.innerHTML = "❌ افتحي التطبيق من Pi Browser"; 
             }
         }
     </script>
