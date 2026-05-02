@@ -1,72 +1,90 @@
-<!DOCTYPE html>
+here<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي</title>
+    <title>ثقة ودليل الباي - نظام الدفع الآمن</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f8f4ff; margin: 0; padding: 15px; text-align: center; }
-        .header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; text-align: right; }
-        .card { background: linear-gradient(135deg, #6a11cb, #2575fc); border-radius: 20px; padding: 25px; color: white; margin-bottom: 20px; }
-        .btn-pay { background: #ffc107; color: #222; border: none; padding: 15px; border-radius: 30px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .box { background: white; padding: 15px; border-radius: 15px; border: 1px solid #eee; }
-        #status { margin-top: 15px; font-weight: bold; color: white; }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; }
+        .btn-pay { padding: 15px 30px; font-size: 18px; background-color: #673ab7; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-pay:hover { background-color: #512da8; }
+        #status { margin-top: 20px; font-weight: bold; color: #333; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div style="background:#673ab7; color:white; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center;">π</div>
-        <div><b>ثقة ودليل الباي</b><br><small style="color:#777;">استثمر عملاتك بأمان</small></div>
-    </div>
 
-    <div class="card">
-        <h2>بوابة دفع Pi الرسمية</h2>
-        <button class="btn-pay" onclick="pay()">ادفع Pi 1 (تجريبي) 💰</button>
-        <div id="status"></div>
-    </div>
-
-    <div class="grid">
-        <div class="box">🏪<br><b>أضف متجرك</b></div>
-        <div class="box">📈<br><b>احسب أرباحك</b></div>
-    </div>
+    <h1>مشروع ثقة ودليل الباي</h1>
+    <p>أول منصة تعليمية وتوثيقية لمجتمع Pi</p>
+    
+    <button class="btn-pay" id="pay-button">دفع 1 Test-Pi للتجربة</button>
+    
+    <div id="status">جاهز لبدء العملية...</div>
 
     <script>
+        // 1. تهيئة الـ SDK
         const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: true });
+        Pi.init({ version: "2.0", sandbox: true }); // sandbox: true لبيئة التست
 
-        async function pay() {
-            const s = document.getElementById('status');
-            s.innerHTML = "جاري الاتصال بالمحفظة... ⏳";
-            try {
-                const payment = await Pi.createPayment({
-                    amount: 1,
-                    memo: "دفع تجريبي - ثقة ودليل الباي",
-                    metadata: { orderId: "TRUST_" + Date.now() },
-                }, {
-                    onReadyForServerApproval: (paymentId) => {
-                        return fetch('https://pi.trust-app.workers.dev/approve', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId })
-                        }).then(res => res.json());
-                    },
-                    onReadyForServerCompletion: (paymentId, txid) => {
-                        return fetch('https://pi.trust-app.workers.dev/complete', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId, txid })
-                        }).then(res => res.json());
-                    },
-                    onCancel: () => { s.innerHTML = "❌ تم إلغاء الدفع"; },
-                    onError: (error) => { s.innerHTML = "❌ خطأ: " + error.message; }
-                });
-                s.innerHTML = "✅ نجح الدفع!";
-            } catch (e) {
-                s.innerHTML = "❌ يجب فتح التطبيق من Pi Browser";
-            }
-        }
+        const statusLabel = document.getElementById('status');
+        
+        // رابط الـ Worker الجديد (الرابط رقم 3) - استبدلي هذا الرابط برابط الـ Worker الخاص بكِ
+        const workerURL = "https://pi-api.thqhwdlylalbay.workers.dev"; 
+
+        // 2. معالجة المدفوعات غير المكتملة (مهم جداً لعدم تعليق الحساب)
+        const onIncompletePaymentFound = (payment) => {
+            statusLabel.innerText = "تم العثور على معاملة سابقة معلقة. جاري محاولة إغلاقها...";
+            console.log("Incomplete payment found:", payment);
+            // يمكنك إرسال الـ paymentId للـ Worker هنا أيضاً لعمل Complete
+        };
+
+        // 3. وظيفة إنشاء الدفع
+        document.getElementById('pay-button').onclick = () => {
+            statusLabel.innerText = "جاري فتح المحفظة...";
+            
+            Pi.createPayment({
+                amount: 1,
+                memo: "دعم مشروع ثقة ودليل الباي - نسخة تجريبية",
+                metadata: { orderId: "TRUST_PI_001" }
+            }, {
+                // المرحلة الحرجة: الموافقة (هنا يتدخل الـ Worker لإلغاء الـ 60 ثانية)
+                onReadyForServerApproval: function(paymentId) {
+                    statusLabel.innerText = "جاري التواصل مع السيرفر لتأكيد العملية...";
+                    
+                    fetch(workerURL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ paymentId: paymentId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        statusLabel.innerText = "تم تأكيد السيرفر! بانتظار توقيعك في المحفظة...";
+                        console.log("Server Approved:", data);
+                    })
+                    .catch(err => {
+                        statusLabel.innerText = "فشل السيرفر في الرد. تأكدي من إعدادات الـ Worker.";
+                        console.error("Error:", err);
+                    });
+                },
+
+                onReadyForServerCompletion: function(paymentId, txid) {
+                    statusLabel.style.color = "green";
+                    statusLabel.innerText = "✅ نجحت العملية! رقم المعاملة: " + txid;
+                    alert("شكراً لثقتك! تم استلام الدفع بنجاح.");
+                },
+
+                onCancel: function(paymentId) {
+                    statusLabel.style.color = "orange";
+                    statusLabel.innerText = "تم إلغاء عملية الدفع.";
+                },
+
+                onError: function(error, payment) {
+                    statusLabel.style.color = "red";
+                    statusLabel.innerText = "حدث خطأ: " + error.message;
+                    console.error("Payment Error:", error);
+                }
+            });
+        };
     </script>
 </body>
 </html>
