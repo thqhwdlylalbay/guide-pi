@@ -3,57 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي</title>
+    <title>ثقة ودليل الباي - نظام التحقق</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+        Pi.init({ version: "2.0", sandbox: true });
+    </script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f9f9f9; }
-        .pay-btn { background: #673ab7; color: white; padding: 20px; border: none; border-radius: 12px; font-size: 20px; cursor: pointer; width: 80%; max-width: 300px; }
-        #status { margin-top: 20px; color: #555; font-size: 16px; }
+        body { font-family: sans-serif; text-align: center; background-color: #f4f7f9; padding: 20px; }
+        .container { background: white; max-width: 400px; margin: 50px auto; padding: 30px; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        #status { margin: 20px 0; padding: 15px; border-radius: 10px; background: #eee; font-weight: bold; }
+        .btn-pay { padding: 15px 30px; background: #673ab7; color: white; border: none; border-radius: 50px; font-size: 18px; cursor: pointer; width: 100%; display: none; }
     </style>
 </head>
 <body>
 
-    <h2>ثقة ودليل الباي</h2>
-    <button class="pay-btn" id="btn-pay">دفع 1 Test-Pi</button>
-    <div id="status">اضغط للدفع التجريبي</div>
+<div class="container">
+    <h2 style="color: #673ab7;">ثقة ودليل الباي</h2>
+    <div id="status">جاري فحص حالة المعاملات...</div>
+    <button id="pay-button" class="btn-pay">إتمام الخطوة 10</button>
+</div>
 
-    <script>
-        const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: true });
+<script>
+    const statusBox = document.getElementById('status');
+    const payBtn = document.getElementById('pay-button');
 
-        const status = document.getElementById('status');
-        const workerURL = "https://pi.trust-app.workers.dev";
-
-        document.getElementById('btn-pay').onclick = async () => {
-            try {
-                status.innerText = "جاري استدعاء المحفظة...";
-                
-                const payment = await Pi.createPayment({
-                    amount: 1.0,
-                    memo: "تجربة دفع - مشروع ثقة ودليل الباي",
-                    metadata: { orderId: "TRUST_" + Date.now() }
-                }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        status.innerText = "جاري تأكيد العملية سرياً...";
-                        // إرسال الإشارة للـ Worker
-                        fetch(workerURL, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ paymentId: paymentId })
-                        });
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        status.innerText = "✅ اكتمل الدفع! شكراً لك.";
-                        console.log("TXID:", txid);
-                    },
-                    onCancel: (paymentId) => { status.innerText = "تم إلغاء الدفع."; },
-                    onError: (error, payment) => { status.innerText = "خطأ: " + error.message; }
-                });
-            } catch (err) {
-                status.innerText = "فشل في تشغيل نظام الدفع.";
-                console.error(err);
+    // دالة التواصل مع السيرفر الخفي (Cloudflare Function)
+    async function callBackendToComplete(paymentId, txid) {
+        statusBox.innerText = "جاري التأكيد مع سيرفرات Pi...";
+        try {
+            const response = await fetch('/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentId, txid })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                statusBox.innerText = "تمت العملية بنجاح! راجعي الخطوة 10 الآن.";
+                statusBox.style.color = "green";
+                alert("مبروك! تم إتمام المعاملة بنجاح.");
+            } else {
+                statusBox.innerText = "خطأ من السيرفر: " + (data.error || "فشل التأكيد");
             }
-        };
-    </script>
+        } catch (err) {
+            statusBox.innerText = "خطأ في الاتصال بالسيرفر.";
+        }
+    }
+
+    // معالجة المعاملات المعلقة (الحل الجذري لمشكلتك)
+    const onIncompletePaymentFound = (payment) => {
+        if (payment.transaction && payment.transaction.txid) {
+            callBackendToComplete(payment.identifier, payment.transaction.txid);
+        }
+    };
+
+    // المصادقة عند فتح الصفحة
+    Pi.authenticate(['payments', 'username'], onIncompletePaymentFound).then(function(auth) {
+        statusBox.innerText = "مرحباً " + auth.user.username + "، جاهز للخطوة 10.";
+        payBtn.style.display = "block";
+    }).catch(function(err) {
+        statusBox.innerText = "يرجى فتح الموقع من داخل Pi Browser.";
+    });
+
+    // تنفيذ دفع جديد
+    payBtn.onclick = function() {
+        payBtn.disabled = true;
+        Pi.createPayment({
+            amount: 1,
+            memo: "Step 10 Verification - Trust and Pi Guide",
+            metadata: { orderId: "verify_" + Date.now() }
+        }, {
+            onReadyForServerApproval: (paymentId) => { statusBox.innerText = "جاري الموافقة..."; },
+            onReadyForServerCompletion: (paymentId, txid) => { callBackendToComplete(paymentId, txid); },
+            onCancel: (paymentId) => { statusBox.innerText = "تم إلغاء العملية."; payBtn.disabled = false; },
+            onError: (error) => { statusBox.innerText = "خطأ: " + error.message; payBtn.disabled = false; }
+        });
+    };
+</script>
+
 </body>
 </html>
