@@ -1,16 +1,11 @@
-<!DOCTYPE html>
+here<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثقة ودليل الباي - النسخة المطورة</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- استدعاء مكتبة Pi SDK -->
+    <title>ثقة ودليل الباي</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <script>
-        // تفعيل وضع الـ Sandbox للتجربة على الـ Testnet
-        Pi.init({ version: "2.0", sandbox: true });
-    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --p: #673ab7; --bg: #f3e5f5; --gold: #ffd700; --red: #e91e63; --ora: #ff9800; --green: #25D366; }
         body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; }
@@ -20,15 +15,13 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .card-bar { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-right: 5px solid var(--p); text-decoration: none; color: inherit; display: block; }
-        .profit-box { background: #e8f5e9; border: 1px solid #2e7d32; padding: 12px; border-radius: 12px; margin-bottom: 15px; color: #1b5e20; line-height: 1.6; }
         .footer { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000; }
         .f-item { flex: 1; text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
         .f-item.active { color: var(--p); font-weight: bold; }
         .f-item i { display: block; font-size: 22px; margin-bottom: 4px; }
         .btn-main { width: 100%; background: var(--p); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; display: block; box-sizing: border-box; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; font-weight: bold; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
         .res-highlight { background: #fff9c4; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); margin-top: 15px; }
-        .pay-card { background: linear-gradient(135deg, #fff 60%, #fff9c4 100%); border-right: 5px solid var(--gold) !important; }
     </style>
 </head>
 <body>
@@ -40,27 +33,21 @@
         <div style="display:flex; align-items:center; gap:8px;">
             <div style="text-align: right;">
                 <b id="t-title">ثقة ودليل الباي</b><br>
-                <small id="t-desc">استثمر عملاتك بأمان</small>
+                <small id="user-name">جاري تسجيل الدخول...</small>
             </div>
             <div class="logo-box">π</div>
         </div>
     </div>
 
     <div id="home" class="section active">
-        <!-- زر الدفع المدمج -->
-        <div class="card-bar pay-card" style="margin-bottom: 20px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                <div>
-                    <strong style="color: var(--p); font-size: 14px;"><i class="fa fa-certificate"></i> انضم للمتاجر الموثقة</strong><br>
-                    <small id="t-pay-desc" style="font-size: 11px;">احصل على شارة الثقة بـ 0.1 π</small>
-                </div>
-                <button onclick="payPi()" style="background: var(--gold); color: #000; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; min-width: 80px;">
-                    ادفع الآن
-                </button>
-            </div>
+        <div class="card-bar" style="text-align: center; background: linear-gradient(135deg, #673ab7, #9c27b0); color: white;">
+            <p>ادعم استمرار المشروع بتبرع بسيط</p>
+            <button class="btn-main" style="background: var(--gold); color: #000;" onclick="transferPi()">
+                <i class="fa fa-heart"></i> تبرع بـ 1 Pi
+            </button>
         </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;">
             <div onclick="showPage('add_form', this)" style="background: var(--p); color:white; padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
                 <i class="fa fa-store"></i> <br><span id="t-b-add">أضف متجرك</span>
             </div>
@@ -68,103 +55,83 @@
                 <i class="fa fa-chart-line"></i> <br><span id="t-b-calc">احسب أرباحك</span>
             </div>
         </div>
-
-        <h4 id="t-feat-h">تطبيقات المايننت الموثقة</h4>
-        <a href="https://fireside.pinet.com" class="card-bar" style="border-right-color: var(--ora);">
-            <strong>Fireside Forum</strong><br>
-            <small id="t-fire-d">اربح عملات Pi مقابل المحتوى المميز.</small>
-        </a>
-    </div>
-
-    <div id="verify_list" class="section">
-        <h3 id="t-v-title" style="text-align:center;">دليل المشاريع الرسمية</h3>
-        <a href="https://www.pichainmall.com" class="card-bar"><strong>Pi Chain Mall</strong></a>
-        <a href="https://pibridge.org" class="card-bar" style="border-right-color: #2196f3;"><strong>Pi Bridge</strong></a>
-    </div>
-
-    <div id="stake" class="section">
-        <h3 id="t-s-title" style="text-align:center;">مركز استثمار وأرباح Pi</h3>
-        <div class="card-bar">
-            <label id="t-l-amt">الكمية المراد استثمارها:</label>
-            <input type="number" id="p_amount" placeholder="مثلاً: 100">
-            <button class="btn-main" onclick="calc()" id="t-s-btn">احسب أرباحي الآن</button>
-            <div id="res_box" class="res-highlight" style="display:none; text-align:center;">
-                <span id="total_v" style="font-size:28px; color:var(--p); font-weight:900;"></span> <b style="color:var(--p)">π</b>
-            </div>
         </div>
-    </div>
-
-    <div id="add_form" class="section">
-        <h3 id="t-a-title" style="text-align:center;">سجل كتاجر موثق</h3>
-        <a href="whatsapp://send?phone=201220469415&text=أريد_تسجيل_متجري" class="btn-main" style="background:var(--green);">
-            <span id="t-a-btn">اضغط للمراسلة فوراً</span>
-        </a>
-    </div>
-
-    <div id="report" class="section">
-        <h3 id="t-r-title" style="text-align:center; color:var(--red);">مركز الأمان</h3>
-        <a href="whatsapp://send?phone=201220469415&text=بلاغ_عن_محاولة_احتيال" class="btn-main" style="background:var(--red);">
-            <span id="t-r-btn">إرسال بلاغ واتساب</span>
-        </a>
-    </div>
 
     <div class="footer">
-        <div class="f-item" id="n-rep" onclick="showPage('report', this)"><i class="fa fa-bullhorn"></i>إبلاغ</div>
-        <div class="f-item" id="n-ver" onclick="showPage('verify_list', this)"><i class="fa fa-medal"></i>توثيق</div>
-        <div class="f-item" id="n-sta" onclick="showPage('stake', this)"><i class="fa fa-chart-pie"></i>أرباح</div>
-        <div class="f-item active" id="n-hom" onclick="showPage('home', this)"><i class="fa fa-house"></i>الرئيسية</div>
+        <div class="f-item" id="n-rep" onclick="showPage('report', this)"><i class="fa fa-bullhorn"></i><span id="n-t-rep">إبلاغ</span></div>
+        <div class="f-item" id="n-ver" onclick="showPage('verify_list', this)"><i class="fa fa-medal"></i><span id="n-t-ver">توثيق</span></div>
+        <div class="f-item" id="n-sta" onclick="showPage('stake', this)"><i class="fa fa-chart-pie"></i><span id="n-t-sta">أرباح</span></div>
+        <div class="f-item active" id="n-hom" onclick="showPage('home', this)"><i class="fa fa-house"></i><span id="n-t-hom">الرئيسية</span></div>
     </div>
 
     <script>
-        let isAr = true;
+        // --- 1. تهيئة الـ SDK ---
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0", sandbox: true }); // اجعل sandbox: false عند الإطلاق الحقيقي
 
-        async function payPi() {
+        async function authUser() {
             try {
-                const payment = await Pi.createPayment({
-                    amount: 0.1,
-                    memo: "رسوم توثيق متجر في دليل الثقة (Testnet)",
-                    metadata: { type: "verification" },
-                }, {
-                    onReadyForServerApproval: (paymentId) => {
-                        console.log("Payment ID:", paymentId);
-                        alert("العملية قيد المعالجة تجريبياً...");
-                    },
-                    onReadyForServerCompletion: (paymentId, txid) => {
-                        alert("تم الدفع بنجاح (Testnet)! رقم العملية: " + txid);
-                    },
-                    onCancel: (paymentId) => { console.log("Cancelled"); },
-                    onError: (error, payment) => { 
-                        alert("خطأ: تأكد من استخدام محفظة Testnet داخل متصفح Pi");
-                        console.error(error); 
-                    },
-                });
+                const scopes = ['username', 'payments'];
+                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                document.getElementById('user-name').innerText = "مرحباً، " + auth.user.username;
+                console.log("Authenticated User:", auth.user.username);
             } catch (err) {
-                alert("يرجى فتح الموقع من متصفح Pi");
+                console.error("Authentication failed", err);
             }
         }
 
+        // --- 2. معالجة المدفوعات غير المكتملة ---
+        function onIncompletePaymentFound(payment) {
+            console.log("Incomplete payment found", payment);
+            // هنا يجب إرسال معرف الدفع للسيرفر الخاص بك لإغلاقه
+        }
+
+        // --- 3. وظيفة الدفع (مثال: تبرع) ---
+        async function transferPi() {
+            try {
+                const payment = await Pi.createPayment({
+                    amount: 1,
+                    memo: "دعم مشروع ثقة ودليل الباي",
+                    metadata: { type: "donation" },
+                }, {
+                    onReadyForServerApproval: (paymentId) => {
+                        console.log("Payment Ready, ID:", paymentId);
+                        // هنا يتم إبلاغ سيرفرك للموافقة
+                    },
+                    onReadyForServerCompletion: (paymentId, txid) => {
+                        console.log("Payment Finished, TXID:", txid);
+                        alert("شكراً لدعمك! تم التحويل بنجاح.");
+                    },
+                    onCancel: (paymentId) => console.log("User cancelled"),
+                    onError: (error, payment) => console.error("Error", error),
+                });
+            } catch (err) {
+                alert("حدث خطأ أثناء عملية الدفع");
+            }
+        }
+
+        // تشغيل المصادقة فور تحميل الصفحة
+        window.onload = authUser;
+
+        // --- وظائف التنقل والحساب الأصلية ---
         function showPage(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.f-item').forEach(i => i.classList.remove('active'));
             if(el) el.classList.add('active');
-            window.scrollTo(0,0);
         }
 
         function calc() {
             let amt = document.getElementById('p_amount').value;
+            let bonus = document.getElementById('p_years').value;
             if(amt > 0) {
-                let total = parseFloat(amt) * 1.5;
+                let total = parseFloat(amt) + (amt * bonus);
                 document.getElementById('total_v').innerText = total.toLocaleString();
                 document.getElementById('res_box').style.display = 'block';
             } else { alert("من فضلك أدخل كمية باي"); }
         }
 
-        function toggleLang() {
-            isAr = !isAr;
-            document.dir = isAr ? 'rtl' : 'ltr';
-            // Language logic implementation...
-        }
+        // (وظيفة toggleLang تبقى كما هي لديك)
     </script>
 </body>
     </html>
