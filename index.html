@@ -6,7 +6,6 @@
     <title>ثقة ودليل الباي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* التعديل هنا: اللون البنفسجي الفاتح الهادئ للخلفية */
         :root { --p: #673ab7; --bg: #f3e5f5; --gold: #ffd700; --red: #e91e63; --ora: #ff9800; --green: #25D366; }
         body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; }
         .header { background: #fff; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
@@ -161,7 +160,9 @@
     <script>
         let isAr = true;
         
-        // تهيئة Pi SDK بمجرد تحميل الصفحة
+        // رابط الـ Cloudflare Worker الخاص بك (استبدليه برابطك الحقيقي)
+        const SERVER_URL = "https://pi.trust-app.workers.dev";
+        
         try {
             Pi.init({ version: "2.0", sandbox: true }); 
         } catch(e) {
@@ -192,7 +193,7 @@
             const d = {
                 ar: { 
                     title: "ثقة ودليل الباي", desc: "استثمر عملاتك بأمان", badd: "أضف متجرك", bcalc: "احسب أرباحك", 
-                    payBtn: "انضم للمتاجر الموثوقة بـ 0.1 Pi", /* تمت إضافة الترجمة للزر الجديد */
+                    payBtn: "انضم للمتاجر الموثوقة بـ 0.1 Pi", 
                     feat: "تطبيقات المايننت الموثقة", vtitle: "دليل المشاريع الرسمية", stitle: "مركز استثمار وأرباح Pi", promo: "لماذا الاستيكنج (Stake)؟",
                     l1: "أرباح صافية تضاف لرصيدك الحالي.", l2: "مضاعفة سرعة تعدينك اليومي فوراً.", l3: "دعم قيمة العملة عالمياً.",
                     res: "رصيدك الإجمالي المتوقع:", btn: "احسب أرباحي الآن", atitle: "سجل كتاجر موثق", 
@@ -203,7 +204,7 @@
                 },
                 en: { 
                     title: "Trust & Pi Guide", desc: "Invest your Pi Safely", badd: "Add Store", bcalc: "Calc Profits", 
-                    payBtn: "Join Trusted Stores for 0.1 Pi", /* تمت إضافة الترجمة للزر الجديد */
+                    payBtn: "Join Trusted Stores for 0.1 Pi", 
                     feat: "Verified Mainnet Apps", vtitle: "Official Projects Directory", stitle: "Pi Investment Center", promo: "Why Staking?",
                     l1: "Get net profits added to your balance.", l2: "Instantly double your mining rate.", l3: "Support Pi value globally.",
                     res: "Expected total balance:", btn: "Calculate My Profits", atitle: "Register Store", 
@@ -218,7 +219,7 @@
             document.getElementById('t-desc').innerText = t.desc;
             document.getElementById('t-b-add').innerText = t.badd;
             document.getElementById('t-b-calc').innerText = t.bcalc;
-            document.getElementById('t-pay-btn').innerText = t.payBtn; /* تغيير نص الزر الجديد */
+            document.getElementById('t-pay-btn').innerText = t.payBtn; 
             document.getElementById('t-feat-h').innerText = t.feat;
             document.getElementById('t-v-title').innerText = t.vtitle;
             document.getElementById('t-s-title').innerText = t.stitle;
@@ -243,7 +244,6 @@
             document.getElementById('t-pizza-d').innerText = t.pizzaD;
         }
 
-        // دوال التحكم في دفع Pi
         async function payWithPi() {
             try {
                 const scopes = ['payments'];
@@ -257,12 +257,24 @@
 
                 const paymentCallbacks = {
                     onReadyForServerApproval: function(paymentId) {
-                        console.log("جاهز للموافقة من السيرفر. رقم الدفعة:", paymentId);
-                        // يجب إرسال paymentId إلى Cloudflare Worker هنا
+                        console.log("إرسال طلب الموافقة للسيرفر...", paymentId);
+                        // هذه الدالة توقف الـ 60 ثانية وتفتح المحفظة
+                        fetch(`${SERVER_URL}/approve`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId: paymentId })
+                        }).catch(err => console.error(err));
                     },
                     onReadyForServerCompletion: function(paymentId, txid) {
-                        console.log("تم الدفع في المحفظة، ننتظر التأكيد النهائي:", paymentId, txid);
-                        // يجب إرسال paymentId و txid إلى Cloudflare Worker هنا
+                        console.log("تم سحب الرصيد، تأكيد النهاية...", paymentId, txid);
+                        // هذه الدالة تؤكد عملية الدفع وتنهيها بنجاح
+                        fetch(`${SERVER_URL}/complete`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId: paymentId, txid: txid })
+                        }).then(() => {
+                            alert("تم الدفع بنجاح! شكراً لانضمامك للمتاجر الموثوقة.");
+                        }).catch(err => console.error(err));
                     },
                     onCancel: function(paymentId) {
                         alert("تم إلغاء عملية الدفع.");
@@ -282,8 +294,13 @@
         }
 
         function onIncompletePaymentFound(payment) {
-            console.log("تم العثور على دفعة غير مكتملة:", payment);
+            console.log("دفعة معلقة:", payment);
+            fetch(`${SERVER_URL}/complete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid })
+            }).catch(err => console.error(err));
         }
     </script>
 </body>
-            </html>
+                                         </html>
