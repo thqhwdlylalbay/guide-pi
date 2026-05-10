@@ -33,7 +33,7 @@
         <div style="display:flex; align-items:center; gap:8px;">
             <div style="text-align: right;">
                 <b id="t-title">ثقة ودليل الباي</b><br>
-                <small id="t-desc">استثمر عملاتك بأمان</small>
+                <small id="t-desc">دليلك الآمن في عالم الباي</small>
             </div>
             <div class="logo-box">π</div>
         </div>
@@ -50,7 +50,7 @@
                 <i class="fa fa-store"></i> <br><span id="t-b-add">أضف متجرك</span>
             </div>
             <div onclick="showPage('stake', this)" style="background:#fff; border:1px solid var(--p); color:var(--p); padding:18px; border-radius:15px; text-align:center; cursor:pointer;">
-                <i class="fa fa-chart-line"></i> <br><span id="t-b-calc">احسب أرباحك</span>
+                <i class="fa fa-calculator"></i> <br><span id="t-b-calc">حاسبة الحجز</span>
             </div>
         </div>
 
@@ -99,28 +99,28 @@
     </div>
 
     <div id="stake" class="section">
-        <h3 id="t-s-title" style="text-align:center;">مركز استثمار وأرباح Pi</h3>
+        <h3 id="t-s-title" style="text-align:center;">حاسبة مكافآت الحجز (Lockup) الرسمية</h3>
         <div class="profit-box">
-            <i class="fa fa-gift"></i> <b id="t-s-promo">لماذا الاستيكنج (Stake)؟</b>
+            <i class="fa fa-lock"></i> <b id="t-s-promo">لماذا تقوم بحجز عملاتك (Lockup)؟</b>
             <ul style="margin: 8px 0; padding-right: 20px;">
-                <li id="t-s-l1">أرباح صافية تضاف لرصيدك الحالي.</li>
-                <li id="t-s-l2">مضاعفة سرعة تعدينك اليومي فوراً.</li>
-                <li id="t-s-l3">دعم قيمة العملة واستقرارها عالمياً.</li>
+                <li id="t-s-l1">زيادة معدل التعدين الأساسي الخاص بك فوراً.</li>
+                <li id="t-s-l2">دعم أمان وقوة شبكة Pi.</li>
+                <li id="t-s-l3">تشجيع استقرار العملة عالمياً.</li>
             </ul>
         </div>
         <div class="card-bar">
-            <label id="t-l-amt">الكمية المراد استثمارها:</label>
+            <label id="t-l-amt">الكمية المراد حجزها في التطبيق الرسمي:</label>
             <input type="number" id="p_amount" placeholder="مثلاً: 100">
-            <label id="t-l-yrs">اختر خطة الأرباح:</label>
+            <label id="t-l-yrs">مدة الحجز التقريبية:</label>
             <select id="p_years">
-                <option value="0.5">6 أشهر (أرباح +50%)</option>
-                <option value="2.0">سنة واحدة (أرباح +200%) 🔥</option>
-                <option value="5.0">3 سنوات (أرباح +500%) 🚀</option>
+                <option value="0.5">6 أشهر (مكافأة تعدين +50%)</option>
+                <option value="2.0">سنة واحدة (مكافأة تعدين +200%) 🔥</option>
+                <option value="5.0">3 سنوات (مكافأة تعدين +500%) 🚀</option>
             </select>
-            <button class="btn-main" onclick="calc()" id="t-s-btn">احسب أرباحي الآن</button>
+            <button class="btn-main" onclick="calc()" id="t-s-btn">احسب المكافآت التقريبية</button>
 
-<div id="res_box" class="res-highlight" style="display:none; text-align:center;">
-                <span id="t-s-res-l" style="font-weight:bold; color:#555;">رصيدك الإجمالي المتوقع:</span><br>
+            <div id="res_box" class="res-highlight" style="display:none; text-align:center;">
+                <span id="t-s-res-l" style="font-weight:bold; color:#555;">رصيدك الإجمالي المتوقع (تقريبي):</span><br>
                 <span id="total_v" style="font-size:28px; color:var(--p); font-weight:900;"></span> <b style="color:var(--p)">π</b>
             </div>
         </div>
@@ -151,7 +151,7 @@
     <div class="footer">
         <div class="f-item" id="n-rep" onclick="showPage('report', this)"><i class="fa fa-bullhorn"></i><span id="n-t-rep">إبلاغ</span></div>
         <div class="f-item" id="n-ver" onclick="showPage('verify_list', this)"><i class="fa fa-medal"></i><span id="n-t-ver">توثيق</span></div>
-        <div class="f-item" id="n-sta" onclick="showPage('stake', this)"><i class="fa fa-chart-pie"></i><span id="n-t-sta">أرباح</span></div>
+        <div class="f-item" id="n-sta" onclick="showPage('stake', this)"><i class="fa fa-lock"></i><span id="n-t-sta">مكافآت</span></div>
         <div class="f-item active" id="n-hom" onclick="showPage('home', this)"><i class="fa fa-house"></i><span id="n-t-hom">الرئيسية</span></div>
     </div>
 
@@ -160,10 +160,10 @@
     <script>
         let isAr = true;
         
-        // رابط الـ Cloudflare Worker الخاص بك (استبدليه برابطك الحقيقي)
         const SERVER_URL = "https://pi.trust-app.workers.dev";
         
         try {
+            // ملاحظة: عند الإطلاق الفعلي للـ Mainnet يمكنك تغيير sandbox إلى false
             Pi.init({ version: "2.0", sandbox: true }); 
         } catch(e) {
             console.log("Pi SDK needs to run inside Pi Browser");
@@ -192,25 +192,27 @@
             document.dir = isAr ? 'rtl' : 'ltr';
             const d = {
                 ar: { 
-                    title: "ثقة ودليل الباي", desc: "استثمر عملاتك بأمان", badd: "أضف متجرك", bcalc: "احسب أرباحك", 
+                    title: "ثقة ودليل الباي", desc: "دليلك الآمن في عالم الباي", badd: "أضف متجرك", bcalc: "حاسبة الحجز", 
                     payBtn: "انضم للمتاجر الموثوقة بـ 0.1 Pi", 
-                    feat: "تطبيقات المايننت الموثقة", vtitle: "دليل المشاريع الرسمية", stitle: "مركز استثمار وأرباح Pi", promo: "لماذا الاستيكنج (Stake)؟",
-                    l1: "أرباح صافية تضاف لرصيدك الحالي.", l2: "مضاعفة سرعة تعدينك اليومي فوراً.", l3: "دعم قيمة العملة عالمياً.",
-                    res: "رصيدك الإجمالي المتوقع:", btn: "احسب أرباحي الآن", atitle: "سجل كتاجر موثق", 
+                    feat: "تطبيقات المايننت الموثقة", vtitle: "دليل المشاريع الرسمية", stitle: "حاسبة مكافآت الحجز (Lockup) الرسمية", promo: "لماذا تقوم بحجز عملاتك (Lockup)؟",
+                    l1: "زيادة معدل التعدين الأساسي الخاص بك فوراً.", l2: "دعم أمان وقوة شبكة Pi.", l3: "تشجيع استقرار العملة عالمياً.",
+                    lamt: "الكمية المراد حجزها في التطبيق الرسمي:", lyrs: "مدة الحجز التقريبية:",
+                    res: "رصيدك الإجمالي المتوقع (تقريبي):", btn: "احسب المكافآت التقريبية", atitle: "سجل كتاجر موثق", 
                     adesc: "ارسل بيانات متجرك الآن ليظهر في الدليل العالمي.", abtn: "اضغط للمراسلة فوراً",
                     rtitle: "مركز الأمان", rdesc: "أبلغ عن أي نصاب لحماية المجتمع.", rbtn: "إرسال بلاغ واتساب",
-                    nhom: "الرئيسية", nver: "توثيق", nsta: "أرباح", nrep: "إبلاغ",
+                    nhom: "الرئيسية", nver: "توثيق", nsta: "مكافآت", nrep: "إبلاغ",
                     safeT: "نصيحة للمحافظة على حسابك", safeD: "لا تقم أبداً بإدخال كلمة سر المحفظة خارج متصفح Pi الرسمي.", pizzaD: "خدمات توصيل ووجبات سريعة تدعم نظام المقايضة."
                 },
                 en: { 
-                    title: "Trust & Pi Guide", desc: "Invest your Pi Safely", badd: "Add Store", bcalc: "Calc Profits", 
+                    title: "Trust & Pi Guide", desc: "Your safe guide in Pi", badd: "Add Store", bcalc: "Lockup Calc", 
                     payBtn: "Join Trusted Stores for 0.1 Pi", 
-                    feat: "Verified Mainnet Apps", vtitle: "Official Projects Directory", stitle: "Pi Investment Center", promo: "Why Staking?",
-                    l1: "Get net profits added to your balance.", l2: "Instantly double your mining rate.", l3: "Support Pi value globally.",
-                    res: "Expected total balance:", btn: "Calculate My Profits", atitle: "Register Store", 
+                    feat: "Verified Mainnet Apps", vtitle: "Official Projects Directory", stitle: "Official Lockup Rewards Calculator", promo: "Why Lockup Pi?",
+                    l1: "Increase your base mining rate instantly.", l2: "Support Pi network security.", l3: "Encourage global stability.",
+                    lamt: "Amount to lockup in official app:", lyrs: "Approximate lockup duration:",
+                    res: "Expected total balance (Approx):", btn: "Calculate Approx Rewards", atitle: "Register Store", 
                     adesc: "Send your store info to join the global list.", abtn: "Message Now",
                     rtitle: "Security Center", rdesc: "Report scammers to protect the community.", rbtn: "Send WhatsApp Report",
-                    nhom: "Home", nver: "Verify", nsta: "Earnings", nrep: "Report",
+                    nhom: "Home", nver: "Verify", nsta: "Rewards", nrep: "Report",
                     safeT: "Security Tip", safeD: "Never enter your passphrase outside the Pi Browser.", pizzaD: "Delivery services supporting Pi Barter."
                 }
             };
@@ -227,6 +229,8 @@
             document.getElementById('t-s-l1').innerText = t.l1;
             document.getElementById('t-s-l2').innerText = t.l2;
             document.getElementById('t-s-l3').innerText = t.l3;
+            document.getElementById('t-l-amt').innerText = t.lamt;
+            document.getElementById('t-l-yrs').innerText = t.lyrs;
             document.getElementById('t-s-res-l').innerText = t.res;
             document.getElementById('t-s-btn').innerText = t.btn;
             document.getElementById('t-a-title').innerText = t.atitle;
@@ -258,7 +262,6 @@
                 const paymentCallbacks = {
                     onReadyForServerApproval: function(paymentId) {
                         console.log("إرسال طلب الموافقة للسيرفر...", paymentId);
-                        // هذه الدالة توقف الـ 60 ثانية وتفتح المحفظة
                         fetch(`${SERVER_URL}/approve`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -267,7 +270,6 @@
                     },
                     onReadyForServerCompletion: function(paymentId, txid) {
                         console.log("تم سحب الرصيد، تأكيد النهاية...", paymentId, txid);
-                        // هذه الدالة تؤكد عملية الدفع وتنهيها بنجاح
                         fetch(`${SERVER_URL}/complete`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -303,4 +305,4 @@
         }
     </script>
 </body>
-                                         </html>
+            </html>
