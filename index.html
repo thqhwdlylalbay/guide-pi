@@ -28,6 +28,7 @@
         .badge { padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: bold; color: white; }
         .badge-new { background: #4caf50; }
         .badge-scam { background: #e91e63; }
+        .loader { text-align: center; color: var(--p); font-size: 14px; padding: 20px; display: none; }
     </style>
 </head>
 <body>
@@ -45,9 +46,8 @@
         </div>
     </div>
 
-    <!-- الصفحة الرئيسية -->
+    <!-- الرئيسية -->
     <div id="home" class="section active">
-        
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
             <div onclick="showPage('add_form', document.getElementById('n-ver'))" style="background: linear-gradient(135deg, var(--p), #9c27b0); color:white; padding:18px; border-radius:15px; text-align:center; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                 <i class="fa fa-store" style="font-size: 24px; margin-bottom: 8px;"></i> <br><span id="t-b-add">أضف متجرك مجاناً</span>
@@ -59,15 +59,12 @@
 
         <h4 style="margin-top:25px; color: var(--p); border-bottom: 2px solid #ddd; padding-bottom: 5px;" id="t-stores-title"><i class="fa fa-store-alt"></i> المتاجر المعتمدة</h4>
         
-        <!-- حاوية المتاجر الديناميكية -->
-        <div id="stores-container">
-            <!-- سيتم تحميل المتاجر هنا عبر الجافاسكريبت -->
-        </div>
+        <div id="stores-loader" class="loader"><i class="fa fa-spinner fa-spin"></i> جاري تحميل المتاجر...</div>
+        <div id="stores-container"></div>
 
         <h4 id="t-feat-h" style="margin-top:25px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">تطبيقات المايننت الموثقة</h4>
         <a href="https://fireside.pinet.com" class="card-bar" style="border-right-color: var(--ora);">
-            <strong>Fireside Forum</strong><br>
-            <small id="t-fire-d">اربح عملات Pi مقابل المحتوى المميز.</small>
+            <strong>Fireside Forum</strong><br><small id="t-fire-d">اربح عملات Pi مقابل المحتوى المميز.</small>
         </a>
         <a href="https://www.pichainmall.com" class="card-bar" style="border-right-color: #ffd700;">
             <strong>Pi Chain Mall</strong><br><small id="t-v1">أكبر سوق تجاري لشراء المنتجات بـ Pi.</small>
@@ -80,82 +77,75 @@
                 <strong id="t-safe-t">نصيحة للمحافظة على حسابك</strong>
             </div>
             <p id="t-safe-d" style="font-size: 13px; color: #666; margin-top: 8px; margin-bottom: 0;">
-                لا تقم أبداً بإدخال "كلمة سر المحفظة" في أي موقع خارج متصفح Pi الرسمي. فريق العمل لن يطلبها منك أبداً.
+                لا تقم أبداً بإدخال "كلمة سر المحفظة" خارج متصفح Pi الرسمي.
             </p>
         </div>
     </div>
 
-    <!-- قسم الإضافة (المتاجر) -->
+    <!-- إضافة متجر -->
     <div id="add_form" class="section">
         <h3 id="t-a-title" style="text-align:center; color: var(--p);">سجل كتاجر موثق مجاناً</h3>
         <div class="card-bar" style="border-right-color: #4caf50;">
-            <p id="t-a-desc" style="text-align:center; color:#555; margin-bottom:15px; font-size: 14px;">أدخل بيانات متجرك ليظهر فوراً في الدليل لجميع المستخدمين.</p>
+            <p id="t-a-desc" style="text-align:center; color:#555; margin-bottom:15px; font-size: 14px;">أدخل بيانات متجرك ليظهر فوراً في الدليل العالمي.</p>
             <form id="merchantForm" onsubmit="addStore(event)">
                 <input type="text" id="storeName" placeholder="اسم المتجر" required>
-                <textarea id="storeDesc" placeholder="وصف موجز للمنتجات أو الخدمات التي تقدمها مقابل باي" rows="3" required></textarea>
+                <textarea id="storeDesc" placeholder="وصف موجز للمنتجات أو الخدمات" rows="3" required></textarea>
                 <input type="url" id="storeLink" placeholder="رابط المتجر (http://...)" required>
-                <button type="submit" class="btn-main" style="margin-top: 15px; background: #4caf50;" id="t-a-btn">نشر المتجر في الدليل</button>
+                <button type="submit" class="btn-main" style="margin-top: 15px; background: #4caf50;" id="t-a-btn">نشر المتجر</button>
             </form>
         </div>
     </div>
 
-    <!-- قسم حاسبة الحجز -->
+    <!-- الحاسبة -->
     <div id="stake" class="section">
         <h3 id="t-s-title" style="text-align:center; color: var(--p);">حاسبة مكافآت الحجز (Lockup)</h3>
         <div class="profit-box">
-            <i class="fa fa-lock"></i> <b id="t-s-promo">لماذا تقوم بحجز عملاتك؟</b>
+            <i class="fa fa-lock"></i> <b id="t-s-promo">لماذا تحجز عملاتك؟</b>
             <ul style="margin: 8px 0; padding-right: 20px; font-size: 14px;">
-                <li id="t-s-l1">زيادة معدل التعدين الأساسي الخاص بك فوراً.</li>
+                <li id="t-s-l1">زيادة معدل التعدين فوراً.</li>
                 <li id="t-s-l2">دعم أمان وقوة شبكة Pi.</li>
-                <li id="t-s-l3">المساهمة في استقرار قيمة العملة عند فتح المايننت.</li>
+                <li id="t-s-l3">استقرار قيمة العملة بالمايننت.</li>
             </ul>
         </div>
         <div class="card-bar">
             <label id="t-l-amt" style="font-weight: bold; font-size: 14px;">الكمية المراد حجزها:</label>
             <input type="number" id="p_amount" placeholder="مثلاً: 1000">
-            <label id="t-l-yrs" style="font-weight: bold; font-size: 14px; margin-top: 10px; display: block;">مدة الحجز التقريبية:</label>
+            <label id="t-l-yrs" style="font-weight: bold; font-size: 14px; margin-top: 10px; display: block;">مدة الحجز:</label>
             <select id="p_years">
-                <option value="0.5">6 أشهر (مكافأة تعدين +50%)</option>
-                <option value="2.0">سنة واحدة (مكافأة تعدين +200%) 🔥</option>
-                <option value="5.0">3 سنوات (مكافأة تعدين +500%) 🚀</option>
+                <option value="0.5">6 أشهر (+50%)</option>
+                <option value="2.0">سنة واحدة (+200%) 🔥</option>
+                <option value="5.0">3 سنوات (+500%) 🚀</option>
             </select>
-            <button class="btn-main" onclick="calc()" id="t-s-btn" style="margin-top: 15px;">احسب المكافآت التقريبية</button>
+            <button class="btn-main" onclick="calc()" id="t-s-btn" style="margin-top: 15px;">احسب المكافآت</button>
 
             <div id="res_box" class="res-highlight" style="display:none; text-align:center;">
-                <span id="t-s-res-l" style="font-weight:bold; color:#555;">رصيدك الإجمالي المتوقع (تقريبي):</span><br>
+                <span id="t-s-res-l" style="font-weight:bold; color:#555;">رصيدك الإجمالي المتوقع:</span><br>
                 <span id="total_v" style="font-size:32px; color:var(--p); font-weight:900;"></span> <b style="color:var(--p)">π</b>
             </div>
         </div>
     </div>
 
-    <!-- قسم الإبلاغ العام (القائمة السوداء) -->
+    <!-- الأمان والبلاغات -->
     <div id="report" class="section">
         <h3 id="t-r-title" style="text-align:center; color:var(--red);">مركز الأمان والقائمة السوداء</h3>
+        <div class="alert-box"><i class="fa fa-info-circle"></i> <span id="t-r-info">البلاغات تظهر للجميع لتحذير المجتمع. يرجى توخي الدقة.</span></div>
         
-        <div class="alert-box">
-            <i class="fa fa-info-circle"></i> <span id="t-r-info">البلاغات المقدمة هنا تظهر للجميع لتحذير المجتمع من عمليات النصب والاحتيال. يرجى توخي الدقة.</span>
-        </div>
-
-        <!-- نموذج تقديم بلاغ -->
         <div class="card-bar" style="border-right-color: var(--red);">
-            <h4 style="margin-top: 0; color: var(--red);" id="t-r-form-title">إضافة تحذير جديد</h4>
+            <h4 style="margin-top: 0; color: var(--red);" id="t-r-form-title">إضافة تحذير</h4>
             <form id="reportForm" onsubmit="addReport(event)">
-                <input type="text" id="scammerName" placeholder="اسم الجهة أو الشخص النصاب" required>
-                <textarea id="scamDetails" placeholder="تفاصيل عملية النصب وكيف تمت" rows="3" required></textarea>
-                <input type="url" id="scamProof" placeholder="رابط إثبات (سكرين شوت أو حساب النصاب)" required>
-                <button type="submit" class="btn-main" style="margin-top: 15px; background:var(--red);" id="t-r-btn">نشر التحذير للعامة</button>
+                <input type="text" id="scammerName" placeholder="اسم الجهة أو النصاب" required>
+                <textarea id="scamDetails" placeholder="تفاصيل النصب" rows="3" required></textarea>
+                <input type="url" id="scamProof" placeholder="رابط إثبات (مهم)" required>
+                <button type="submit" class="btn-main" style="margin-top: 15px; background:var(--red);" id="t-r-btn">نشر التحذير</button>
             </form>
         </div>
 
-        <h4 style="margin-top:25px; color: var(--dark); border-bottom: 2px solid #ddd; padding-bottom: 5px;" id="t-r-list-title"><i class="fa fa-list-alt"></i> التحذيرات الحالية من المجتمع</h4>
-        
-        <!-- حاوية البلاغات الديناميكية -->
-        <div id="reports-container">
-            <!-- سيتم تحميل البلاغات هنا عبر الجافاسكريبت -->
-        </div>
+        <h4 style="margin-top:25px; color: var(--dark); border-bottom: 2px solid #ddd; padding-bottom: 5px;" id="t-r-list-title"><i class="fa fa-list-alt"></i> التحذيرات الحالية</h4>
+        <div id="reports-loader" class="loader"><i class="fa fa-spinner fa-spin"></i> جاري تحميل التحذيرات...</div>
+        <div id="reports-container"></div>
     </div>
 
-    <!-- شريط التنقل السفلي -->
+    <!-- شريط التنقل -->
     <div class="footer">
         <div class="f-item" id="n-rep" onclick="showPage('report', this)"><i class="fa fa-shield-virus"></i><span id="n-t-rep">الأمان</span></div>
         <div class="f-item" id="n-ver" onclick="showPage('add_form', this)"><i class="fa fa-store"></i><span id="n-t-ver">المتاجر</span></div>
@@ -167,140 +157,115 @@
     
     <script>
         let isAr = true;
+        // رابط الخادم السحابي الخاص بكِ يعمل الآن
+        const WORKER_URL = "https://pi.trust-app.workers.dev";
 
-        // تهيئة التطبيق للـ Mainnet مباشرة
-        try {
-            Pi.init({ version: "2.0", sandbox: false }); 
-        } catch(e) {
-            console.log("Pi SDK must run inside Pi Browser to connect to Pi Network.");
+        try { Pi.init({ version: "2.0", sandbox: false }); } catch(e) { console.log("Pi SDK error"); }
+
+        async function fetchStores() {
+            document.getElementById('stores-loader').style.display = 'block';
+            try {
+                const res = await fetch(`${WORKER_URL}/stores`);
+                const storesDB = await res.json();
+                const container = document.getElementById('stores-container');
+                container.innerHTML = '';
+                [...storesDB].reverse().forEach(store => {
+                    const dateStr = new Date(store.date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US');
+                    container.innerHTML += `
+                        <div class="card-bar" style="border-right-color: #4caf50;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="font-size: 16px;">${store.name}</strong>
+                                <span class="badge badge-new">${isAr ? 'موثق' : 'Verified'}</span>
+                            </div>
+                            <small style="display: block; margin: 8px 0; color: #555;">${store.desc}</small>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                                <span style="font-size: 10px; color: #999;">${dateStr}</span>
+                                <a href="${store.link}" target="_blank" style="color:var(--p); font-weight:bold; font-size:13px; text-decoration:none;">${isAr ? 'زيارة' : 'Visit'} <i class="fa fa-external-link-alt"></i></a>
+                            </div>
+                        </div>`;
+                });
+            } catch (err) { console.error(err); }
+            document.getElementById('stores-loader').style.display = 'none';
         }
 
-        // ==========================================
-        // نظام قاعدة البيانات الديناميكية (LocalStorage)
-        // ==========================================
-        
-        // 1. استدعاء البيانات المحفوظة أو إنشاء بيانات افتراضية
-        let storesDB = JSON.parse(localStorage.getItem('pi_stores_db')) || [
-            { name: "Pi Pizza Hub", desc: "خدمات توصيل ووجبات سريعة تدعم نظام المقايضة.", link: "https://pibartermall.com", date: new Date().getTime() }
-        ];
-
-        let reportsDB = JSON.parse(localStorage.getItem('pi_reports_db')) || [
-            { name: "موقع استثمار وهمي", details: "يطلبون إرسال عملات Pi بادعاء مضاعفتها. هذا نصب لا ترسل عملاتك.", link: "#", date: new Date().getTime() }
-        ];
-
-        // 2. دالة عرض المتاجر في الصفحة الرئيسية
-        function renderStores() {
-            const container = document.getElementById('stores-container');
-            container.innerHTML = '';
-            
-            // عكس المصفوفة لعرض الأحدث أولاً
-            [...storesDB].reverse().forEach(store => {
-                const storeEl = document.createElement('div');
-                storeEl.className = 'card-bar';
-                storeEl.style.borderRightColor = '#4caf50';
-                
-                const dateStr = new Date(store.date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US');
-                
-                storeEl.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="font-size: 16px;">${store.name}</strong>
-                        <span class="badge badge-new">${isAr ? 'موثق' : 'Verified'}</span>
-                    </div>
-                    <small style="display: block; margin: 8px 0; color: #555; line-height: 1.4;">${store.desc}</small>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                        <span style="font-size: 10px; color: #999;"><i class="fa fa-calendar-alt"></i> ${dateStr}</span>
-                        <a href="${store.link}" target="_blank" style="color:var(--p); font-weight:bold; font-size:13px; text-decoration:none;">${isAr ? 'زيارة المتجر' : 'Visit Store'} <i class="fa fa-external-link-alt"></i></a>
-                    </div>
-                `;
-                container.appendChild(storeEl);
-            });
-        }
-
-        // 3. دالة إضافة متجر جديد
-        function addStore(event) {
+        async function addStore(event) {
             event.preventDefault();
+            const btn = document.getElementById('t-a-btn');
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جاري النشر...';
             const newStore = {
                 name: document.getElementById('storeName').value,
                 desc: document.getElementById('storeDesc').value,
                 link: document.getElementById('storeLink').value,
                 date: new Date().getTime()
             };
-            
-            storesDB.push(newStore);
-            localStorage.setItem('pi_stores_db', JSON.stringify(storesDB)); // الحفظ في القاعدة
-            
-            alert(isAr ? "تم نشر متجرك بنجاح في الدليل!" : "Your store has been published successfully!");
-            document.getElementById('merchantForm').reset();
-            
-            renderStores(); // تحديث العرض
-            showPage('home', document.getElementById('n-hom')); // العودة للرئيسية
+            try {
+                await fetch(`${WORKER_URL}/stores`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newStore)
+                });
+                alert(isAr ? "تم نشر متجرك بنجاح!" : "Store published!");
+                document.getElementById('merchantForm').reset();
+                fetchStores();
+                showPage('home', document.getElementById('n-hom'));
+            } catch (err) { alert("Error connecting to server"); }
+            btn.innerHTML = isAr ? 'نشر المتجر' : 'Publish Store';
         }
 
-        // 4. دالة عرض البلاغات في قسم الأمان
-        function renderReports() {
-            const container = document.getElementById('reports-container');
-            container.innerHTML = '';
-            
-            [...reportsDB].reverse().forEach(report => {
-                const repEl = document.createElement('div');
-                repEl.className = 'card-bar';
-                repEl.style.borderRightColor = '#e91e63';
-                repEl.style.background = '#fffafa';
-                
-                const dateStr = new Date(report.date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US');
-                
-                repEl.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color: #c62828; font-size: 15px;"><i class="fa fa-ban"></i> ${report.name}</strong>
-                        <span class="badge badge-scam">${isAr ? 'نصاب' : 'Scam'}</span>
-                    </div>
-                    <p style="font-size: 13px; color: #333; margin: 8px 0; line-height: 1.5;">${report.details}</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid #ffcdd2; padding-top: 8px;">
-                        <span style="font-size: 10px; color: #999;">${dateStr}</span>
-                        <a href="${report.link}" target="_blank" style="color:#d32f2f; font-size:11px; text-decoration:none;"><i class="fa fa-link"></i> ${isAr ? 'رابط الإثبات' : 'Proof Link'}</a>
-                    </div>
-                `;
-                container.appendChild(repEl);
-            });
+        async function fetchReports() {
+            document.getElementById('reports-loader').style.display = 'block';
+            try {
+                const res = await fetch(`${WORKER_URL}/reports`);
+                const reportsDB = await res.json();
+                const container = document.getElementById('reports-container');
+                container.innerHTML = '';
+                [...reportsDB].reverse().forEach(rep => {
+                    const dateStr = new Date(rep.date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US');
+                    container.innerHTML += `
+                        <div class="card-bar" style="border-right-color: #e91e63; background: #fffafa;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="color: #c62828; font-size: 15px;"><i class="fa fa-ban"></i> ${rep.name}</strong>
+                                <span class="badge badge-scam">${isAr ? 'تحذير' : 'Scam'}</span>
+                            </div>
+                            <p style="font-size: 13px; color: #333; margin: 8px 0;">${rep.details}</p>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid #ffcdd2; padding-top: 8px;">
+                                <span style="font-size: 10px; color: #999;">${dateStr}</span>
+                                <a href="${rep.link}" target="_blank" style="color:#d32f2f; font-size:11px; text-decoration:none;"><i class="fa fa-link"></i> ${isAr ? 'الإثبات' : 'Proof'}</a>
+                            </div>
+                        </div>`;
+                });
+            } catch (err) { console.error(err); }
+            document.getElementById('reports-loader').style.display = 'none';
         }
 
-        // 5. دالة إضافة بلاغ جديد
-        function addReport(event) {
+        async function addReport(event) {
             event.preventDefault();
-            const newReport = {
+            const btn = document.getElementById('t-r-btn');
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جاري النشر...';
+            const newRep = {
                 name: document.getElementById('scammerName').value,
                 details: document.getElementById('scamDetails').value,
                 link: document.getElementById('scamProof').value,
                 date: new Date().getTime()
             };
-            
-            reportsDB.push(newReport);
-            localStorage.setItem('pi_reports_db', JSON.stringify(reportsDB)); // الحفظ
-            
-            alert(isAr ? "تم نشر التحذير بنجاح لحماية المجتمع." : "Warning published successfully to protect the community.");
-            document.getElementById('reportForm').reset();
-            
-            renderReports(); // تحديث العرض
+            try {
+                await fetch(`${WORKER_URL}/reports`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newRep)
+                });
+                alert(isAr ? "تم نشر التحذير بنجاح." : "Warning published.");
+                document.getElementById('reportForm').reset();
+                fetchReports();
+            } catch (err) { alert("Error connecting to server"); }
+            btn.innerHTML = isAr ? 'نشر التحذير' : 'Publish Warning';
         }
 
-        // التهيئة الأولية عند تحميل الصفحة
-        renderStores();
-        renderReports();
-
-        // ==========================================
-        // واجهة المستخدم والتنقل
-        // ==========================================
+        window.onload = () => { fetchStores(); fetchReports(); };
 
         function showPage(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            
             document.querySelectorAll('.f-item').forEach(i => i.classList.remove('active'));
-            if(el) {
-                el.classList.add('active');
-            } else if(id === 'home') {
-                document.getElementById('n-hom').classList.add('active');
-            }
+            if(el) el.classList.add('active'); else if(id === 'home') document.getElementById('n-hom').classList.add('active');
             window.scrollTo(0,0);
         }
 
@@ -308,95 +273,23 @@
             let amt = document.getElementById('p_amount').value;
             let bonus = document.getElementById('p_years').value;
             if(amt > 0) {
-                let total = parseFloat(amt) + (amt * bonus);
-                document.getElementById('total_v').innerText = total.toLocaleString();
+                document.getElementById('total_v').innerText = (parseFloat(amt) + (amt * bonus)).toLocaleString();
                 document.getElementById('res_box').style.display = 'block';
-            } else { 
-                alert(isAr ? "من فضلك أدخل كمية باي" : "Please enter a Pi amount"); 
-            }
+            } else { alert(isAr ? "أدخل الكمية" : "Enter amount"); }
         }
 
         function toggleLang() {
             isAr = !isAr;
             document.dir = isAr ? 'rtl' : 'ltr';
             const d = {
-                ar: { 
-                    title: "ثقة ودليل الباي", desc: "دليلك الآمن في عالم الباي", badd: "أضف متجرك مجاناً", bcalc: "حاسبة الحجز", 
-                    feat: "تطبيقات المايننت الموثقة", stitle: "حاسبة مكافآت الحجز (Lockup)", promo: "لماذا تقوم بحجز عملاتك؟",
-                    l1: "زيادة معدل التعدين الأساسي الخاص بك فوراً.", l2: "دعم أمان وقوة شبكة Pi.", l3: "المساهمة في استقرار قيمة العملة عند فتح المايننت.",
-                    lamt: "الكمية المراد حجزها:", lyrs: "مدة الحجز التقريبية:",
-                    res: "رصيدك الإجمالي المتوقع (تقريبي):", btn: "احسب المكافآت التقريبية", 
-                    atitle: "سجل كتاجر موثق مجاناً", adesc: "أدخل بيانات متجرك ليظهر فوراً في الدليل لجميع المستخدمين.", abtn: "نشر المتجر في الدليل",
-                    rtitle: "مركز الأمان والقائمة السوداء", rinfo: "البلاغات المقدمة هنا تظهر للجميع لتحذير المجتمع من عمليات النصب والاحتيال. يرجى توخي الدقة.", rformTitle: "إضافة تحذير جديد", rbtn: "نشر التحذير للعامة", rlistTitle: "التحذيرات الحالية من المجتمع",
-                    nhom: "الرئيسية", nver: "المتاجر", nsta: "المكافآت", nrep: "الأمان",
-                    safeT: "نصيحة للمحافظة على حسابك", safeD: "لا تقم أبداً بإدخال كلمة سر المحفظة خارج متصفح Pi الرسمي.", fireD: "اربح عملات Pi مقابل المحتوى المميز.", v1: "أكبر سوق تجاري لشراء المنتجات بـ Pi.",
-                    storesT: "المتاجر المعتمدة",
-                    phName: "اسم المتجر", phDesc: "وصف موجز للمنتجات أو الخدمات التي تقدمها مقابل باي", phLink: "رابط المتجر (http://...)",
-                    phScamName: "اسم الجهة أو الشخص النصاب", phScamDesc: "تفاصيل عملية النصب وكيف تمت", phScamLink: "رابط إثبات (سكرين شوت أو حساب النصاب)"
-                },
-                en: { 
-                    title: "Trust & Pi Guide", desc: "Your safe guide in Pi", badd: "Add Store Free", bcalc: "Lockup Calc", 
-                    feat: "Verified Mainnet Apps", stitle: "Lockup Rewards Calculator", promo: "Why Lockup Pi?",
-                    l1: "Increase your base mining rate instantly.", l2: "Support Pi network security.", l3: "Contribute to currency stability at Mainnet launch.",
-                    lamt: "Amount to lockup:", lyrs: "Approximate duration:",
-                    res: "Expected total balance (Approx):", btn: "Calculate Rewards", 
-                    atitle: "Register Store Free", adesc: "Enter your store info to appear instantly in the directory for all users.", abtn: "Publish Store",
-                    rtitle: "Security Center & Blacklist", rinfo: "Reports submitted here are public to warn the community about scams. Please be accurate.", rformTitle: "Add New Warning", rbtn: "Publish Warning Publicly", rlistTitle: "Current Community Warnings",
-                    nhom: "Home", nver: "Stores", nsta: "Rewards", nrep: "Security",
-                    safeT: "Security Tip", safeD: "Never enter your passphrase outside the Pi Browser.", fireD: "Earn Pi for great content.", v1: "Largest Pi marketplace.",
-                    storesT: "Verified Stores",
-                    phName: "Store Name", phDesc: "Brief description of products/services for Pi", phLink: "Store Link (http://...)",
-                    phScamName: "Scammer Name/Platform", phScamDesc: "Details of the scam and how it happened", phScamLink: "Proof Link (Screenshot or Scammer Profile)"
-                }
+                ar: { title: "ثقة ودليل الباي", desc: "دليلك الآمن في عالم الباي", badd: "أضف متجرك مجاناً", bcalc: "حاسبة الحجز", feat: "تطبيقات المايننت", stitle: "حاسبة مكافآت الحجز (Lockup)", promo: "لماذا تحجز عملاتك؟", l1: "زيادة معدل التعدين فوراً.", l2: "دعم أمان وقوة شبكة Pi.", l3: "استقرار قيمة العملة.", lamt: "الكمية المراد حجزها:", lyrs: "مدة الحجز:", res: "رصيدك الإجمالي المتوقع:", btn: "احسب المكافآت", atitle: "سجل كتاجر مجاناً", adesc: "أدخل بيانات متجرك ليظهر فوراً.", abtn: "نشر المتجر", rtitle: "مركز الأمان", rinfo: "البلاغات تظهر للجميع للتحذير.", rformTitle: "إضافة تحذير", rbtn: "نشر التحذير", rlistTitle: "التحذيرات الحالية", nhom: "الرئيسية", nver: "المتاجر", nsta: "المكافآت", nrep: "الأمان", safeT: "نصيحة أمنية", safeD: "لا تدخل كلمة السر خارج المتصفح الرسمي.", fireD: "اربح Pi مقابل المحتوى.", v1: "أكبر سوق لـ Pi.", storesT: "المتاجر المعتمدة", phName: "اسم المتجر", phDesc: "وصف المنتجات", phLink: "رابط المتجر", phScamName: "اسم النصاب", phScamDesc: "تفاصيل النصب", phScamLink: "رابط الإثبات" },
+                en: { title: "Trust & Pi Guide", desc: "Your safe guide", badd: "Add Store Free", bcalc: "Lockup Calc", feat: "Mainnet Apps", stitle: "Lockup Calculator", promo: "Why Lockup?", l1: "Increase mining rate.", l2: "Support network security.", l3: "Currency stability.", lamt: "Amount to lockup:", lyrs: "Duration:", res: "Expected total:", btn: "Calculate", atitle: "Register Store", adesc: "Enter info to appear instantly.", abtn: "Publish Store", rtitle: "Security Center", rinfo: "Reports are public.", rformTitle: "Add Warning", rbtn: "Publish Warning", rlistTitle: "Current Warnings", nhom: "Home", nver: "Stores", nsta: "Rewards", nrep: "Security", safeT: "Security Tip", safeD: "Never enter passphrase outside official browser.", fireD: "Earn Pi for content.", v1: "Largest Pi market.", storesT: "Verified Stores", phName: "Store Name", phDesc: "Products description", phLink: "Store Link", phScamName: "Scammer Name", phScamDesc: "Scam details", phScamLink: "Proof Link" }
             };
             const t = isAr ? d.ar : d.en;
-            
-            // النصوص الثابتة
-            document.getElementById('t-title').innerText = t.title;
-            document.getElementById('t-desc').innerText = t.desc;
-            document.getElementById('t-b-add').innerText = t.badd;
-            document.getElementById('t-b-calc').innerText = t.bcalc;
-            document.getElementById('t-feat-h').innerText = t.feat;
-            document.getElementById('t-s-title').innerText = t.stitle;
-            document.getElementById('t-s-promo').innerText = t.promo;
-            document.getElementById('t-s-l1').innerText = t.l1;
-            document.getElementById('t-s-l2').innerText = t.l2;
-            document.getElementById('t-s-l3').innerText = t.l3;
-            document.getElementById('t-l-amt').innerText = t.lamt;
-            document.getElementById('t-l-yrs').innerText = t.lyrs;
-            document.getElementById('t-s-res-l').innerText = t.res;
-            document.getElementById('t-s-btn').innerText = t.btn;
-            document.getElementById('t-a-title').innerText = t.atitle;
-            document.getElementById('t-a-desc').innerText = t.adesc;
-            document.getElementById('t-a-btn').innerText = t.abtn;
-            document.getElementById('t-r-title').innerText = t.rtitle;
-            document.getElementById('t-r-info').innerText = t.rinfo;
-            document.getElementById('t-r-form-title').innerText = t.rformTitle;
-            document.getElementById('t-r-btn').innerText = t.rbtn;
-            document.getElementById('t-r-list-title').innerHTML = `<i class="fa fa-list-alt"></i> ${t.rlistTitle}`;
-            document.getElementById('n-t-hom').innerText = t.nhom;
-            document.getElementById('n-t-ver').innerText = t.nver;
-            document.getElementById('n-t-sta').innerText = t.nsta;
-            document.getElementById('n-t-rep').innerText = t.nrep;
-            document.getElementById('t-safe-t').innerText = t.safeT;
-            document.getElementById('t-safe-d').innerText = t.safeD;
-            document.getElementById('t-fire-d').innerText = t.fireD;
-            document.getElementById('t-v1').innerText = t.v1;
-            document.getElementById('t-stores-title').innerHTML = `<i class="fa fa-store-alt"></i> ${t.storesT}`;
-            
-            // تحديث نصوص النماذج
-            document.getElementById('storeName').placeholder = t.phName;
-            document.getElementById('storeDesc').placeholder = t.phDesc;
-            document.getElementById('storeLink').placeholder = t.phLink;
-            document.getElementById('scammerName').placeholder = t.phScamName;
-            document.getElementById('scamDetails').placeholder = t.phScamDesc;
-            document.getElementById('scamProof').placeholder = t.phScamLink;
-            
-            // إعادة رسم القوائم لتحديث نصوص (موثق/نصاب) بداخلها
-            renderStores();
-            renderReports();
+            document.getElementById('t-title').innerText = t.title; document.getElementById('t-desc').innerText = t.desc; document.getElementById('t-b-add').innerText = t.badd; document.getElementById('t-b-calc').innerText = t.bcalc; document.getElementById('t-feat-h').innerText = t.feat; document.getElementById('t-s-title').innerText = t.stitle; document.getElementById('t-s-promo').innerText = t.promo; document.getElementById('t-s-l1').innerText = t.l1; document.getElementById('t-s-l2').innerText = t.l2; document.getElementById('t-s-l3').innerText = t.l3; document.getElementById('t-l-amt').innerText = t.lamt; document.getElementById('t-l-yrs').innerText = t.lyrs; document.getElementById('t-s-res-l').innerText = t.res; document.getElementById('t-s-btn').innerText = t.btn; document.getElementById('t-a-title').innerText = t.atitle; document.getElementById('t-a-desc').innerText = t.adesc; document.getElementById('t-a-btn').innerText = t.abtn; document.getElementById('t-r-title').innerText = t.rtitle; document.getElementById('t-r-info').innerText = t.rinfo; document.getElementById('t-r-form-title').innerText = t.rformTitle; document.getElementById('t-r-btn').innerText = t.rbtn; document.getElementById('t-r-list-title').innerHTML = `<i class="fa fa-list-alt"></i> ${t.rlistTitle}`; document.getElementById('n-t-hom').innerText = t.nhom; document.getElementById('n-t-ver').innerText = t.nver; document.getElementById('n-t-sta').innerText = t.nsta; document.getElementById('n-t-rep').innerText = t.nrep; document.getElementById('t-safe-t').innerText = t.safeT; document.getElementById('t-safe-d').innerText = t.safeD; document.getElementById('t-fire-d').innerText = t.fireD; document.getElementById('t-v1').innerText = t.v1; document.getElementById('t-stores-title').innerHTML = `<i class="fa fa-store-alt"></i> ${t.storesT}`;
+            document.getElementById('storeName').placeholder = t.phName; document.getElementById('storeDesc').placeholder = t.phDesc; document.getElementById('storeLink').placeholder = t.phLink; document.getElementById('scammerName').placeholder = t.phScamName; document.getElementById('scamDetails').placeholder = t.phScamDesc; document.getElementById('scamProof').placeholder = t.phScamLink;
+            fetchStores(); fetchReports();
         }
     </script>
 </body>
 </html>
-
